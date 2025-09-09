@@ -6,6 +6,8 @@ A platform for creating sequential workflow commands that execute Claude Code su
 
 CC-Flow enables you to create custom slash commands that automatically execute multiple Claude Code sub-agents sequentially, passing context between each step. This creates powerful automation workflows for complex development tasks.
 
+The included `spec` agents are provided as a sample workflow demonstrating specification-driven development. You can create your own agent collections for any domain or workflow pattern.
+
 ## Key Features
 
 - **Sequential Sub-agent Execution**: Chain multiple Claude Code agents together
@@ -54,6 +56,8 @@ Use the `/create-workflow` command to generate a new workflow:
 
 This creates a new slash command (e.g., `/spec-workflow`) that executes the agents in the `spec` directory sequentially.
 
+**Note**: The `spec` workflow is a sample implementation. You can create workflows for any domain by organizing agents in directories under `/.claude/agents/`.
+
 ### Running a Workflow
 
 Execute the generated workflow command:
@@ -79,9 +83,11 @@ For the `spec` workflow with `implementation` type:
 ✅ Workflow completed
 ```
 
-## Available Sub-agents
+## Sample Sub-agents
 
-### Specification Agents (`/.claude/agents/spec/`)
+### Specification Agents (`/.claude/agents/spec/`) - Sample Implementation
+
+The `spec` agents demonstrate a complete specification-driven development workflow:
 
 - **spec-init**: Initialize new specification with directory structure
 - **spec-requirements**: Generate comprehensive requirements using EARS format  
@@ -97,6 +103,8 @@ For the `spec` workflow with `implementation` type:
 - **date-utility**: Provides current date and time information
 - **poml-spec-researcher**: Research POML specifications and syntax
 - **spec-creation-expert**: Create comprehensive technical specifications
+
+**Note**: These agents serve as examples. Create your own agent collections for different domains like testing, deployment, documentation, code review, or any custom workflow you need.
 
 ## Template Structure
 
@@ -129,8 +137,8 @@ Defines the workflow orchestration logic using POML syntax:
 cc-flow/
 ├── .claude/
 │   ├── agents/
-│   │   ├── spec/          # Specification workflow agents
-│   │   └── utility/       # Utility agents
+│   │   ├── spec/          # Sample specification workflow agents
+│   │   └── utility/       # Sample utility agents
 │   └── commands/
 │       └── create-workflow.md
 ├── templates/
