@@ -27,10 +27,15 @@ The included `spec` agents are provided as a sample workflow demonstrating speci
    - `workflow.poml`: POML template for workflow orchestration logic
 
 2. **Sub-agents** (`/.claude/agents/`): Specialized agents for different tasks
-   - `spec/`: Specification-related agents (init, design, implementation, etc.)
+   - `spec/`: Sample specification-related agents (init, design, implementation, etc.)
    - `utility/`: Utility agents (date handling, POML research, etc.)
 
-3. **Command Generator**: The `/create-workflow` command that generates new workflow commands
+3. **Script Architecture** (`/scripts/`): Modular implementation following GitHub spec-kit patterns
+   - `create-workflow.sh`: Main entry point with error handling
+   - `lib/`: Feature-specific modules (discovery, interaction, processing)
+   - `utils/`: Shared utilities and common functions
+
+4. **Command Generator**: The `/create-workflow` command that calls the script architecture
 
 ### Workflow Execution Flow
 
@@ -184,12 +189,19 @@ cc-flow/
 │   │   ├── create-workflow.md    # Workflow generator command
 │   │   └── poml/                 # Generated POML files (auto-created)
 │   └── settings.local.json
+├── scripts/               # Modular script architecture (GitHub spec-kit style)
+│   ├── create-workflow.sh # Main workflow generator script
+│   ├── lib/
+│   │   ├── agent-discovery.sh      # Agent discovery and listing
+│   │   ├── template-processor.sh   # Template processing and generation
+│   │   └── user-interaction.sh     # Interactive order selection
+│   └── utils/
+│       └── common.sh      # Common utilities and error handling
 ├── templates/
 │   ├── workflow.md        # Command template
 │   └── workflow.poml      # POML workflow template
 ├── docs/
-│   ├── create-workflow-spec.md    # Japanese specification
-│   └── create-workflow-spec-en.md # English specification
+│   └── create-workflow-spec.md    # Detailed implementation specification
 ├── package.json
 └── README.md
 ```
@@ -202,13 +214,44 @@ Different workflow types can be defined to execute different combinations of age
 - **design-only**: Design-focused workflow (requirements → design)
 - **planning**: Planning workflow (init → requirements → tasks)
 
+## Implementation Details
+
+### Script Architecture Benefits
+
+Following GitHub spec-kit patterns provides several advantages:
+
+- **Maintainability**: Logic separated into focused modules
+- **Testability**: Each script can be tested independently  
+- **Reusability**: Modules can be imported by other scripts
+- **Extensibility**: Easy to add new functionality without affecting core logic
+- **Error Handling**: Centralized error management and user feedback
+
+### Module Responsibilities
+
+- **agent-discovery.sh**: Finds and validates agent files, extracts metadata
+- **user-interaction.sh**: Manages all user input/output, validation, confirmation
+- **template-processor.sh**: Handles file I/O, variable substitution, generation
+- **common.sh**: Provides consistent error handling, logging, and utilities
+
+### Direct Script Usage
+
+You can also run the script directly for testing or automation:
+
+```bash
+# Interactive mode
+./scripts/create-workflow.sh spec
+
+# View usage help
+./scripts/create-workflow.sh
+```
+
 ## Extension
 
 ### Adding New Agents
 
 1. Create agent definition in `/.claude/agents/{category}/{agent-name}.md`
-2. Update workflow templates to include the new agent in relevant workflow types
-3. Test the agent integration in your workflow
+2. Use `/create-workflow {category}` to generate workflow with interactive selection
+3. Test the generated workflow command
 
 ### Creating Custom Workflows
 

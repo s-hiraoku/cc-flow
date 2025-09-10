@@ -205,19 +205,62 @@ Usage: /spec-workflow <type> "<context>"
 - **Error Output**: Clearly display error reason
 - **Example**: `Error: Cannot create poml directory: Permission denied`
 
+## Script Architecture
+
+### Architecture
+
+Adopting modular structure inspired by GitHub spec-kit:
+
+```
+scripts/
+├── create-workflow.sh          # Main script
+├── lib/
+│   ├── agent-discovery.sh      # Agent discovery functionality
+│   ├── template-processor.sh   # Template processing
+│   └── user-interaction.sh     # Interactive processing
+└── utils/
+    └── common.sh               # Common functions
+```
+
+### Module Description
+
+#### `scripts/create-workflow.sh`
+- Main entry point
+- Argument parsing and error handling
+- Coordination control of each module
+
+#### `scripts/lib/agent-discovery.sh`
+- Agent file search
+- Agent name extraction
+- Agent list display
+
+#### `scripts/lib/user-interaction.sh`  
+- Interactive order selection
+- Input validation and error handling
+- Confirmation processing
+
+#### `scripts/lib/template-processor.sh`
+- Template file loading
+- Variable substitution processing
+- File generation
+
+#### `scripts/utils/common.sh`
+- Common error handling functions
+- Log output functions
+- File operation utilities
+
 ## Technical Implementation Requirements
 
-### Required Tools
-- `Read`: Template file loading
-- `Write`: New command file creation
-- `Bash`: Directory search, file operations
-- `Glob`: Agent file search
+### Claude Code Command
+- `.claude/commands/create-workflow.md`: Simple script invocation
+- `allowed-tools: [Bash]`: Use only Bash tool
 
 ### Dependencies
 - Template file existence (`templates/workflow.md`, `templates/workflow.poml`)
 - `/.claude/agents/` directory structure
 - `/.claude/commands/` directory (write permission)
 - `/.claude/commands/poml/` directory (POML file placement, auto-created)
+- `scripts/` directory structure
 
 ## Extension Specifications (Future Support)
 

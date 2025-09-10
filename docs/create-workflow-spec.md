@@ -205,19 +205,62 @@ Usage: /spec-workflow <type> "<context>"
 - **エラー出力**: エラー理由を明確に表示
 - **例**: `Error: Cannot create poml directory: Permission denied`
 
+## スクリプト構造
+
+### アーキテクチャ
+
+GitHub spec-kitを参考にしたモジュラー構造を採用：
+
+```
+scripts/
+├── create-workflow.sh          # メインスクリプト
+├── lib/
+│   ├── agent-discovery.sh      # エージェント検索機能
+│   ├── template-processor.sh   # テンプレート処理
+│   └── user-interaction.sh     # 対話処理
+└── utils/
+    └── common.sh               # 共通関数
+```
+
+### モジュール説明
+
+#### `scripts/create-workflow.sh`
+- メインエントリーポイント
+- 引数解析とエラーハンドリング
+- 各モジュールの連携制御
+
+#### `scripts/lib/agent-discovery.sh`
+- エージェントファイルの検索
+- エージェント名の抽出
+- エージェント一覧の表示
+
+#### `scripts/lib/user-interaction.sh`  
+- 対話的な順序選択
+- 入力検証とエラーハンドリング
+- 確認処理
+
+#### `scripts/lib/template-processor.sh`
+- テンプレートファイルの読み込み
+- 変数置換処理
+- ファイル生成
+
+#### `scripts/utils/common.sh`
+- 共通エラーハンドリング関数
+- ログ出力関数
+- ファイル操作ユーティリティ
+
 ## 実装技術要件
 
-### 必要なツール
-- `Read`: テンプレートファイル読み込み
-- `Write`: 新しいコマンドファイル作成
-- `Bash`: ディレクトリ検索、ファイル操作
-- `Glob`: エージェントファイル検索
+### Claude Codeコマンド
+- `.claude/commands/create-workflow.md`: シンプルなスクリプト呼び出し
+- `allowed-tools: [Bash]`: Bashツールのみ使用
 
 ### 依存関係
 - テンプレートファイルの存在（`templates/workflow.md`, `templates/workflow.poml`）
 - `/.claude/agents/`ディレクトリ構造
 - `/.claude/commands/`ディレクトリ（書き込み権限）
 - `/.claude/commands/poml/`ディレクトリ（POMLファイル配置用、自動作成）
+- `scripts/`ディレクトリ構造
 
 ## 拡張仕様（将来対応）
 
