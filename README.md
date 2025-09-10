@@ -12,9 +12,11 @@ The included `spec` agents are provided as a sample workflow demonstrating speci
 
 - **Sequential Sub-agent Execution**: Chain multiple Claude Code agents together
 - **Context Passing**: Results from each agent are passed to the next in the sequence
+- **Interactive Agent Selection**: Choose which agents to execute and in what order
 - **Template-based Command Generation**: Create new workflow commands from templates
 - **POML Integration**: Uses POML (Prompt Orchestration Markup Language) for workflow definitions
 - **Flexible Workflow Types**: Support for different workflow patterns and agent combinations
+- **Error Handling**: Comprehensive validation and error reporting during workflow creation
 
 ## Architecture
 
@@ -54,7 +56,46 @@ Use the `/create-workflow` command to generate a new workflow:
 /create-workflow spec
 ```
 
-This creates a new slash command (e.g., `/spec-workflow`) that executes the agents in the `spec` directory sequentially.
+**Interactive Agent Selection Process:**
+
+1. **Agent Discovery**: The command scans the specified directory and lists all available agents
+```
+Found agents in 'spec' directory:
+1. spec-init
+2. spec-requirements  
+3. spec-design
+4. spec-tasks
+5. spec-impl
+6. spec-status
+7. steering
+8. steering-custom
+```
+
+2. **Order Selection**: Choose execution order by entering numbers
+```
+Enter execution order: 1 2 3 5
+```
+
+3. **Confirmation**: Review and confirm your selection
+```
+Selected execution order:
+1. spec-init
+2. spec-requirements
+3. spec-design
+4. spec-impl
+
+Is this correct? (y/n): y
+```
+
+4. **Generation**: Creates the workflow command and supporting files
+```
+✅ Created workflow command: /spec-workflow
+📁 Generated files:
+   - .claude/commands/spec-workflow.md
+   - .claude/commands/poml/spec-workflow.poml
+
+Agent execution order: spec-init → spec-requirements → spec-design → spec-impl
+```
 
 **Note**: The `spec` workflow is a sample implementation. You can create workflows for any domain by organizing agents in directories under `/.claude/agents/`.
 
@@ -139,11 +180,16 @@ cc-flow/
 │   ├── agents/
 │   │   ├── spec/          # Sample specification workflow agents
 │   │   └── utility/       # Sample utility agents
-│   └── commands/
-│       └── create-workflow.md
+│   ├── commands/
+│   │   ├── create-workflow.md    # Workflow generator command
+│   │   └── poml/                 # Generated POML files (auto-created)
+│   └── settings.local.json
 ├── templates/
 │   ├── workflow.md        # Command template
 │   └── workflow.poml      # POML workflow template
+├── docs/
+│   ├── create-workflow-spec.md    # Japanese specification
+│   └── create-workflow-spec-en.md # English specification
 ├── package.json
 └── README.md
 ```
@@ -166,9 +212,27 @@ Different workflow types can be defined to execute different combinations of age
 
 ### Creating Custom Workflows
 
-1. Define your agent sequence in a new directory under `/.claude/agents/`
-2. Run `/create-workflow {category}` to generate the workflow command
-3. Customize the generated POML definitions for your specific use case
+1. **Create Agent Directory**: Define your agent sequence in a new directory under `/.claude/agents/`
+   ```bash
+   mkdir .claude/agents/deploy
+   # Add your agents: deploy-build.md, deploy-test.md, deploy-release.md
+   ```
+
+2. **Generate Workflow**: Run `/create-workflow {category}` to generate the workflow command
+   ```bash
+   /create-workflow deploy
+   ```
+
+3. **Interactive Selection**: Choose agents and execution order during the creation process
+
+4. **Customize**: Modify the generated POML definitions for your specific use case
+
+**Error Handling**: The creation process includes comprehensive validation:
+- Directory existence checking
+- Agent file validation
+- Duplicate selection prevention
+- Template file verification
+- Permission checks for file generation
 
 ## Development Status
 
