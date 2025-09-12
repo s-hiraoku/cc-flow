@@ -1,0 +1,52 @@
+<poml>
+  <meta minVersion="0.0.8" />
+  
+  <role>Layer 2 spec-workflow Workflow Command</role>
+
+  <task>
+    User Instruction: {{user_input}}
+    Context: {{context}}
+
+    Execute sequential workflow with the following steps:
+
+    <list>
+      <item>Parse workflow type from user input: "{{user_input}}"</item>
+      <item>Determine sub-agent list based on workflow type</item>
+      
+      <!-- Execute workflow-specific sub-agents -->
+      <item for="subagent in ["spec-design", "spec-init", "spec-status", "steering-custom"]">
+        Execute sub-agent {{subagent.type}}:
+        <list>
+          <item>Create context-aware prompt for sub-agent "{{subagent.type}}":
+            
+            Task: {{subagent.task}}
+            Context: {{context}}
+            Previous Results: {ACCUMULATED_CONTEXT}
+            
+            </item>
+          <item>Call sub-agent using claude subagent "{{subagent.type}}"</item>
+          <item>Receive and validate response from sub-agent {{subagent.type}}</item>
+          <item>Display response as "→ {{subagent.type}}: [response]"</item>
+          <item>Update accumulated context with {{subagent.type}} results</item>
+        </list>
+      </item>
+      
+      <!-- Consolidate workflow results -->
+      <item>Aggregate all sub-agent responses into final workflow output</item>
+      <item>Display consolidated results to user</item>
+      <item>Return "✅ Workflow completed" status message</item>
+    </list>
+  </task>
+
+  <output-format>
+    For each sub-agent execution:
+    → [agent-name]: [response]
+    
+    Final output:
+    ✅ Workflow completed
+  </output-format>
+  
+  <!-- Workflow Configuration Templates -->
+  
+  
+</poml>
