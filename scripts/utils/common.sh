@@ -53,7 +53,8 @@ validate_args() {
     local arg="$1"
     local description="$2"
     
-    if [[ -z "$arg" ]]; then
+    # 空文字列または空白文字のみの場合はエラー
+    if [[ -z "$arg" || "$arg" =~ ^[[:space:]]*$ ]]; then
         error_exit "$description が必要です"
     fi
 }
@@ -85,6 +86,11 @@ safe_mkdir() {
 safe_write_file() {
     local file="$1"
     local content="$2"
+    local parent_dir
+    
+    # 親ディレクトリを作成
+    parent_dir=$(dirname "$file")
+    safe_mkdir "$parent_dir"
     
     if ! echo "$content" > "$file" 2>/dev/null; then
         error_exit "ファイル '$file' を書き込めません"

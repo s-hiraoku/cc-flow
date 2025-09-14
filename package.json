@@ -1,5 +1,12 @@
 {
   "dependencies": {
     "pomljs": "^0.0.8"
+  },
+  "devDependencies": {
+    "bats": "^1.10.0"
+  },
+  "scripts": {
+    "test": "bats test/*.bats",
+    "test:watch": "bats test/*.bats --watch"
   }
 }
