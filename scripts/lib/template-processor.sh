@@ -91,6 +91,12 @@ generate_files() {
         info "中間ファイルをクリーンアップしました: $poml_file"
     fi
     
+    # pomlディレクトリが空の場合は削除
+    if [[ -d ".claude/commands/poml" ]] && [[ -z "$(ls -A .claude/commands/poml)" ]]; then
+        rmdir ".claude/commands/poml" >/dev/null 2>&1
+        info "空のpomlディレクトリを削除しました: .claude/commands/poml"
+    fi
+    
     info "ワークフローファイルを生成しました"
 }
 
