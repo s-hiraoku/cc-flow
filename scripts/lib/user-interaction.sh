@@ -172,6 +172,55 @@ process_order_specification() {
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 }
 
+# アイテム名指定による順序処理
+process_item_names_specification() {
+    echo ""
+    echo "📋 指定されたアイテム名で処理します: ${ITEM_NAMES_SPECIFIED[*]}"
+    
+    local selected_agents=()
+    
+    # 指定されたアイテム名が存在するかチェック
+    for item_name in "${ITEM_NAMES_SPECIFIED[@]}"; do
+        local found=false
+        for agent_name in "${AGENT_NAMES[@]}"; do
+            if [[ "$agent_name" == "$item_name" ]]; then
+                selected_agents+=("$agent_name")
+                found=true
+                break
+            fi
+        done
+        
+        if [[ "$found" == false ]]; then
+            error_exit "指定されたアイテム '$item_name' が見つかりません"
+        fi
+    done
+    
+    # 選択されたエージェントをグローバル配列に設定
+    SELECTED_AGENTS=("${selected_agents[@]}")
+    
+    # 結果を表示
+    show_item_names_result "${selected_agents[@]}"
+}
+
+# アイテム名指定の結果表示
+show_item_names_result() {
+    local selected_agents=("$@")
+    
+    echo ""
+    echo "✅ 選択されたワークフロー (アイテム名指定モード):"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    for i in "${!selected_agents[@]}"; do
+        if [[ $i -eq 0 ]]; then
+            echo "   $((i+1)). 🚀 ${selected_agents[$i]} (開始)"
+        elif [[ $i -eq $((${#selected_agents[@]}-1)) ]]; then
+            echo "   $((i+1)). 🏁 ${selected_agents[$i]} (完了)"
+        else
+            echo "   $((i+1)). ⚙️  ${selected_agents[$i]}"
+        fi
+    done
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+}
+
 # 最終確認メッセージ
 show_final_confirmation() {
     echo ""

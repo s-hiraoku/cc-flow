@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# エージェント検索関連の関数
+# エージェント・アイテム検索関連の関数
+# 将来的にitem-discovery.shに改名予定
 
 # 現在のスクリプトのディレクトリを取得
 LIB_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,23 +10,30 @@ source "$LIB_SCRIPT_DIR/../utils/common.sh"
 # エージェントディレクトリからエージェントファイルを検索
 discover_agents() {
     local agent_dir="$1"
-    local agent_path=".claude/agents/$agent_dir"
     
-    # ディレクトリの存在確認
-    check_directory "$agent_path" "エージェントディレクトリ"
-    
-    # エージェントファイルを検索
-    local agent_files=()
-    while IFS= read -r -d '' file; do
-        agent_files+=("$file")
-    done < <(find "$agent_path" -name "*.md" -type f -print0 | sort -z)
-    
-    if [[ ${#agent_files[@]} -eq 0 ]]; then
-        error_exit "ディレクトリ '$agent_dir' にエージェントが見つかりません"
+    if [[ "$agent_dir" == "all" ]]; then
+        # 全エージェント検索
+        discover_all_items ".claude/agents"
+    else
+        # 特定ディレクトリ検索
+        local agent_path=".claude/agents/$agent_dir"
+        
+        # ディレクトリの存在確認
+        check_directory "$agent_path" "エージェントディレクトリ"
+        
+        # エージェントファイルを検索
+        local agent_files=()
+        while IFS= read -r -d '' file; do
+            agent_files+=("$file")
+        done < <(find "$agent_path" -name "*.md" -type f -print0 | sort -z)
+        
+        if [[ ${#agent_files[@]} -eq 0 ]]; then
+            error_exit "ディレクトリ '$agent_dir' にエージェントが見つかりません"
+        fi
+        
+        # グローバル配列に結果を設定
+        AGENT_FILES=("${agent_files[@]}")
     fi
-    
-    # グローバル配列に結果を設定
-    AGENT_FILES=("${agent_files[@]}")
 }
 
 # エージェントファイルからエージェント名を抽出
@@ -43,7 +51,11 @@ display_agent_list() {
     local agent_dir="$1"
     
     echo ""
-    echo "📂 '$agent_dir' ディレクトリで見つかったエージェント："
+    if [[ "$agent_dir" == "all" ]]; then
+        echo "📂 全ディレクトリで見つかったエージェント："
+    else
+        echo "📂 '$agent_dir' ディレクトリで見つかったエージェント："
+    fi
     echo ""
     
     for i in "${!AGENT_NAMES[@]}"; do
@@ -82,4 +94,102 @@ get_agent_name_by_index() {
     else
         return 1
     fi
+}
+# ========================================
+# 汎用的なアイテム発見機能（将来拡張用）
+# ========================================
+
+# 全アイテム発見機能
+discover_all_items() {
+    local base_path="$1"  # ".claude/agents" or ".claude/commands"
+    local item_files=()
+    
+    # ディレクトリの存在確認
+    if [[ ! -d "$base_path" ]]; then
+        error_exit "ディレクトリ '$base_path' が見つかりません"
+    fi
+    
+    while IFS= read -r -d '' file; do
+        item_files+=("$file")
+    done < <(find "$base_path" -name "*.md" -type f -print0 | sort -z)
+    
+    if [[ ${#item_files[@]} -eq 0 ]]; then
+        error_exit "$base_path にアイテムが見つかりません"
+    fi
+    
+    # 後方互換性のためにAGENT_FILESにも設定
+    AGENT_FILES=("${item_files[@]}")
+    ITEM_FILES=("${item_files[@]}")
+}
+
+# 特定ディレクトリのアイテム発見
+discover_directory_items() {
+    local target_path="$1"  # ".claude/agents/spec"
+    
+    check_directory "$target_path" "対象ディレクトリ"
+    
+    local item_files=()
+    while IFS= read -r -d '' file; do
+        item_files+=("$file")
+    done < <(find "$target_path" -name "*.md" -type f -print0 | sort -z)
+    
+    if [[ ${#item_files[@]} -eq 0 ]]; then
+        error_exit "$target_path にアイテムが見つかりません"
+    fi
+    
+    # 後方互換性のためにAGENT_FILESにも設定
+    AGENT_FILES=("${item_files[@]}")
+    ITEM_FILES=("${item_files[@]}")
+}
+
+# TARGET_PATHに基づく汎用的なアイテム発見
+discover_items() {
+    local target_path="$1"  # "./agents/spec" or "./agents"
+    local full_path=".claude/$target_path"
+    
+    case "$target_path" in
+        "./agents")
+            # 全エージェント
+            discover_all_items "$full_path"
+            ;;
+        "./commands")
+            # 全コマンド（将来）
+            discover_all_items "$full_path"
+            ;;
+        "./agents/"*)
+            # 特定エージェントディレクトリ
+            discover_directory_items "$full_path"
+            ;;
+        "./commands/"*)
+            # 特定コマンドディレクトリ（将来）
+            discover_directory_items "$full_path"
+            ;;
+        *)
+            error_exit "サポートされていないパス形式: $target_path"
+            ;;
+    esac
+}
+
+# パスからアイテム情報を抽出
+extract_item_info_from_path() {
+    local file_path="$1"      # ".claude/agents/spec/spec-init.md"
+    local item_name=$(basename "$file_path" .md)    # "spec-init"
+    local directory=$(basename "$(dirname "$file_path")")  # "spec"
+    local category=$(basename "$(dirname "$(dirname "$file_path")")")  # "agents"
+    
+    echo "$category/$directory/$item_name"
+}
+
+# アイテム名配列を抽出（汎用版）
+extract_item_names() {
+    AGENT_NAMES=()  # 後方互換性
+    ITEM_NAMES=()
+    
+    local files_array=("${ITEM_FILES[@]:-${AGENT_FILES[@]}}")
+    
+    for file in "${files_array[@]}"; do
+        local item_name=$(basename "$file" .md)
+        AGENT_NAMES+=("$item_name")  # 後方互換性
+        ITEM_NAMES+=("$item_name")
+    done
 }
