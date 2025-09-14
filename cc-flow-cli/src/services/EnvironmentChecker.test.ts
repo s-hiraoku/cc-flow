@@ -47,8 +47,8 @@ describe('EnvironmentChecker', () => {
       expect(result.availableDirectories).toHaveLength(3); // spec, utility, and "all"
       
       // Should have "all" option as first item
-      expect(result.availableDirectories[0].displayName).toBe('all');
-      expect(result.availableDirectories[0].agentCount).toBe(3);
+      expect(result.availableDirectories[0]!.displayName).toBe('all');
+      expect(result.availableDirectories[0]!.agentCount).toBe(3);
     });
 
     it('should handle direct .md files in agents directory', async () => {
@@ -69,13 +69,13 @@ describe('EnvironmentChecker', () => {
       expect(result.availableDirectories).toHaveLength(1);
       
       // Should have "all" directory containing direct files
-      const allDir = result.availableDirectories[0];
+      const allDir = result.availableDirectories[0]!;
       expect(allDir.displayName).toBe('all');
       expect(allDir.agentCount).toBe(2);
       expect(allDir.agents).toHaveLength(2);
-      expect(allDir.agents[0].name).toBe('demo-agent');
-      expect(allDir.agents[1].name).toBe('test-agent');
-      expect(allDir.agents[0].directory).toBe('root');
+      expect(allDir.agents[0]!.name).toBe('demo-agent');
+      expect(allDir.agents[1]!.name).toBe('test-agent');
+      expect(allDir.agents[0]!.directory).toBe('root');
     });
 
     it('should handle mixed subdirectories and direct files', async () => {
@@ -98,7 +98,7 @@ describe('EnvironmentChecker', () => {
       expect(result.availableDirectories).toHaveLength(3); // all, spec, all(direct)
       
       // Should have "all" option first with all agents
-      const allDir = result.availableDirectories[0];
+      const allDir = result.availableDirectories[0]!;
       expect(allDir.displayName).toBe('all');
       expect(allDir.agentCount).toBe(2);
     });
@@ -174,15 +174,15 @@ describe('EnvironmentChecker', () => {
       expect(allDir).toBeDefined();
       
       const agents = allDir!.agents;
-      expect(agents.find(a => a.name === 'spec-init')?.description).toBe('🏗️  Initialize project structure');
-      expect(agents.find(a => a.name === 'spec-requirements')?.description).toBe('📋 Generate requirements using EARS');
-      expect(agents.find(a => a.name === 'spec-design')?.description).toBe('🎨 Create technical design');
-      expect(agents.find(a => a.name === 'spec-tasks')?.description).toBe('📝 Generate implementation tasks');
-      expect(agents.find(a => a.name === 'spec-impl')?.description).toBe('⚡ Implement using TDD methodology');
-      expect(agents.find(a => a.name === 'test-runner')?.description).toBe('🧪 Run tests and validation');
-      expect(agents.find(a => a.name === 'deploy-helper')?.description).toBe('🚀 Deploy to environment');
-      expect(agents.find(a => a.name === 'steering-doc')?.description).toBe('🎯 Create steering documents');
-      expect(agents.find(a => a.name === 'custom-agent')?.description).toBe('⚙️  Execute workflow step');
+      expect(agents.find(a => a.name === 'spec-init')!.description).toBe('🏗️  Initialize project structure');
+      expect(agents.find(a => a.name === 'spec-requirements')!.description).toBe('📋 Generate requirements using EARS');
+      expect(agents.find(a => a.name === 'spec-design')!.description).toBe('🎨 Create technical design');
+      expect(agents.find(a => a.name === 'spec-tasks')!.description).toBe('📝 Generate implementation tasks');
+      expect(agents.find(a => a.name === 'spec-impl')!.description).toBe('⚡ Implement using TDD methodology');
+      expect(agents.find(a => a.name === 'test-runner')!.description).toBe('🧪 Run tests and validation');
+      expect(agents.find(a => a.name === 'deploy-helper')!.description).toBe('🚀 Deploy to environment');
+      expect(agents.find(a => a.name === 'steering-doc')!.description).toBe('🎯 Create steering documents');
+      expect(agents.find(a => a.name === 'custom-agent')!.description).toBe('⚙️  Execute workflow step');
     });
   });
 
@@ -203,14 +203,14 @@ describe('EnvironmentChecker', () => {
       const agents = allDir!.agents;
       
       // Should be sorted alphabetically
-      expect(agents[0].name).toBe('alpha-agent');
-      expect(agents[1].name).toBe('beta-agent');
-      expect(agents[2].name).toBe('zebra-agent');
+      expect(agents[0]!.name).toBe('alpha-agent');
+      expect(agents[1]!.name).toBe('beta-agent');
+      expect(agents[2]!.name).toBe('zebra-agent');
       
       // Should have proper IDs for direct files
-      expect(agents[0].id).toBe('root/alpha-agent');
-      expect(agents[1].id).toBe('root/beta-agent');
-      expect(agents[2].id).toBe('root/zebra-agent');
+      expect(agents[0]!.id).toBe('root/alpha-agent');
+      expect(agents[1]!.id).toBe('root/beta-agent');
+      expect(agents[2]!.id).toBe('root/zebra-agent');
     });
   });
 });

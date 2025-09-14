@@ -4,6 +4,18 @@ import type { DirectoryInfo } from '../../models/Agent.js';
 
 export class DirectoryScreen {
   async show(directories: DirectoryInfo[]): Promise<DirectoryInfo> {
+    // Handle empty directories list
+    if (directories.length === 0) {
+      console.clear();
+      console.log(chalk.bold('┌─ No Agents Found ───────────────────────┐'));
+      console.log('│                                         │');
+      console.log('│ No agent directories or files found.   │');
+      console.log('│ Please add .md files to .claude/agents │');
+      console.log('│                                         │');
+      console.log('└─────────────────────────────────────────┘');
+      throw new Error('No agent directories available');
+    }
+
     // If there's only one directory (likely "all" with direct .md files), auto-select it
     if (directories.length === 1 && directories[0]) {
       const selected = directories[0];
