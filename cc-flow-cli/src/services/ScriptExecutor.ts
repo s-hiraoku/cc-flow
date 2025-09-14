@@ -12,13 +12,18 @@ export class ScriptExecutor {
   }
 
   async executeWorkflowCreation(config: WorkflowConfig): Promise<void> {
-    const { targetPath, selectedAgents } = config;
+    const { targetPath, workflowName, selectedAgents } = config;
     
     // Validate environment before execution
     await this.validateEnvironment();
     
     const scriptPath = this.getScriptPath();
     const agentNames = selectedAgents.map(agent => agent.name).join(',');
+    const finalWorkflowName = workflowName || this.generateDefaultWorkflowName(targetPath);
+    
+    // Set environment variable for workflow name
+    process.env['WORKFLOW_NAME'] = finalWorkflowName;
+    
     const command = `"${scriptPath}" "${targetPath}" "${agentNames}"`;
     
     console.log(`\nExecuting: ${command}`);
@@ -52,6 +57,16 @@ export class ScriptExecutor {
   private getScriptPath(): string {
     // Path to the create-workflow.sh script relative to user's project root
     return join(this.basePath, 'scripts/create-workflow.sh');
+  }
+
+  private generateDefaultWorkflowName(targetPath: string): string {
+    if (targetPath === './agents') {
+      return 'all-workflow';
+    }
+    
+    const pathParts = targetPath.split('/');
+    const dirName = pathParts[pathParts.length - 1];
+    return `${dirName}-workflow`;
   }
 
   /**

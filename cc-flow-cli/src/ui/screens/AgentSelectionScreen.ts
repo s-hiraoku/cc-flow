@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { checkbox, input } from '@inquirer/prompts';
+import { checkbox } from '@inquirer/prompts';
 import type { Agent, DirectoryInfo } from '../../models/Agent.js';
 
 export interface AgentSelectionResult {
@@ -9,67 +9,49 @@ export interface AgentSelectionResult {
 
 export class AgentSelectionScreen {
   async show(directory: DirectoryInfo, purpose?: string): Promise<AgentSelectionResult> {
+    const agents = directory.agents;
+    
     console.clear();
-    console.log(chalk.bold(`┌─ Select Agents (${directory.displayName} directory) ────────┐`));
-    console.log('│                                         │');
+    this.showHeader(directory);
     
-    if (purpose) {
-      console.log(chalk.dim(`│ Purpose: ${purpose.substring(0, 35).padEnd(35)} │`));
-      console.log('│                                         │');
-    }
-    
-    console.log('│ Available agents:                       │');
-    console.log('└─────────────────────────────────────────┘');
-    console.log();
-    
-    // Prepare choices for checkbox selection
-    const choices = directory.agents.map(agent => ({
-      name: `${agent.name}`,
-      value: agent,
-      description: agent.description,
-      checked: false
+    // Prepare choices for checkbox
+    const choices = agents.map(agent => ({
+      name: `${agent.name.padEnd(15)} - ${agent.description.slice(0, 40)}${agent.description.length > 40 ? '...' : ''}`,
+      value: agent
     }));
     
     const selectedAgents = await checkbox({
-      message: 'Select agents to include in the workflow:',
+      message: 'ワークフローに含めるエージェントを選択してください (スペースでチェック/アンチェック):',
       choices,
-      pageSize: 15,
-      instructions: false,
-      validate: (selections: readonly unknown[]) => {
-        if (selections.length === 0) {
-          return 'Please select at least one agent';
+      pageSize: 10,
+      required: true,
+      validate: (answer) => {
+        if (answer.length === 0) {
+          return '少なくとも1つのエージェントを選択してください';
         }
         return true;
       }
     });
     
-    console.log(chalk.green(`\n✓ Selected ${selectedAgents.length} agents`));
+    console.log(chalk.green(`\n✅ ${selectedAgents.length}個のエージェントを選択しました！`));
     
     return {
       selectedAgents,
-      purpose: purpose || 'Default workflow purpose'
+      purpose: purpose || 'Custom workflow'
     };
   }
   
-  async getPurpose(): Promise<string | undefined> {
-    console.clear();
-    console.log(chalk.bold('┌─ Workflow Purpose ──────────────────────┐'));
+  async getPurpose(): Promise<string> {
+    return '';
+  }
+  
+  private showHeader(directory: DirectoryInfo) {
+    console.log(chalk.bold('┌─ 🎯 エージェント選択 ───────────────────┐'));
     console.log('│                                         │');
-    console.log('│ Describe the purpose of this workflow:  │');
-    console.log('│                                         │');
-    console.log('│ This will be used to:                   │');
-    console.log('│ • Guide agent execution                 │');
-    console.log('│ • Generate documentation               │');
-    console.log('│ • Create meaningful descriptions        │');
+    console.log(`│ 📁 ディレクトリ: ${directory.displayName.padEnd(20)} │`);
+    console.log(`│ 📊 利用可能: ${directory.agentCount.toString().padEnd(2)}個のエージェント        │`);
     console.log('│                                         │');
     console.log('└─────────────────────────────────────────┘');
     console.log();
-    
-    const purpose = await input({
-      message: 'Workflow purpose (optional):',
-      default: ''
-    });
-    
-    return purpose.trim() || undefined;
   }
 }

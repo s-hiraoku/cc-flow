@@ -5,6 +5,7 @@ import { ScriptExecutor } from '../services/ScriptExecutor.js';
 import { WelcomeScreen } from '../ui/screens/WelcomeScreen.js';
 import { EnvironmentScreen } from '../ui/screens/EnvironmentScreen.js';
 import { DirectoryScreen } from '../ui/screens/DirectoryScreen.js';
+import { WorkflowNameScreen } from '../ui/screens/WorkflowNameScreen.js';
 import { AgentSelectionScreen } from '../ui/screens/AgentSelectionScreen.js';
 import { OrderScreen } from '../ui/screens/OrderScreen.js';
 import { PreviewScreen } from '../ui/screens/PreviewScreen.js';
@@ -78,6 +79,10 @@ export class WorkflowBuilder {
         const dirScreen = new DirectoryScreen();
         const selectedDirectory = await dirScreen.show(envStatus.availableDirectories);
         
+        // Workflow name input
+        const nameScreen = new WorkflowNameScreen();
+        const workflowName = await nameScreen.show(selectedDirectory);
+        
         // Purpose input (optional)
         const agentScreen = new AgentSelectionScreen();
         const purpose = await agentScreen.getPurpose();
@@ -92,6 +97,7 @@ export class WorkflowBuilder {
         // Create workflow config
         const config: WorkflowConfig = {
           targetPath: selectedDirectory.path,
+          workflowName: workflowName,
           purpose: selectionResult.purpose || 'Workflow created without specific purpose',
           selectedAgents: orderedAgents,
           executionOrder: orderedAgents.map(a => a.name),

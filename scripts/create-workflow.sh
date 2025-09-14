@@ -52,6 +52,7 @@ show_usage() {
 parse_arguments() {
     local target_path="$1"
     local order_spec="${2:-}"
+    local custom_workflow_name="${3:-}"
     
     # 引数のバリデーション
     validate_args "$target_path" "対象パス"
@@ -90,15 +91,21 @@ parse_arguments() {
     fi
     
     ORDER_SPEC="$order_spec"
+    
+    # カスタムワークフロー名の設定
+    if [[ -n "$custom_workflow_name" ]]; then
+        WORKFLOW_NAME="$custom_workflow_name"
+    fi
 }
 
 # メイン処理
 main() {
     local target_path="$1"
     local order_spec="${2:-}"
+    local custom_workflow_name="${3:-}"
     
     # 引数解析
-    parse_arguments "$target_path" "$order_spec"
+    parse_arguments "$target_path" "$order_spec" "$custom_workflow_name"
     
     # 処理開始メッセージ
     info "処理開始: 対象パス '$TARGET_PATH'"

@@ -5,92 +5,204 @@ import type { Agent } from '../../models/Agent.js';
 export class OrderScreen {
   async show(selectedAgents: Agent[]): Promise<Agent[]> {
     let orderedAgents = [...selectedAgents];
-    let modified = false;
+    
+    // If only one agent, skip ordering
+    if (orderedAgents.length <= 1) {
+      console.clear();
+      this.showHeader();
+      console.log('│ 1つのエージェントのみ選択済み           │');
+      console.log('│ 順序設定は不要です。                    │');
+      console.log('│                                         │');
+      console.log('└─────────────────────────────────────────┘');
+      await this.delay(1500);
+      return orderedAgents;
+    }
     
     while (true) {
       console.clear();
-      console.log(chalk.bold('┌─ Set Execution Order ───────────────────┐'));
-      console.log('│                                         │');
-      console.log('│ Set the execution order for selected    │');
-      console.log('│ agents:                                 │');
-      console.log('│                                         │');
-      console.log('│ Current order:                          │');
-      
-      // Show current order
-      orderedAgents.forEach((agent, index) => {
-        const marker = index === 0 ? '→' : ' ';
-        console.log(`│ ${marker} ${(index + 1).toString().padEnd(2)} ${agent.name.padEnd(30)} │`);
-      });
-      
-      console.log('│                                         │');
-      console.log('│ Execution flow:                         │');
-      const flow = orderedAgents.map(a => a.name).join(' → ');
-      const truncatedFlow = flow.length > 35 ? flow.substring(0, 32) + '...' : flow;
-      console.log(`│ ${truncatedFlow.padEnd(39)} │`);
-      console.log('│                                         │');
+      this.showHeader();
+      this.showCurrentOrder(orderedAgents);
       console.log('└─────────────────────────────────────────┘');
-      
-      const choices = [
-        { name: 'Move an agent', value: 'move' },
-        { name: 'Confirm order', value: 'confirm' }
-      ];
+      console.log();
       
       const action = await select({
-        message: 'What would you like to do?',
-        choices
+        message: '実行順序を設定してください:',
+        choices: [
+          {
+            name: '✅ この順序で確定する',
+            value: 'confirm'
+          },
+          {
+            name: '🔄 順序を変更する',
+            value: 'reorder'
+          },
+          {
+            name: '📚 ヘルプを表示',
+            value: 'help'
+          }
+        ]
       });
       
       if (action === 'confirm') {
         break;
       }
       
-      if (action === 'move') {
-        const moved = await this.moveAgent(orderedAgents);
-        if (moved) {
-          orderedAgents = moved;
-          modified = true;
-        }
+      if (action === 'help') {
+        this.showHelp();
+        await this.waitForKey();
+        continue;
       }
-    }
-    
-    if (modified) {
-      console.log(chalk.green('\n✓ Execution order updated'));
+      
+      if (action === 'reorder') {
+        // Show current order and let user reorder
+        const reorderedAgents = await this.reorderAgents(orderedAgents);
+        if (reorderedAgents) {
+          orderedAgents = reorderedAgents;
+        }
+        continue;
+      }
     }
     
     return orderedAgents;
   }
   
-  private async moveAgent(agents: Agent[]): Promise<Agent[] | null> {
-    // Select which agent to move
-    const agentChoices = agents.map((agent, index) => ({
-      name: `${index + 1}. ${agent.name}`,
-      value: index
-    }));
+  private async reorderAgents(agents: Agent[]): Promise<Agent[] | null> {
+    let orderedAgents: Agent[] = [];
+    let remainingAgents = [...agents];
     
-    const agentIndex = await select({
-      message: 'Which agent would you like to move?',
-      choices: agentChoices
-    });
-    
-    // Select new position
-    const positionChoices = agents.map((_, index) => ({
-      name: `Position ${index + 1}`,
-      value: index,
-      disabled: index === agentIndex
-    }));
-    
-    const newPosition = await select({
-      message: `Move ${agents[agentIndex]?.name ?? 'Agent'} to which position?`,
-      choices: positionChoices
-    });
-    
-    // Perform the move
-    const newOrder = [...agents];
-    const [movedAgent] = newOrder.splice(agentIndex, 1);
-    if (movedAgent) {
-      newOrder.splice(newPosition, 0, movedAgent);
+    while (remainingAgents.length > 0) {
+      console.clear();
+      console.log(chalk.bold('┌─ 🔄 実行順序の設定 ─────────────────────┐'));
+      console.log('│                                         │');
+      
+      if (orderedAgents.length > 0) {
+        console.log('│ 📋 確定済みの実行順序:                  │');
+        orderedAgents.forEach((agent, index) => {
+          const position = chalk.green(`${index + 1}.`);
+          const name = chalk.white(agent.name.slice(0, 16));
+          console.log(`│   ${position} ${name.padEnd(18)} │`);
+        });
+        console.log('│                                         │');
+      }
+      
+      console.log(`│ 次に実行するエージェントを選択: (残り${remainingAgents.length}個) │`);
+      console.log('│                                         │');
+      console.log('└─────────────────────────────────────────┘');
+      console.log();
+      
+      // Show remaining agents as choices
+      const choices = remainingAgents.map((agent, index) => ({
+        name: `${agent.name.padEnd(18)} - ${agent.description.slice(0, 20)}${agent.description.length > 20 ? '...' : ''}`,
+        value: agent
+      }));
+      
+      // Add control options
+      if (orderedAgents.length > 0) {
+        choices.push({
+          name: '✅ この順序で確定する',
+          value: 'confirm' as any
+        });
+      }
+      
+      choices.push({
+        name: '↩️  キャンセル（順序変更せずに戻る）',
+        value: 'cancel' as any
+      });
+      
+      try {
+        const selected = await select({
+          message: orderedAgents.length === 0 
+            ? '最初に実行するエージェントを選択してください:' 
+            : `${orderedAgents.length + 1}番目に実行するエージェントを選択してください:`,
+          choices,
+          pageSize: 10
+        });
+        
+        if (typeof selected === 'string' && selected === 'confirm') {
+          // Add remaining agents to the end
+          return [...orderedAgents, ...remainingAgents];
+        }
+        
+        if (typeof selected === 'string' && selected === 'cancel') {
+          return null;
+        }
+        
+        // Add selected agent to ordered list and remove from remaining
+        if (typeof selected === 'object' && selected !== null) {
+          orderedAgents.push(selected as Agent);
+          remainingAgents = remainingAgents.filter(agent => agent.id !== (selected as Agent).id);
+        }
+        
+      } catch {
+        return null;
+      }
     }
     
-    return newOrder;
+    return orderedAgents;
+  }
+  
+  private showHeader() {
+    console.log(chalk.bold('┌─ 🔄 実行順序の設定 ─────────────────────┐'));
+    console.log('│                                         │');
+  }
+  
+  private showCurrentOrder(agents: Agent[]) {
+    console.log('│ 📋 現在の実行順序:                      │');
+    console.log('│                                         │');
+    
+    agents.forEach((agent, index) => {
+      const position = chalk.cyan(`${index + 1}.`);
+      const name = chalk.white(agent.name);
+      const desc = chalk.dim(agent.description.slice(0, 15) + (agent.description.length > 15 ? '...' : ''));
+      console.log(`│   ${position} ${name.padEnd(20)} ${desc.padEnd(15)} │`);
+    });
+    
+    console.log('│                                         │');
+    console.log(`│ 🔗 実行フロー: ${this.getFlowDisplay(agents)} │`);
+    console.log('│                                         │');
+  }
+  
+  private showHelp() {
+    console.clear();
+    console.log(chalk.bold('┌─ 📚 ヘルプ - 実行順序の設定 ──────────────┐'));
+    console.log('│                                         │');
+    console.log('│ 🎯 ' + chalk.cyan('順序設定の流れ:') + '                     │');
+    console.log('│   1. 最初に実行するエージェントを選択    │');
+    console.log('│   2. 次に実行するエージェントを選択      │');
+    console.log('│   3. 残りがなくなるまで繰り返し          │');
+    console.log('│                                         │');
+    console.log('│ 📋 ' + chalk.cyan('確定済み順序の表示:') + '                 │');
+    console.log('│   選択したエージェントが枠内に表示され   │');
+    console.log('│   実行順序が視覚的に確認できます         │');
+    console.log('│                                         │');
+    console.log('│ ✅ ' + chalk.cyan('途中で確定:') + '                         │');
+    console.log('│   "この順序で確定する"を選択すると       │');
+    console.log('│   残りのエージェントは最後に追加されます │');
+    console.log('│                                         │');
+    console.log('│ 💡 ' + chalk.dim('選んだ順番がそのまま実行順序になります') + ' │');
+    console.log('│                                         │');
+    console.log('└─────────────────────────────────────────┘');
+    console.log(chalk.dim('\nPress any key to continue...'));
+  }
+  
+  private getFlowDisplay(agents: Agent[]): string {
+    const flow = agents.map(a => a.name).join(' → ');
+    return flow.length > 28 ? flow.substring(0, 25) + '...' : flow.padEnd(28);
+  }
+  
+  private async delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  
+  private async waitForKey(): Promise<void> {
+    return new Promise(resolve => {
+      process.stdin.setRawMode?.(true);
+      process.stdin.resume();
+      process.stdin.once('data', () => {
+        process.stdin.setRawMode?.(false);
+        process.stdin.pause();
+        resolve();
+      });
+    });
   }
 }

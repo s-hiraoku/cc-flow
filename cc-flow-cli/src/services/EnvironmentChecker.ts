@@ -88,7 +88,7 @@ export class EnvironmentChecker {
       if (directFiles.length > 0) {
         directories.push({
           path: './agents',
-          displayName: 'all',
+          displayName: 'root',
           category: 'agents',
           agentCount: directFiles.length,
           agents: directFiles.sort((a, b) => a.name.localeCompare(b.name))

@@ -34,7 +34,8 @@
     "test:coverage": "vitest run --coverage",
     "test:compile": "tsc src/test-compile.ts --outDir dist-test --module ESNext --target ES2022 --moduleResolution Node",
     "test:build": "node scripts/test-build.js",
-    "validate": "npm run type-check && npm run build"
+    "validate": "npm run type-check && npm run build",
+    "demo-reorder": "tsx src/demo-reorder.ts"
   },
   "engines": {
     "node": ">=18.0.0",

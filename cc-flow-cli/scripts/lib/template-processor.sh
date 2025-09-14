@@ -43,7 +43,7 @@ create_agent_list_json() {
 # テンプレート変数を置換
 process_templates() {
     local agent_dir="$1"
-    local workflow_name="${agent_dir}-workflow"
+    local workflow_name="${WORKFLOW_NAME:-${agent_dir}-workflow}"
     local description="Execute $agent_dir workflow"
     local argument_hint="[context]"
     local agent_list_json
