@@ -3,7 +3,7 @@
 ## [1.0.0] - 2025-01-15
 
 ### Fixed
-- **TypeScript Configuration**: Updated to ES2022 target for proper Node.js 16+ compatibility
+- **TypeScript Configuration**: Updated to ES2022 target for proper Node.js 18+ compatibility
 - **Module System**: Resolved ESM/CommonJS conflicts by standardizing on ES Modules
 - **Import Statements**: Removed `.js` extensions from TypeScript imports 
 - **Build Process**: Enhanced with validation and automated testing
@@ -25,10 +25,10 @@
 
 ### Dependencies
 - **Updated**: chalk@5.3.0, figlet@1.7.0, TypeScript~5.3.3
-- **Maintained**: Node.js ≥16.0.0 compatibility
+- **Maintained**: Node.js ≥18.0.0 compatibility
 - **ESM Only**: All dependencies are now ESM-compatible
 
 ### Breaking Changes
-- Requires Node.js ≥16.0.0 for ESM support
+- Requires Node.js ≥18.0.0 for ESM support
 - Package is now pure ESM (no CommonJS compatibility)
 - Import paths changed to use ES Module syntax

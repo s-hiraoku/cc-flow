@@ -5,7 +5,7 @@
 ### 1. TypeScript Compilation Errors
 **Problem**: `import.meta.url` syntax errors with CommonJS output
 **Solution**: 
-- Updated `tsconfig.json` target from ES2023 to ES2022 for Node.js 16+ compatibility
+- Updated `tsconfig.json` target from ES2023 to ES2022 for Node.js 18+ compatibility
 - Standardized on ESNext modules with proper ESM configuration
 - Removed conflicting `verbatimModuleSyntax` option
 
@@ -90,15 +90,15 @@ npm run test:build  # Validate build output
 
 ### CLI Usage
 ```bash
-npx cc-flow-cli     # Interactive workflow creation
-cc-flow             # If installed globally
+npx @hiraoku/cc-flow-cli   # Interactive workflow creation
+cc-flow                    # If installed globally
 ```
 
 ## Technical Specifications
 
 ### Node.js Compatibility
-- **Minimum**: Node.js ≥16.0.0
-- **Recommended**: Node.js ≥18.0.0 
+- **Minimum**: Node.js ≥18.0.0
+- **Recommended**: Node.js ≥20.0.0 
 - **ESM Support**: Pure ES Modules (no CommonJS)
 
 ### TypeScript Configuration
@@ -110,7 +110,7 @@ cc-flow             # If installed globally
 ### Dependencies
 - **Runtime**: ESM-only packages (chalk@5, @inquirer/*)
 - **Development**: TypeScript 5.3, tsx, modern tooling
-- **Compatibility**: All dependencies support Node.js 16+
+- **Compatibility**: All dependencies support Node.js 18+
 
 ## Validation Checklist
 

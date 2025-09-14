@@ -1,17 +1,17 @@
 ---
-description: Execute utility workflow
-argument-hint: [context]
+description: {DESCRIPTION}
+argument-hint: {ARGUMENT_HINT}
 allowed-tools: [Read, Bash]
 ---
 
-# utility-workflow
+# {WORKFLOW_NAME}
 
 Execute multiple sub-agents sequentially based on workflow type.
 
 ## Usage
 
 ```bash
-/utility-workflow "context description"
+/{WORKFLOW_NAME} "context description"
 ```
 
 ## Execution
@@ -21,7 +21,7 @@ Execute multiple sub-agents sequentially based on workflow type.
 USER_CONTEXT="$*"
 
 # Define agent list directly
-AGENT_LIST="typescript-helper npm-package-builder tui-designer inquirer-ui-expert cli-tester error-handler accessibility-checker"
+AGENT_LIST="{WORKFLOW_AGENT_LIST}"
 
 echo "Executing: $AGENT_LIST"
 
@@ -39,15 +39,15 @@ echo "✅ Workflow completed"
 
 ## Template Variables
 
-- `Execute utility workflow`: Brief workflow description
-- `[context]`: Expected arguments format  
-- `utility-workflow`: Command name (matches filename)
+- `{DESCRIPTION}`: Brief workflow description
+- `{ARGUMENT_HINT}`: Expected arguments format  
+- `{WORKFLOW_NAME}`: Command name (matches filename)
 
 ## Example
 
 For `example-workflow.md`:
-- `Execute utility workflow` → "Execute example workflow"
-- `[context]` → "[context]"
-- `utility-workflow` → "example-workflow"
+- `{DESCRIPTION}` → "Execute example workflow"
+- `{ARGUMENT_HINT}` → "[context]"
+- `{WORKFLOW_NAME}` → "example-workflow"
 
 Usage: `/example-workflow "your task description"`

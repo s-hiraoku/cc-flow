@@ -10,8 +10,8 @@
 
 ### 位置づけ
 
-- **独立した npm パッケージ**: `cc-flow`
-- **npx 実行**: `npx cc-flow`
+- **独立した npm パッケージ**: `@hiraoku/cc-flow-cli`
+- **npx 実行**: `npx @hiraoku/cc-flow-cli`
 - **cc-flow との連携**: 既存のスクリプトを活用して処理実行
 
 ## 2. アーキテクチャ設計
@@ -19,7 +19,7 @@
 ### 全体フロー
 
 ```
-npx cc-flow
+npx @hiraoku/cc-flow-cli
     ↓
 TUI起動・対話的設定
     ↓
@@ -43,11 +43,11 @@ TUI起動・対話的設定
 
 ```bash
 # シンプル実行（推奨）
-npx cc-flow
+npx @hiraoku/cc-flow-cli
 
 # 将来的に引数指定も可能
-npx cc-flow --directory spec
-npx cc-flow --non-interactive
+npx @hiraoku/cc-flow-cli --directory spec  # planned
+npx @hiraoku/cc-flow-cli --non-interactive # planned
 ```
 
 ### 理由
@@ -168,29 +168,26 @@ npx cc-flow --non-interactive
 └─────────────────────────────────────────┘
 ```
 
-### 4.6 実行順序設定
+### 4.6 実行順序設定（逐次選択方式）
 
 ```
-┌─ Set Execution Order ───────────────────┐
+┌─ 🔄 実行順序の設定 ─────────────────────┐
 │                                         │
-│ Set the execution order for selected    │
-│ agents:                                 │
+│ 📋 現在の実行順序:                      │
+│   1. spec-init                          │
 │                                         │
-│ Current order:                          │
-│ → 1. spec-init                          │
-│   2. spec-requirements                  │
-│   3. spec-impl                          │
+│ 次に実行するエージェントを選択:         │
+│   spec-requirements - 要件定義           │
+│   spec-impl         - 実装               │
+│   …                                     │
 │                                         │
-│ Execution flow:                         │
-│ spec-init → spec-requirements → spec-impl│
+│ 🔗 実行フロー: spec-init → …             │
 │                                         │
-│ [↑↓] Move selection                     │
-│ [M] Move this agent                     │
-│ [Enter] Confirm order                   │
+│ [Enter] 決定  [ヘルプ]  [この順序で確定]   │
 └─────────────────────────────────────────┘
 ```
 
-### 4.7 プレビュー
+### 4.7 プレビュー（日本語UI）
 
 ```
 ┌─ Workflow Preview ──────────────────────┐
@@ -207,15 +204,14 @@ npx cc-flow --non-interactive
 │ 3. spec-impl                           │
 │    → Implement using TDD methodology    │
 │                                         │
-│ Generated Files:                        │
+│ 生成されるファイル:                     │
 │ • .claude/commands/spec-workflow.md     │
-│ • .claude/commands/poml/spec-workflow.poml│
 │                                         │
 │ [G] Generate  [E] Edit  [Q] Cancel      │
 └─────────────────────────────────────────┘
 ```
 
-### 4.8 完了画面
+### 4.8 完了画面（日本語UI）
 
 ```
 ┌─ Workflow Created ──────────────────────┐
@@ -225,9 +221,8 @@ npx cc-flow --non-interactive
 │ Your workflow has been created:         │
 │                                         │
 │ Command: /spec-workflow                 │
-│ Files generated:                        │
+│ 生成されたファイル:                     │
 │ • .claude/commands/spec-workflow.md     │
-│ • .claude/commands/poml/spec-workflow.poml│
 │                                         │
 │ Usage:                                  │
 │ /spec-workflow "create authentication   │
@@ -350,7 +345,7 @@ cc-flow/                    # npmパッケージルート
 
 ```json
 {
-  "name": "cc-flow",
+  "name": "@hiraoku/cc-flow-cli",
   "version": "1.0.0",
   "description": "Interactive TUI for creating Claude Code workflows",
   "bin": {
@@ -359,7 +354,7 @@ cc-flow/                    # npmパッケージルート
   "main": "dist/index.js",
   "files": ["dist/", "bin/", "README.md"],
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   }
 }
 ```

@@ -112,8 +112,8 @@ export class OrderScreen {
       try {
         const selected = await select({
           message: orderedAgents.length === 0 
-            ? '最初に実行するエージェントを選択してください:' 
-            : `${orderedAgents.length + 1}番目に実行するエージェントを選択してください:`,
+            ? '最初に実行するエージェントを選択してください: (↑↓で選択、Enterで決定)' 
+            : `${orderedAgents.length + 1}番目に実行するエージェントを選択してください: (↑↓で選択、Enterで決定)`,
           choices,
           pageSize: 10
         });

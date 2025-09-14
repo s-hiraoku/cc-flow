@@ -1,23 +1,23 @@
 ---
-description: {DESCRIPTION}
-argument-hint: {ARGUMENT_HINT}
+description: Execute demo workflow
+argument-hint: [context]
 allowed-tools: [Read, Bash]
 ---
 
-# {WORKFLOW_NAME}
+# demo-workflow
 
 Execute multiple sub-agents sequentially based on workflow type.
 
 ## Usage
 
 ```
-/{WORKFLOW_NAME} "your task or requirement"
+/demo-workflow "your task or requirement"
 ```
 
 ## Execution Instructions
 
 You are asked to execute a sequential workflow with the following agents:
-`{WORKFLOW_AGENT_LIST}`
+`requirements-analyzer architecture-designer code-generator quality-checker deployment-manager progress-reporter`
 
 Please perform these steps:
 
@@ -56,10 +56,10 @@ If any agent fails to execute:
 
 ## Template Variables Reference
 
-- `{DESCRIPTION}`: Brief workflow description
-- `{ARGUMENT_HINT}`: Expected arguments format  
-- `{WORKFLOW_NAME}`: Command name (matches filename)
-- `{WORKFLOW_AGENT_LIST}`: Space-separated list of agent names
+- `Execute demo workflow`: Brief workflow description
+- `[context]`: Expected arguments format  
+- `demo-workflow`: Command name (matches filename)
+- `requirements-analyzer architecture-designer code-generator quality-checker deployment-manager progress-reporter`: Space-separated list of agent names
 
 ## Example
 

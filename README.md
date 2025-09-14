@@ -165,6 +165,10 @@ Copy them from this repo into your project root if they’re missing:
 cp -r scripts templates /path/to/your-project/
 ```
 
+Repository: https://github.com/s-hiraoku/cc-flow
+
+npm: https://www.npmjs.com/package/@hiraoku/cc-flow-cli
+
 Then ensure the workflow script is executable:
 
 ```bash
