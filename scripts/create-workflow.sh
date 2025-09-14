@@ -18,64 +18,127 @@ source "$SCRIPT_DIR/lib/template-processor.sh"
 declare -a AGENT_FILES
 declare -a AGENT_NAMES
 declare -a SELECTED_AGENTS
+declare -a ITEM_NAMES_SPECIFIED
+declare -a ITEM_FILES
+declare -a ITEM_NAMES
 declare WORKFLOW_MD_TEMPLATE
 declare WORKFLOW_POML_TEMPLATE
 declare WORKFLOW_MD_CONTENT
 declare WORKFLOW_POML_CONTENT
 declare WORKFLOW_NAME
+declare TARGET_PATH
+declare MODE
 
 # 使用方法を表示
 show_usage() {
-    echo "使用方法: $0 <エージェントディレクトリ> [順序]"
+    echo "使用方法: $0 <対象パス> [順序またはアイテム名]"
     echo ""
-    echo "例:"
-    echo "  $0 spec                    # 対話モード"
-    echo "  $0 spec \"1 3 4 6\"         # 順序指定モード"
+    echo "対象パス形式:"
+    echo "  ./agents/spec              # 特定ディレクトリ"
+    echo "  ./agents                   # 全エージェント"
+    echo "  spec                       # 旧形式（廃止予定）"
     echo ""
-    echo "指定されたエージェントディレクトリから、順次実行するワークフローコマンドを生成します。"
+    echo "順序指定例:"
+    echo "  $0 ./agents/spec                           # 対話モード"
+    echo "  $0 ./agents/spec \"1 3 4 6\"                # インデックス指定"
+    echo "  $0 ./agents/spec \"spec-init,spec-impl\"     # アイテム名指定"
+    echo "  $0 ./agents \"spec-init,utility-date\"       # 横断指定"
+    echo ""
+    echo "指定された対象パスから、順次実行するワークフローコマンドを生成します。"
     echo "順序を指定しない場合は対話モードで実行されます。"
 }
 
 # 引数を解析
 parse_arguments() {
-    local agent_dir="$1"
+    local target_path="$1"
     local order_spec="${2:-}"
+    local custom_workflow_name="${3:-}"
     
     # 引数のバリデーション
-    validate_args "$agent_dir" "エージェントディレクトリ名"
+    validate_args "$target_path" "対象パス"
     
-    # エージェントディレクトリ名をグローバル変数に設定
-    AGENT_DIR="$agent_dir"
+    # 相対パス形式の処理
+    case "$target_path" in
+        ./*)
+            # 新形式: 相対パス
+            TARGET_PATH="$target_path"
+            # 後方互換性のためにAGENT_DIRも設定
+            if [[ "$target_path" == "./agents/"* ]]; then
+                AGENT_DIR=$(basename "$target_path")
+                [[ "$AGENT_DIR" == "agents" ]] && AGENT_DIR="all"
+            else
+                AGENT_DIR="all"  # 非agentsディレクトリの場合
+            fi
+            ;;
+        *)
+            # 旧形式: 短縮形（後方互換性、廃止予定警告）
+            warn "短縮形式 '$target_path' は廃止予定です。'./agents/$target_path' を使用してください"
+            TARGET_PATH="./agents/$target_path"
+            AGENT_DIR="$target_path"
+            ;;
+    esac
+    
+    # アイテム名リストが指定された場合の処理
+    if [[ "$order_spec" == *","* ]]; then
+        # カンマ区切りはアイテム名リスト
+        IFS=',' read -ra ITEM_NAMES_SPECIFIED <<< "$order_spec"
+        MODE="item-names"
+    elif [[ -n "$order_spec" ]]; then
+        # スペース区切りは従来の数字インデックス
+        MODE="indices"
+    else
+        MODE="interactive"
+    fi
+    
     ORDER_SPEC="$order_spec"
+    
+    # カスタムワークフロー名の設定
+    if [[ -n "$custom_workflow_name" ]]; then
+        WORKFLOW_NAME="$custom_workflow_name"
+    fi
 }
 
 # メイン処理
 main() {
-    local agent_dir="$1"
+    local target_path="$1"
     local order_spec="${2:-}"
+    local custom_workflow_name="${3:-}"
     
     # 引数解析
-    parse_arguments "$agent_dir" "$order_spec"
+    parse_arguments "$target_path" "$order_spec" "$custom_workflow_name"
     
     # 処理開始メッセージ
-    info "処理開始: エージェントディレクトリ '$AGENT_DIR'"
+    info "処理開始: 対象パス '$TARGET_PATH'"
     
-    # エージェント検索
-    discover_agents "$AGENT_DIR"
-    extract_agent_names
+    # アイテム検索（新形式では汎用的な関数を使用）
+    if [[ "$TARGET_PATH" == ./agents/* ]] || [[ "$TARGET_PATH" == ./commands/* ]]; then
+        discover_items "$TARGET_PATH"
+        extract_item_names
+    else
+        # 後方互換性: 既存関数を使用
+        discover_agents "$AGENT_DIR"
+        extract_agent_names
+    fi
     
     # エージェント一覧を表示
     display_agent_list "$AGENT_DIR"
     
     # 実行順序を決定
-    if [[ -n "$ORDER_SPEC" ]]; then
-        # 順序指定モード
-        process_order_specification "$ORDER_SPEC"
-    else
-        # 対話モード
-        show_selection_instructions
-        get_execution_order
-    fi
+    case "$MODE" in
+        "item-names")
+            # アイテム名指定モード
+            process_item_names_specification
+            ;;
+        "indices")
+            # インデックス指定モード（従来）
+            process_order_specification "$ORDER_SPEC"
+            ;;
+        *)
+            # 対話モード
+            show_selection_instructions
+            get_execution_order
+            ;;
+    esac
     
     # 確認メッセージ
     show_final_confirmation

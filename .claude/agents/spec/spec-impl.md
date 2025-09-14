@@ -1,9 +1,11 @@
 ---
 name: spec-impl
 description: Execute specification tasks using Kent Beck's TDD methodology
-model: sonnet
 tools: [Bash, Read, Write, Edit, MultiEdit, Grep, Glob, LS, WebFetch]
+model: sonnet
+color: green
 ---
+
 
 # Execute Spec Tasks with TDD
 

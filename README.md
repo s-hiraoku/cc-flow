@@ -1,285 +1,255 @@
 # CC-Flow: Claude Code Workflow Platform
 
-A platform for creating sequential workflow commands that execute Claude Code sub-agents in a structured manner.
-
-## Overview
-
-CC-Flow enables you to create custom slash commands that automatically execute multiple Claude Code sub-agents sequentially, passing context between each step. This creates powerful automation workflows for complex development tasks.
-
-The included `spec` agents are provided as a sample workflow demonstrating specification-driven development. You can create your own agent collections for any domain or workflow pattern.
-
-## Key Features
-
-- **Sequential Sub-agent Execution**: Chain multiple Claude Code agents together
-- **Context Passing**: Results from each agent are passed to the next in the sequence
-- **Interactive Agent Selection**: Choose which agents to execute and in what order
-- **Template-based Command Generation**: Create new workflow commands from templates
-- **POML Integration**: Uses POML (Prompt Orchestration Markup Language) for workflow definitions
-- **Flexible Workflow Types**: Support for different workflow patterns and agent combinations
-- **Error Handling**: Comprehensive validation and error reporting during workflow creation
-
-## Architecture
-
-### Core Components
-
-1. **Templates** (`/templates/`): Base templates for creating new workflow commands
-   - `workflow.md`: Markdown template for Claude Code slash commands
-   - `workflow.poml`: POML template for workflow orchestration logic
-
-2. **Sub-agents** (`/.claude/agents/`): Specialized agents for different tasks
-   - `spec/`: Sample specification-related agents (init, design, implementation, etc.)
-   - `utility/`: Utility agents (date handling, POML research, etc.)
-
-3. **Script Architecture** (`/scripts/`): Modular implementation following GitHub spec-kit patterns
-   - `create-workflow.sh`: Main entry point with error handling
-   - `lib/`: Feature-specific modules (discovery, interaction, processing)
-   - `utils/`: Shared utilities and common functions
-
-4. **Command Generator**: The `/create-workflow` command that calls the script architecture
-
-### Workflow Execution Flow
-
-```mermaid
-graph TD
-    A[User runs /workflow-name type] --> B[Parse arguments]
-    B --> C[Load POML workflow definition]
-    C --> D[Extract agent list for workflow type]
-    D --> E[Execute agents sequentially]
-    E --> F[Agent 1: Execute with initial context]
-    F --> G[Agent 2: Execute with previous results]
-    G --> H[Agent N: Execute with accumulated context]
-    H --> I[Display consolidated results]
+```
+   ██████╗ ██████╗       ███████╗██╗      ██████╗ ██╗    ██╗
+  ██╔════╝██╔════╝      ██╔════╝██║     ██╔═══██╗██║    ██║
+  ██║     ██║     █████╗█████╗  ██║     ██║   ██║██║ █╗ ██║
+  ██║     ██║     ╚════╝██╔══╝  ██║     ██║   ██║██║███╗██║
+  ╚██████╗╚██████╗      ██║     ███████╗╚██████╔╝╚███╔███╔╝
+   ╚═════╝ ╚═════╝      ╚═╝     ╚══════╝ ╚═════╝  ╚══╝╚══╝
 ```
 
-## Usage
+🚀 **Create powerful Claude Code workflows with a beautiful interactive terminal interface**
 
-### Creating a New Workflow
+CC-Flow makes it easy to build and run custom workflows that chain multiple Claude Code agents together. No complex configuration needed - just launch the interactive TUI and create workflows visually!
 
-Use the `/create-workflow` command to generate a new workflow:
+## 🎯 What is CC-Flow?
+
+CC-Flow lets you:
+
+- **Chain Claude Code agents** together in custom workflows
+- **Create workflows visually** with an intuitive terminal interface
+- **Automate complex tasks** by combining multiple specialized agents
+- **Save time** by reusing workflows for similar tasks
+
+Perfect for development workflows like: specification creation, code review processes, testing pipelines, deployment automation, and more.
+
+## ⚡ Quick Start
+
+### 1. **Launch the Interactive TUI**
 
 ```bash
-/create-workflow spec
+npx @hiraoku/cc-flow-cli
+# or (after global install):
+cc-flow
 ```
 
-**Interactive Agent Selection Process:**
+**You'll see a beautiful welcome screen with:**
 
-1. **Agent Discovery**: The command scans the specified directory and lists all available agents
-```
-Found agents in 'spec' directory:
-1. spec-init
-2. spec-requirements  
-3. spec-design
-4. spec-tasks
-5. spec-impl
-6. spec-status
-7. steering
-8. steering-custom
-```
+- 🎨 Colorful ASCII art logo
+- 📋 Clear menu options
+- ⌨️ Keyboard shortcuts
+- 🌐 Bilingual UI (English/Japanese labels)
 
-2. **Order Selection**: Choose execution order by entering numbers
-```
-Enter execution order: 1 2 3 5
-```
+### 2. **Follow the Visual Setup**
 
-3. **Confirmation**: Review and confirm your selection
-```
-Selected execution order:
-1. spec-init
-2. spec-requirements
-3. spec-design
-4. spec-impl
+- ✅ See the beautiful CC-FLOW welcome screen
+- ✅ Choose your agent directory (e.g., "spec" for specification workflows)
+- ✅ Select which agents you want to use
+- ✅ Set the execution order
+- ✅ Preview and confirm your workflow
 
-Is this correct? (y/n): y
-```
+**Interactive Features:**
 
-4. **Generation**: Creates the workflow command and supporting files
-```
-✅ Created workflow command: /spec-workflow
-📁 Generated files:
-   - .claude/commands/spec-workflow.md
-   - .claude/commands/poml/spec-workflow.poml
+- ✨ Visual agent cards with descriptions
+- ✅ Checkbox-based selection in the TUI
+- 🔢 Script mode supports numeric index and CSV selection
+- 📝 Real-time validation and tips
+- 👀 Preview before confirmation
 
-Agent execution order: spec-init → spec-requirements → spec-design → spec-impl
-```
-
-**Note**: The `spec` workflow is a sample implementation. You can create workflows for any domain by organizing agents in directories under `/.claude/agents/`.
-
-### Running a Workflow
-
-Execute the generated workflow command:
+### 3. **Run Your Workflow**
 
 ```bash
-/spec-workflow implementation "create authentication system"
+# Use the generated workflow command
+/your-workflow "describe your task here"
 ```
 
-**Arguments:**
-- `implementation`: The workflow type/variant
-- `"create authentication system"`: Context description passed to all agents
+That's it! 🎉 Your custom workflow is ready to use.
 
-### Workflow Execution Example
+## 🎨 Features
 
-For the `spec` workflow with `implementation` type:
+### **Beautiful Terminal Interface**
 
-```
-→ spec-init: Initializing project structure...
-→ spec-requirements: Generating requirements documentation...
-→ spec-design: Creating technical design...
-→ spec-tasks: Breaking down implementation tasks...
-→ spec-impl: Implementing core functionality...
-✅ Workflow completed
-```
+- 3-color ASCII art logo (centers when width allows)
+- Intuitive menus and visual feedback
+- Keyboard shortcuts and accessibility support
+- Works in standard terminal environments
 
-## Sample Sub-agents
-
-### Specification Agents (`/.claude/agents/spec/`) - Sample Implementation
-
-The `spec` agents demonstrate a complete specification-driven development workflow:
-
-- **spec-init**: Initialize new specification with directory structure
-- **spec-requirements**: Generate comprehensive requirements using EARS format  
-- **spec-design**: Create technical design with research and requirements mapping
-- **spec-tasks**: Generate detailed implementation tasks with TDD approach
-- **spec-impl**: Execute specification tasks using Kent Beck's TDD methodology
-- **spec-status**: Generate progress reports and status tracking
-- **steering**: Create and update Kiro steering documents
-- **steering-custom**: Create custom steering documents for specialized contexts
-
-### Utility Agents (`/.claude/agents/utility/`)
-
-- **date-utility**: Provides current date and time information
-- **poml-spec-researcher**: Research POML specifications and syntax
-- **spec-creation-expert**: Create comprehensive technical specifications
-
-**Note**: These agents serve as examples. Create your own agent collections for different domains like testing, deployment, documentation, code review, or any custom workflow you need.
-
-## Template Structure
-
-### Workflow Command Template (`templates/workflow.md`)
-
-Creates a Claude Code slash command with:
-- Argument parsing for workflow type and context
-- POML integration for dynamic agent selection
-- Sequential agent execution with context passing
-- Progress reporting and error handling
-
-### POML Template (`templates/workflow.poml`)
-
-Defines the workflow orchestration logic using POML syntax:
-- Dynamic agent selection based on workflow type
-- Context accumulation between agents
-- Structured output formatting
-- Workflow-specific instructions and configurations
-
-## Configuration
-
-### Dependencies
-
-- **pomljs**: POML processing library for workflow definitions
-- **Claude Code**: Required runtime environment
-
-### File Structure
+**Terminal Experience:**
 
 ```
-cc-flow/
-├── .claude/
-│   ├── agents/
-│   │   ├── spec/          # Sample specification workflow agents
-│   │   └── utility/       # Sample utility agents
-│   ├── commands/
-│   │   ├── create-workflow.md    # Workflow generator command
-│   │   └── poml/                 # Generated POML files (auto-created)
-│   └── settings.local.json
-├── scripts/               # Modular script architecture (GitHub spec-kit style)
-│   ├── create-workflow.sh # Main workflow generator script
-│   ├── lib/
-│   │   ├── agent-discovery.sh      # Agent discovery and listing
-│   │   ├── template-processor.sh   # Template processing and generation
-│   │   └── user-interaction.sh     # Interactive order selection
-│   └── utils/
-│       └── common.sh      # Common utilities and error handling
-├── templates/
-│   ├── workflow.md        # Command template
-│   └── workflow.poml      # POML workflow template
-├── docs/
-│   └── create-workflow-spec.md    # Detailed implementation specification
-├── package.json
-└── README.md
+┌─ Select Agents (spec directory) ────────┐
+│ Available agents:                        │
+│ > ○ spec-init   🚀 Initialize project   │
+│   ○ spec-design 🎨 Create architecture  │
+│   ○ spec-impl   ⚙️  Implement features   │
+└──────────────────────────────────────────┘
 ```
 
-## Workflow Types
+### **Easy Workflow Creation**
 
-Different workflow types can be defined to execute different combinations of agents:
+- Visual agent selection with descriptions
+- Step-by-step ordering (choose next agent sequentially)
+- Real-time validation and error checking
+- Preview before creating workflows
 
-- **implementation**: Full specification workflow (init → requirements → design → tasks → impl)
-- **design-only**: Design-focused workflow (requirements → design)
-- **planning**: Planning workflow (init → requirements → tasks)
+### **Powerful Automation**
 
-## Implementation Details
+- Chain multiple agents together
+- Context flows between agents automatically
+- Reusable workflows for common tasks
+- Built-in error handling and recovery
 
-### Script Architecture Benefits
+## 📚 Common Use Cases
 
-Following GitHub spec-kit patterns provides several advantages:
-
-- **Maintainability**: Logic separated into focused modules
-- **Testability**: Each script can be tested independently  
-- **Reusability**: Modules can be imported by other scripts
-- **Extensibility**: Easy to add new functionality without affecting core logic
-- **Error Handling**: Centralized error management and user feedback
-
-### Module Responsibilities
-
-- **agent-discovery.sh**: Finds and validates agent files, extracts metadata
-- **user-interaction.sh**: Manages all user input/output, validation, confirmation
-- **template-processor.sh**: Handles file I/O, variable substitution, generation
-- **common.sh**: Provides consistent error handling, logging, and utilities
-
-### Direct Script Usage
-
-You can also run the script directly for testing or automation:
+### **Software Development**
 
 ```bash
-# Interactive mode
-./scripts/create-workflow.sh spec
-
-# View usage help
-./scripts/create-workflow.sh
+# Create a specification workflow
+npx @hiraoku/cc-flow-cli
+# Select: spec → spec-init, spec-requirements, spec-design, spec-impl
+# Run: /spec-workflow "build user authentication system"
 ```
 
-## Extension
+**Workflow Creation Flow:**
 
-### Adding New Agents
+```
+📁 Select Directory → 🔍 Choose Agents → 📋 Set Order → ✅ Confirm → 🎉 Ready!
+```
 
-1. Create agent definition in `/.claude/agents/{category}/{agent-name}.md`
-2. Use `/create-workflow {category}` to generate workflow with interactive selection
-3. Test the generated workflow command
+### **Code Review Process**
 
-### Creating Custom Workflows
+```bash
+# Create a review workflow
+npx @hiraoku/cc-flow-cli
+# Select agents for: code analysis → security check → documentation
+# Run: /review-workflow "review this pull request"
+```
 
-1. **Create Agent Directory**: Define your agent sequence in a new directory under `/.claude/agents/`
-   ```bash
-   mkdir .claude/agents/deploy
-   # Add your agents: deploy-build.md, deploy-test.md, deploy-release.md
-   ```
+### **Testing Pipeline**
 
-2. **Generate Workflow**: Run `/create-workflow {category}` to generate the workflow command
-   ```bash
-   /create-workflow deploy
-   ```
+```bash
+# Create a testing workflow
+npx @hiraoku/cc-flow-cli
+# Select agents for: unit tests → integration tests → e2e tests
+# Run: /test-workflow "test the payment module"
+```
 
-3. **Interactive Selection**: Choose agents and execution order during the creation process
+## 🔧 Installation & Setup
 
-4. **Customize**: Modify the generated POML definitions for your specific use case
+### **Prerequisites**
 
-**Error Handling**: The creation process includes comprehensive validation:
-- Directory existence checking
-- Agent file validation
-- Duplicate selection prevention
-- Template file verification
-- Permission checks for file generation
+- Claude Code CLI available on PATH (the generated commands call `claude subagent`)
+- Node.js 18+ (for the TUI application)
+- Project contains your agents under `.claude/agents/**.md`
 
-## Development Status
+### **Setup**
 
-**Status**: Draft/Development
-**Version**: 0.1.0
+You can run the TUI via npx or install globally. The TUI ultimately invokes a local script `scripts/create-workflow.sh` in your current project directory to generate workflow commands.
 
-This platform is in active development. Features and APIs may change as the system evolves.
+- Option A: Run with npx (recommended)
+  - From your Claude Code project root: `npx @hiraoku/cc-flow-cli`
+
+- Option B: Global install
+  - `npm install -g @hiraoku/cc-flow-cli`
+  - Run with: `cc-flow`
+
+Important: If you are using the CLI outside this repository, make sure your project has the CC-Flow helper files that the TUI calls:
+
+- `scripts/` (contains `create-workflow.sh` and libraries)
+- `templates/` (workflow templates)
+
+Copy them from this repo into your project root if they’re missing:
+
+```bash
+cp -r scripts templates /path/to/your-project/
+```
+
+Then ensure the workflow script is executable:
+
+```bash
+chmod +x scripts/create-workflow.sh
+```
+
+### **Start Creating Workflows**
+
+```bash
+# Launch the TUI
+npx @hiraoku/cc-flow-cli
+
+# Follow the interactive prompts
+# Your workflow will be ready in minutes!
+```
+
+## 🤔 FAQ
+
+### **How do I create my first workflow?**
+
+Just run `npx @hiraoku/cc-flow-cli` (or `cc-flow` if installed globally) and follow the visual prompts. The TUI guides you through everything!
+
+### **Can I use existing agents?**
+
+Yes! CC-Flow comes with sample `spec` agents for specification-driven development. You can use them as-is or create your own.
+
+### **How do I add new agents?**
+
+1. Create a `.md` file in `/.claude/agents/your-category/`
+2. Launch the TUI to include it in workflows
+3. That's it!
+
+### **Can I run workflow generation without the TUI?**
+
+Yes. The TUI delegates to a local script. You can call it directly for scripting/CI:
+
+```bash
+# New recommended path format
+scripts/create-workflow.sh ./agents/spec "1 3 4"
+
+# Or specify agent names (comma-separated)
+scripts/create-workflow.sh ./agents/spec "spec-init,spec-requirements,spec-design"
+
+# Cross-category selection (when using ./agents)
+scripts/create-workflow.sh ./agents "spec-init,utility-date"
+
+# Back-compat short form (deprecated; emits a warning)
+scripts/create-workflow.sh spec "1 3 4"
+```
+
+This generates `.claude/commands/<dir>-workflow.md` which you run inside Claude Code as a slash command, for example: `/spec-workflow "your context"`.
+
+### **Can I edit from the preview screen?**
+
+Not yet. Editing from the preview screen is planned. For now, cancel and re-run the wizard to change selection or order.
+
+### **What if I need help?**
+
+- The TUI has built-in help and validation
+- Check the included sample agents for examples
+- All workflows include error handling and recovery
+
+## 🚀 Ready to Get Started?
+
+```bash
+npx @hiraoku/cc-flow-cli
+```
+
+**Within 5 minutes you'll have:**
+
+- ✅ A beautiful interactive workflow creator
+- ✅ Custom workflows tailored to your needs
+- ✅ Powerful automation for your development tasks
+
+**Success! Your workflow is ready:**
+
+```bash
+✅ ワークフローコマンドを作成しました: /spec-workflow
+💡 実行: /spec-workflow "your task description"
+🎯 Agents: spec-init → spec-requirements → spec-design → spec-impl
+```
+
+Happy workflow building! 🎉
+
+---
+
+**CC-Flow Preview (0.x)**  
+Feature-complete enough for daily use; some flows (e.g. editing from the preview screen) are planned and not yet implemented.

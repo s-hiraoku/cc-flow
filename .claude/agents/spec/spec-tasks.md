@@ -1,9 +1,11 @@
 ---
 name: spec-tasks
 description: Generate detailed implementation tasks with TDD approach and requirements mapping
-model: sonnet
 tools: [Bash, Read, Write, Edit, MultiEdit]
+model: sonnet
+color: yellow
 ---
+
 
 # Implementation Tasks
 

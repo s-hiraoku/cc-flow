@@ -1,17 +1,17 @@
 ---
-description: Execute spec workflow
+description: Execute utility workflow
 argument-hint: [context]
 allowed-tools: [Read, Bash]
 ---
 
-# spec-workflow
+# utility-workflow
 
 Execute multiple sub-agents sequentially based on workflow type.
 
 ## Usage
 
 ```bash
-/spec-workflow "context description"
+/utility-workflow "context description"
 ```
 
 ## Execution
@@ -21,7 +21,7 @@ Execute multiple sub-agents sequentially based on workflow type.
 USER_CONTEXT="$*"
 
 # Define agent list directly
-AGENT_LIST="spec-init spec-requirements spec-design spec-tasks spec-impl"
+AGENT_LIST="typescript-helper npm-package-builder tui-designer inquirer-ui-expert cli-tester error-handler accessibility-checker"
 
 echo "Executing: $AGENT_LIST"
 
@@ -39,15 +39,15 @@ echo "✅ Workflow completed"
 
 ## Template Variables
 
-- `Execute spec workflow`: Brief workflow description
+- `Execute utility workflow`: Brief workflow description
 - `[context]`: Expected arguments format  
-- `spec-workflow`: Command name (matches filename)
+- `utility-workflow`: Command name (matches filename)
 
 ## Example
 
-For `spec-workflow.md`:
-- `Execute spec workflow` → "Execute specification workflow"
+For `example-workflow.md`:
+- `Execute utility workflow` → "Execute example workflow"
 - `[context]` → "[context]"
-- `spec-workflow` → "spec-workflow"
+- `utility-workflow` → "example-workflow"
 
-Usage: `/spec-workflow "create auth system"`
+Usage: `/example-workflow "your task description"`

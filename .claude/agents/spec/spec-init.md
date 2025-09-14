@@ -1,9 +1,11 @@
 ---
 name: spec-init
 description: Initialize new specification with directory structure and metadata based on project description
-model: sonnet
 tools: [Bash, Read, Write, Edit, Glob, LS]
+model: sonnet
+color: blue
 ---
+
 
 # Spec Initialization
 
