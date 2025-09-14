@@ -11,24 +11,19 @@ Execute multiple sub-agents sequentially based on workflow type.
 ## Usage
 
 ```bash
-/{WORKFLOW_NAME} {WORKFLOW_TYPE}
-/{WORKFLOW_NAME} {WORKFLOW_TYPE} "context description"
+/{WORKFLOW_NAME} "context description"
 ```
 
 ## Execution
 
 ```bash
 # Parse arguments
-eval "args=($ARGUMENTS)"
-WORKFLOW_TYPE="${args[0]}"
-USER_CONTEXT="${args[@]:1}"
-
-[[ -z "$WORKFLOW_TYPE" ]] && { echo "Error: Workflow type required"; exit 1; }
+USER_CONTEXT="$ARGUMENTS"
 
 # Get agent list from POML
-WORKFLOW_DEF=$(npx pomljs --file "poml/commands/workflow.poml" \
-  --context "workflow_type=$WORKFLOW_TYPE" \
-  --context "user_context=$USER_CONTEXT")
+WORKFLOW_DEF=$(npx pomljs --file "poml/commands/{WORKFLOW_NAME}.poml" \
+  --context "user_input=$USER_CONTEXT" \
+  --context "context=$USER_CONTEXT")
 
 AGENT_LIST=$(echo "$WORKFLOW_DEF" | grep "AGENTS:" | sed 's/AGENTS: *//' | tr ',' ' ')
 [[ -z "$AGENT_LIST" ]] && { echo "Error: No agents found"; exit 1; }
@@ -52,14 +47,12 @@ echo "✅ Workflow completed"
 - `{DESCRIPTION}`: Brief workflow description
 - `{ARGUMENT_HINT}`: Expected arguments format  
 - `{WORKFLOW_NAME}`: Command name (matches filename)
-- `{WORKFLOW_TYPE}`: Example workflow type
 
 ## Example
 
 For `spec-workflow.md`:
 - `{DESCRIPTION}` → "Execute specification workflow"
-- `{ARGUMENT_HINT}` → "[type] [context]"
+- `{ARGUMENT_HINT}` → "[context]"
 - `{WORKFLOW_NAME}` → "spec-workflow"
-- `{WORKFLOW_TYPE}` → "spec-implementation"
 
-Usage: `/spec-workflow spec-implementation "create auth system"`
+Usage: `/spec-workflow "create auth system"`

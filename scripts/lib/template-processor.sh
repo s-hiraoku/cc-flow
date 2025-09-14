@@ -44,8 +44,7 @@ process_templates() {
     local agent_dir="$1"
     local workflow_name="${agent_dir}-workflow"
     local description="Execute $agent_dir workflow"
-    local argument_hint="[type] [context]"
-    local workflow_type="implementation"
+    local argument_hint="[context]"
     local agent_list_json
     
     agent_list_json=$(create_agent_list_json)
@@ -55,7 +54,6 @@ process_templates() {
     WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{DESCRIPTION\}/$description}"
     WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{ARGUMENT_HINT\}/$argument_hint}"
     WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{WORKFLOW_NAME\}/$workflow_name}"
-    WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{WORKFLOW_TYPE\}/$workflow_type}"
     
     # workflow.pomlテンプレートの変数置換
     WORKFLOW_POML_CONTENT="$WORKFLOW_POML_TEMPLATE"
@@ -98,5 +96,5 @@ show_success_message() {
     echo ""
     echo "エージェント実行順序: $agent_order_display"
     echo ""
-    echo "使用方法: /$WORKFLOW_NAME <type> \"<context>\""
+    echo "使用方法: /$WORKFLOW_NAME \"<context>\""
 }
