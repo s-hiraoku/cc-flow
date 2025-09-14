@@ -233,10 +233,10 @@ generate_files
 **処理フロー**:
 1. 出力ディレクトリを作成:
    - `.claude/commands`
-   - `.claude/commands/poml`
+   - `.claude/commands/poml`（中間ファイル用。生成後、空なら削除）
 2. 処理済み内容をファイルに書き込み:
-   - `.claude/commands/$WORKFLOW_NAME.md`
-   - `.claude/commands/poml/$WORKFLOW_NAME.poml`
+   - `.claude/commands/$WORKFLOW_NAME.md`（最終ファイル）
+   - `.claude/commands/poml/$WORKFLOW_NAME.poml`（中間ファイル。最終的に削除）
 
 **使用関数**:
 - `safe_mkdir()` - ディレクトリ安全作成
@@ -265,7 +265,6 @@ show_success_message
 ✅ ワークフローコマンドを作成しました: /workflow-name
 📁 生成されたファイル:
    - .claude/commands/workflow-name.md
-   - .claude/commands/poml/workflow-name.poml
 
 エージェント実行順序: agent1 → agent2 → agent3
 
@@ -437,24 +436,24 @@ TBD
 ### 4.4 関数仕様
 TBD
 
-## 5. poml-processor.sh - POML実行処理ライブラリ
+## 5. poml-processor.sh - POML実行処理ライブラリ（現状は任意）
 
 ### 5.1 概要
-POMLファイルを処理してマークダウンファイルを生成する機能を提供します。pomljsツールを使用してPOMLからマークダウンへの変換を実行し、ワークフロー定義の動的生成をサポートします。
+POMLファイルを処理してマークダウンファイルを生成する機能を提供します。将来拡張用として `pomljs` による POML→Markdown 変換を行えますが、現行の `create-workflow.sh` 既定フローでは使用していません（テンプレート置換で生成した `.md` を最終出力とし、POML は中間ファイルとして削除）。
 
-### 5.2 依存関係
+### 5.2 依存関係（POML処理を行う場合）
 - `../utils/common.sh` - 共通ユーティリティ関数
-- Node.js実行環境
-- npmパッケージマネージャー
-- pomljsパッケージ
+- Node.js 実行環境
+- npm パッケージマネージャー
+- `pomljs` パッケージ
 
 ### 5.3 グローバル変数
 - `SELECTED_AGENTS[]` - 選択されたエージェントの配列（コンテキスト生成で使用）
 
 ### 5.4 関数仕様
 
-#### 5.4.1 check_nodejs_dependencies()
-**目的**: Node.js環境とpomljsパッケージの依存関係をチェックする
+#### 5.4.1 check_nodejs_dependencies()（任意）
+**目的**: POML処理を行う場合に、Node.js 環境と `pomljs` パッケージの依存関係をチェックする
 
 **構文**: 
 ```bash
@@ -476,8 +475,8 @@ check_nodejs_dependencies
 
 **戻り値**: なし (成功時は処理継続)
 
-#### 5.4.2 process_poml_to_markdown()
-**目的**: POMLファイルを処理してマークダウンファイルを生成する
+#### 5.4.2 process_poml_to_markdown()（任意）
+**目的**: POMLファイルを処理してマークダウンファイルを生成する（既定フローでは未使用）
 
 **構文**: 
 ```bash
@@ -509,7 +508,7 @@ npx pomljs --file input.poml --context "var1=value1" --context "var2=value2"
 
 **戻り値**: なし (成功時はファイル生成)
 
-#### 5.4.3 create_workflow_context()
+#### 5.4.3 create_workflow_context()（任意）
 **目的**: ワークフロー用のコンテキスト変数文字列を生成する
 
 **構文**: 
@@ -535,8 +534,8 @@ context_vars=$(create_workflow_context <workflow_name> [user_context])
 
 **戻り値**: コンテキスト変数文字列
 
-#### 5.4.4 process_workflow_poml()
-**目的**: ワークフロー用のPOML処理を実行する（高レベルインターフェース）
+#### 5.4.4 process_workflow_poml()（任意）
+**目的**: ワークフロー用のPOML処理を実行する（高レベルインターフェース・既定フローでは未使用）
 
 **構文**: 
 ```bash
@@ -661,23 +660,21 @@ process_multiple_poml_files <poml_dir> <output_dir> [context_vars]
 
 **戻り値**: なし (複数マークダウンファイル生成)
 
-### 5.5 使用例
+### 5.5 使用例（参考）
 
-#### 基本的なPOML処理
+> 既定フローでは POML 処理は行いません。必要な場合のみ以下を利用してください。
+
 ```bash
 # 依存関係チェック
 check_nodejs_dependencies
 
 # POMLファイルを処理
 process_poml_to_markdown "input.poml" "output.md" "--context \"var=value\""
-```
 
-#### ワークフロー処理
-```bash
 # ワークフロー用POML処理
 process_workflow_poml "spec-workflow" "create todo app"
 
-# または詳細制御
+# 詳細制御の例
 context_vars=$(create_workflow_context "spec-workflow" "user input")
 process_poml_to_markdown "spec-workflow.poml" "spec-workflow.md" "$context_vars"
 ```

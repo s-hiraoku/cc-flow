@@ -1,8 +1,8 @@
-# create-workflow コマンド仕様書
+# create-workflow.sh スクリプト仕様書
 
 ## 概要
 
-Claude Codeのカスタムスラッシュコマンド`/create-workflow`の仕様。指定されたエージェントディレクトリから新しいワークフローコマンドを自動生成する。
+指定されたエージェントディレクトリから新しいワークフローコマンド（Claude Code のスラッシュコマンド .md）を自動生成するシェルスクリプトの仕様です。TUI（`npx @hiraoku/cc-flow-cli`）からも本スクリプトが呼び出されます。
 
 ## 目的
 
@@ -26,8 +26,11 @@ Claude Codeのカスタムスラッシュコマンド`/create-workflow`の仕様
 ├── spec-design.md
 └── spec-impl.md
 
-# 2. ワークフローコマンド生成
-/create-workflow spec
+# 2. ワークフローコマンド生成（推奨の新形式: 相対パス指定）
+scripts/create-workflow.sh ./agents/spec "1 3 4"
+
+# 旧形式（短縮形）は後方互換のために動作しますが警告付き（非推奨）
+scripts/create-workflow.sh spec "1 3 4"
 
 # 3. 生成されたコマンドを使用
 /spec-workflow "Todoアプリを作成して"
@@ -37,15 +40,22 @@ Claude Codeのカスタムスラッシュコマンド`/create-workflow`の仕様
 
 ### コマンド構文
 ```bash
-/create-workflow <agent-directory-name> [options]
+scripts/create-workflow.sh <target_path> [order_spec] [custom_workflow_name]
 ```
 
 ### 引数
-- `<agent-directory-name>`: `/.claude/agents/`配下のディレクトリ名（例: `spec`, `test`, `deploy`）
+- `<target_path>`: 対象パス（新形式）
+  - `./agents/<dir>`（例: `./agents/spec`）
+  - `./agents`（全エージェント横断）
+  - 短縮形 `<dir>` は後方互換のために受け付けますが、非推奨です（警告が出ます）。
+- `[order_spec]`: 実行順序指定（省略時は対話モード）
+  - 数値インデックス（スペース区切り）例: `"1 3 4"`
+  - アイテム名（カンマ区切り）例: `"spec-init,spec-requirements,spec-design"`
+- `[custom_workflow_name]`（任意）: 出力するワークフロー名を明示指定（省略時は `<dir>-workflow`／`all-workflow`）
 
-### オプション（将来拡張用）
-- `--output-dir`: 生成先ディレクトリ（デフォルト: `/.claude/commands/`）
-- `--template`: 使用するテンプレート（デフォルト: `templates/workflow.md`）
+### モード
+- インタラクティブ: `order_spec` を省略すると対話的に番号入力で順序を決定します。
+- 非インタラクティブ: `order_spec` を与えると検証後にその順序で生成します。
 
 ## テンプレート変数置換
 
@@ -54,31 +64,30 @@ Claude Codeのカスタムスラッシュコマンド`/create-workflow`の仕様
 - `{ARGUMENT_HINT}` → `"[context]"`
 - `{WORKFLOW_NAME}` → `"<category>-workflow"`
 
-### workflow.pomlテンプレート
+### workflow.pomlテンプレート（中間ファイル）
 - `{WORKFLOW_NAME}` → `"<category>-workflow"`
 - `{WORKFLOW_AGENT_LIST}` → 選択されたエージェントリスト（JSON配列形式）
 - その他の変数は現状空文字で置換
+
+備考: POML ファイルは中間生成のみ行い、最終的に削除します（既定フローでは `pomljs` は起動しません）。
 
 ## 出力仕様
 
 ### ファイル生成プロセス
 1. **中間ファイル生成**:
-   - `.claude/commands/poml/<category>-workflow.poml` - POML形式のワークフロー定義（中間ファイル）
-   - テンプレートベースの`.md`ファイル（中間ファイル）
+   - `.claude/commands/poml/<category>-workflow.poml`（一時ファイル）
 
-2. **POML処理実行**:
-   - `npx pomljs`を使用してPOMLファイルを処理
-   - コンテキスト変数を注入してマークダウン出力を生成
+2. **最終ファイル出力**:
+   - `.claude/commands/<category>-workflow.md`（Claude Code スラッシュコマンド定義）
 
-3. **最終ファイル出力**:
-   - `.claude/commands/<category>-workflow.md` - pomljsで生成された最終的なClaude Codeスラッシュコマンド定義
+3. **クリーンアップ**:
+   - 中間の `.poml` は削除されます（空の `poml` ディレクトリも削除）。
 
-### 成功時の出力メッセージ
+### 成功時の出力メッセージ（例）
 ```bash
 ✅ ワークフローコマンドを作成しました: /spec-workflow
 📁 生成されたファイル:
-   - .claude/commands/spec-workflow.md (pomljsで生成)
-   - .claude/commands/poml/spec-workflow.poml (中間ファイル)
+   - .claude/commands/spec-workflow.md
 
 エージェント実行順序: spec-init → spec-requirements → spec-design → spec-impl
 
@@ -118,16 +127,11 @@ scripts/
 - `templates/workflow.md`, `templates/workflow.poml`
 - `.claude/agents/` ディレクトリ構造
 - `.claude/commands/` ディレクトリ（書き込み権限）
-- Node.js環境とnpmパッケージ`pomljs`
-- `npx pomljs`コマンドの実行可能性
+- 備考: 既定フローでは `pomljs` は不要です（POML は一時生成して削除）。
 
 ### エージェント名抽出規則
 - ファイル名から `.md` 拡張子を除去してエージェント名とする
 - 例：`spec-init.md` → `spec-init`
 
-### POML処理仕様
-- **実行コマンド**: `npx pomljs --file <poml-file> --context <context-vars>`
-- **入力**: 中間生成されたPOMLファイル
-- **出力**: 最終的なマークダウンファイル（Claude Codeスラッシュコマンド定義）
-- **コンテキスト変数**: 動的に生成されたエージェントリストやワークフロー名を注入
-- **エラー処理**: pomljsの実行失敗時は適切なエラーメッセージを表示して終了
+### 備考（将来拡張）
+- `poml-processor.sh` により POML→MD 変換を行う経路も用意されていますが、現状の `create-workflow.sh` デフォルトフローでは使用しません。

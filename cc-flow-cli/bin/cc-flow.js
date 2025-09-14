@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// This is the entry point for the npx cc-flow command
+// This is the entry point for the npx @hiraoku/cc-flow-cli command (binary: cc-flow)
 // It imports and runs the compiled TypeScript code
 
 import { WorkflowBuilder } from '../dist/cli/main.js';
