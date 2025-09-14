@@ -45,9 +45,9 @@ echo "✅ Workflow completed"
 
 ## Example
 
-For `spec-workflow.md`:
-- `{DESCRIPTION}` → "Execute specification workflow"
+For `example-workflow.md`:
+- `{DESCRIPTION}` → "Execute example workflow"
 - `{ARGUMENT_HINT}` → "[context]"
-- `{WORKFLOW_NAME}` → "spec-workflow"
+- `{WORKFLOW_NAME}` → "example-workflow"
 
-Usage: `/spec-workflow "create auth system"`
+Usage: `/example-workflow "your task description"`
