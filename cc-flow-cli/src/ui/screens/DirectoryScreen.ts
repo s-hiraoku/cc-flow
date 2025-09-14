@@ -4,6 +4,25 @@ import type { DirectoryInfo } from '../../models/Agent.js';
 
 export class DirectoryScreen {
   async show(directories: DirectoryInfo[]): Promise<DirectoryInfo> {
+    // If there's only one directory (likely "all" with direct .md files), auto-select it
+    if (directories.length === 1 && directories[0]) {
+      const selected = directories[0];
+      console.clear();
+      console.log(chalk.bold('┌─ Agent Directory Detected ──────────────┐'));
+      console.log('│                                         │');
+      console.log(`│ Found ${selected.agentCount} agent(s) in ${selected.displayName.padEnd(18)} │`);
+      console.log('│                                         │');
+      console.log('│ Proceeding to agent selection...        │');
+      console.log('└─────────────────────────────────────────┘');
+      
+      const workflowName = selected.displayName === 'all' ? 'workflow' : `${selected.displayName}-workflow`;
+      console.log(chalk.dim(`\nThis will create: /${workflowName}`));
+      
+      // Brief pause to show the message
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return selected;
+    }
+
     console.clear();
     console.log(chalk.bold('┌─ Select Agent Directory ────────────────┐'));
     console.log('│                                         │');

@@ -55,6 +55,7 @@ export class EnvironmentChecker {
 
     try {
       const entries = readdirSync(agentsPath);
+      const directFiles: Agent[] = [];
       
       for (const entry of entries) {
         const entryPath = join(agentsPath, entry);
@@ -69,7 +70,29 @@ export class EnvironmentChecker {
               agents
             });
           }
+        } else if (entry.endsWith('.md')) {
+          // Handle .md files directly in agents directory
+          const agentName = entry.replace('.md', '');
+          directFiles.push({
+            id: `root/${agentName}`,
+            name: agentName,
+            description: this.getAgentDescription(agentName),
+            filePath: entryPath,
+            directory: 'root',
+            category: 'agents'
+          });
         }
+      }
+
+      // If there are direct .md files, add them as a "root" directory
+      if (directFiles.length > 0) {
+        directories.push({
+          path: './agents',
+          displayName: 'all',
+          category: 'agents',
+          agentCount: directFiles.length,
+          agents: directFiles.sort((a, b) => a.name.localeCompare(b.name))
+        });
       }
     } catch (error) {
       console.error('Error scanning agent directories:', error);
