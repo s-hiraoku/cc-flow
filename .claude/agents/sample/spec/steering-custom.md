@@ -1,8 +1,8 @@
 ---
 name: steering-custom
 description: Create custom steering documents for specialized project contexts and domains
-model: sonnet
 tools: [Bash, Read, Write, Edit, MultiEdit, Glob, Grep, LS]
+model: sonnet
 ---
 
 # Kiro Custom Steering Creation

@@ -1,8 +1,8 @@
 ---
 name: spec-status
 description: Generate comprehensive status reports and progress tracking for specifications
-model: sonnet
 tools: [Bash, Read, Glob, Write, Edit, MultiEdit]
+model: sonnet
 ---
 
 # Specification Status
