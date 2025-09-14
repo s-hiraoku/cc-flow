@@ -18,15 +18,10 @@ Execute multiple sub-agents sequentially based on workflow type.
 
 ```bash
 # Parse arguments
-USER_CONTEXT="$ARGUMENTS"
+USER_CONTEXT="$*"
 
-# Get agent list from POML
-WORKFLOW_DEF=$(npx pomljs --file "poml/commands/spec-workflow.poml" \
-  --context "user_input=$USER_CONTEXT" \
-  --context "context=$USER_CONTEXT")
-
-AGENT_LIST=$(echo "$WORKFLOW_DEF" | grep "AGENTS:" | sed 's/AGENTS: *//' | tr ',' ' ')
-[[ -z "$AGENT_LIST" ]] && { echo "Error: No agents found"; exit 1; }
+# Define agent list directly
+AGENT_LIST="spec-init spec-requirements spec-design spec-tasks spec-impl"
 
 echo "Executing: $AGENT_LIST"
 

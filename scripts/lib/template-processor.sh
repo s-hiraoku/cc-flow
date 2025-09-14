@@ -5,6 +5,7 @@
 # 現在のスクリプトのディレクトリを取得
 LIB_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$LIB_SCRIPT_DIR/../utils/common.sh"
+source "$LIB_SCRIPT_DIR/poml-processor.sh"
 
 # テンプレートファイルを読み込み
 load_templates() {
@@ -77,9 +78,20 @@ generate_files() {
     safe_mkdir ".claude/commands"
     safe_mkdir ".claude/commands/poml"
     
-    # ファイルを書き込み
+    # POMLファイルを書き込み（中間ファイル）
+    local poml_file=".claude/commands/poml/$WORKFLOW_NAME.poml"
+    safe_write_file "$poml_file" "$WORKFLOW_POML_CONTENT"
+    
+    # 直接マークダウンファイルを生成（シンプルなテンプレート処理）
     safe_write_file ".claude/commands/$WORKFLOW_NAME.md" "$WORKFLOW_MD_CONTENT"
-    safe_write_file ".claude/commands/poml/$WORKFLOW_NAME.poml" "$WORKFLOW_POML_CONTENT"
+    
+    # 中間POMLファイルを削除
+    if [[ -f "$poml_file" ]]; then
+        rm -f "$poml_file" >/dev/null 2>&1
+        info "中間ファイルをクリーンアップしました: $poml_file"
+    fi
+    
+    info "ワークフローファイルを生成しました"
 }
 
 # 成功メッセージを表示
@@ -96,7 +108,6 @@ show_success_message() {
     success "ワークフローコマンドを作成しました: /$WORKFLOW_NAME"
     echo "📁 生成されたファイル:"
     echo "   - .claude/commands/$WORKFLOW_NAME.md"
-    echo "   - .claude/commands/poml/$WORKFLOW_NAME.poml"
     echo ""
     echo "エージェント実行順序: $agent_order_display"
     echo ""

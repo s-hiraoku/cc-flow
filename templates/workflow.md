@@ -18,14 +18,9 @@ Execute multiple sub-agents sequentially based on workflow type.
 
 ```bash
 # Parse arguments
-USER_CONTEXT="$ARGUMENTS"
+USER_CONTEXT="$*"
 
-# Get agent list from POML
-WORKFLOW_DEF=$(npx pomljs --file "poml/commands/{WORKFLOW_NAME}.poml" \
-  --context "user_input=$USER_CONTEXT" \
-  --context "context=$USER_CONTEXT")
-
-# Define agent list directly (from POML loop)
+# Define agent list directly
 AGENT_LIST="{WORKFLOW_AGENT_LIST}"
 
 echo "Executing: $AGENT_LIST"

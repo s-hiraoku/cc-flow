@@ -440,16 +440,270 @@ TBD
 ## 5. poml-processor.sh - POML実行処理ライブラリ
 
 ### 5.1 概要
-TBD - POMLファイルとMDファイルからpomljs実行してMD出力を生成する機能を提供予定
+POMLファイルを処理してマークダウンファイルを生成する機能を提供します。pomljsツールを使用してPOMLからマークダウンへの変換を実行し、ワークフロー定義の動的生成をサポートします。
 
 ### 5.2 依存関係
-TBD
+- `../utils/common.sh` - 共通ユーティリティ関数
+- Node.js実行環境
+- npmパッケージマネージャー
+- pomljsパッケージ
 
 ### 5.3 グローバル変数
-TBD
+- `SELECTED_AGENTS[]` - 選択されたエージェントの配列（コンテキスト生成で使用）
 
 ### 5.4 関数仕様
-TBD
+
+#### 5.4.1 check_nodejs_dependencies()
+**目的**: Node.js環境とpomljsパッケージの依存関係をチェックする
+
+**構文**: 
+```bash
+check_nodejs_dependencies
+```
+
+**パラメータ**: なし
+
+**処理フロー**:
+1. Node.jsコマンドの存在確認
+2. npmコマンドの存在確認
+3. pomljsパッケージの存在確認（グローバル/ローカル）
+4. pomljsが存在しない場合、自動インストールを試行
+
+**エラーハンドリング**:
+- Node.js不存在: `error_exit`でプロセス終了
+- npm不存在: `error_exit`でプロセス終了
+- pomljsインストール失敗: `error_exit`でプロセス終了
+
+**戻り値**: なし (成功時は処理継続)
+
+#### 5.4.2 process_poml_to_markdown()
+**目的**: POMLファイルを処理してマークダウンファイルを生成する
+
+**構文**: 
+```bash
+process_poml_to_markdown <poml_file> <output_file> [context_vars]
+```
+
+**パラメータ**:
+- `poml_file` (必須): 入力POMLファイルパス
+- `output_file` (必須): 出力マークダウンファイルパス
+- `context_vars` (オプション): コンテキスト変数文字列
+
+**処理フロー**:
+1. 引数の妥当性検証
+2. POMLファイルの存在確認
+3. pomljsコマンドの構築（コンテキスト変数含む）
+4. pomljsの実行とエラーハンドリング
+5. 出力ファイルへの結果書き込み
+
+**コマンド例**:
+```bash
+npx pomljs --file input.poml --context "var1=value1" --context "var2=value2"
+```
+
+**エラーハンドリング**:
+- 引数不正: `validate_args`によるチェック
+- POMLファイル不存在: `check_file`によるチェック
+- pomljs実行失敗: `error_exit`でプロセス終了
+- 出力ファイル書き込み失敗: `error_exit`でプロセス終了
+
+**戻り値**: なし (成功時はファイル生成)
+
+#### 5.4.3 create_workflow_context()
+**目的**: ワークフロー用のコンテキスト変数文字列を生成する
+
+**構文**: 
+```bash
+context_vars=$(create_workflow_context <workflow_name> [user_context])
+```
+
+**パラメータ**:
+- `workflow_name` (必須): ワークフロー名
+- `user_context` (オプション): ユーザー指定のコンテキスト
+
+**処理フロー**:
+1. 基本コンテキスト変数の初期化
+2. ワークフロー名の追加
+3. ユーザーコンテキストの追加
+4. エージェントリスト（`SELECTED_AGENTS`）の追加
+5. 完成したコンテキスト文字列を出力
+
+**生成される変数例**:
+```bash
+--context "workflow_name=spec-workflow" --context "user_input=test_context" --context "agent_list=spec-init spec-requirements"
+```
+
+**戻り値**: コンテキスト変数文字列
+
+#### 5.4.4 process_workflow_poml()
+**目的**: ワークフロー用のPOML処理を実行する（高レベルインターフェース）
+
+**構文**: 
+```bash
+process_workflow_poml <workflow_name> [user_context]
+```
+
+**パラメータ**:
+- `workflow_name` (必須): ワークフロー名
+- `user_context` (オプション): ユーザーコンテキスト（デフォルト: "default_context"）
+
+**処理フロー**:
+1. ファイルパスの構築:
+   - 入力: `.claude/commands/poml/<workflow_name>.poml`
+   - 出力: `.claude/commands/<workflow_name>.md`
+2. コンテキスト変数の生成
+3. POML処理の実行
+
+**戻り値**: なし (最終マークダウンファイル生成)
+
+#### 5.4.5 validate_poml_processing()
+**目的**: POML処理の事前検証を実行する
+
+**構文**: 
+```bash
+validate_poml_processing <poml_file>
+```
+
+**パラメータ**:
+- `poml_file` (必須): 検証対象POMLファイル
+
+**処理フロー**:
+1. Node.js環境の依存関係チェック
+2. POMLファイルの基本検証:
+   - ファイル存在確認
+   - 空ファイルチェック
+   - 基本的なタグ構文チェック（`<.*>`の存在）
+
+**検証ポイント**:
+- POMLファイルが空でないこと
+- 最低限のPOMLタグが含まれていること
+- 構文エラーの早期発見
+
+**戻り値**: なし (問題時は`error_exit`または`warn`)
+
+#### 5.4.6 show_poml_processing_info()
+**目的**: POML処理の詳細情報を表示する
+
+**構文**: 
+```bash
+show_poml_processing_info <poml_file> <output_file>
+```
+
+**パラメータ**:
+- `poml_file` (必須): 入力POMLファイル
+- `output_file` (必須): 出力マークダウンファイル
+
+**処理フロー**:
+1. 処理詳細のヘッダー表示
+2. 入力/出力ファイル情報の表示
+3. 処理エンジン情報の表示
+4. POMLファイルサイズ情報の表示（存在する場合）
+
+**表示形式**:
+```
+🔧 POML処理詳細:
+   入力: input.poml
+   出力: output.md
+   処理エンジン: pomljs
+   POMLファイルサイズ: 1638バイト
+```
+
+**戻り値**: なし (標準出力に表示)
+
+#### 5.4.7 cleanup_poml_processing()
+**目的**: POML処理後のクリーンアップを実行する
+
+**構文**: 
+```bash
+cleanup_poml_processing [temp_files...]
+```
+
+**パラメータ**:
+- `temp_files...` (オプション): 削除対象の一時ファイル配列
+
+**処理フロー**:
+1. 指定された一時ファイルを反復処理
+2. 安全性チェック（`.tmp`拡張子または`/tmp/`ディレクトリ内）
+3. 条件を満たすファイルの削除
+4. 削除結果のログ出力
+
+**安全性対策**:
+- `.tmp`拡張子または`/tmp/`パス内のファイルのみ削除
+- 重要ファイルの誤削除防止
+
+**戻り値**: なし (ファイル削除とログ出力)
+
+#### 5.4.8 process_multiple_poml_files()
+**目的**: 複数POMLファイルのバッチ処理を実行する
+
+**構文**: 
+```bash
+process_multiple_poml_files <poml_dir> <output_dir> [context_vars]
+```
+
+**パラメータ**:
+- `poml_dir` (必須): POMLファイル格納ディレクトリ
+- `output_dir` (必須): 出力ディレクトリ
+- `context_vars` (オプション): 共通コンテキスト変数
+
+**処理フロー**:
+1. ディレクトリの存在確認と作成
+2. POMLファイルの検索（`*.poml`）
+3. 発見されたファイル数の報告
+4. 各POMLファイルの順次処理:
+   - ベースネーム抽出（`.poml` → `.md`）
+   - 個別ファイル処理の実行
+   - 進捗表示
+
+**検索仕様**:
+- `find`コマンドでソート済み検索
+- null区切り文字で安全な配列構築
+
+**戻り値**: なし (複数マークダウンファイル生成)
+
+### 5.5 使用例
+
+#### 基本的なPOML処理
+```bash
+# 依存関係チェック
+check_nodejs_dependencies
+
+# POMLファイルを処理
+process_poml_to_markdown "input.poml" "output.md" "--context \"var=value\""
+```
+
+#### ワークフロー処理
+```bash
+# ワークフロー用POML処理
+process_workflow_poml "spec-workflow" "create todo app"
+
+# または詳細制御
+context_vars=$(create_workflow_context "spec-workflow" "user input")
+process_poml_to_markdown "spec-workflow.poml" "spec-workflow.md" "$context_vars"
+```
+
+#### バッチ処理
+```bash
+# 複数ファイル処理
+process_multiple_poml_files ".claude/commands/poml" ".claude/commands" "--context \"batch=true\""
+```
+
+### 5.6 技術仕様
+
+#### pomljsコマンド実行形式
+```bash
+npx pomljs --file <poml-file> [--context "key=value"]...
+```
+
+#### エラーハンドリング戦略
+- **即座失敗**: 依存関係エラー時は処理継続不可
+- **詳細ログ**: pomljs実行エラーの詳細を取得・表示
+- **安全な削除**: クリーンアップ時の誤削除防止
+
+#### パフォーマンス考慮
+- Node.js環境チェックは初回のみ実行
+- バッチ処理時の効率的なファイル検索
+- 大きなPOMLファイルでのメモリ使用量監視
 
 ## 6. 共通ユーティリティ (common.sh)
 
