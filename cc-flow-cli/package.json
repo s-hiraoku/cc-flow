@@ -66,8 +66,12 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/claude-code/cc-flow.git",
+    "url": "https://github.com/s-hiraoku/cc-flow",
     "directory": "cc-flow-cli"
+  },
+  "homepage": "https://github.com/s-hiraoku/cc-flow/tree/main/cc-flow-cli#readme",
+  "bugs": {
+    "url": "https://github.com/s-hiraoku/cc-flow/issues"
   },
   "dependencies": {
     "@inquirer/checkbox": "^2.0.0",
@@ -88,12 +92,12 @@
   },
   "funding": {
     "type": "github",
-    "url": "https://github.com/claude-code/cc-flow"
+    "url": "https://github.com/s-hiraoku/cc-flow"
   },
   "security": {
     "contacts": [
       "security@cc-flow.dev"
     ],
-    "policy": "https://github.com/claude-code/cc-flow/security/policy"
+    "policy": "https://github.com/s-hiraoku/cc-flow/security/policy"
   }
 }

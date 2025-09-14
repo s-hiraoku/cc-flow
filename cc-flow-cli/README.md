@@ -2,10 +2,13 @@
 
 Interactive Terminal User Interface (TUI) for creating Claude Code workflows.
 
+- npm: https://www.npmjs.com/package/@hiraoku/cc-flow-cli
+- repo: https://github.com/s-hiraoku/cc-flow
+
 ## Features
 
 - 🎯 **Interactive Agent Selection**: Choose from available Claude Code agents
-- 📋 **Workflow Ordering**: Configure execution order with drag-and-drop like interface
+- 📋 **Workflow Ordering**: Configure execution order with step-by-step selection
 - 🎨 **Modern TUI Design**: Clean, accessible terminal interface
 - ⚡ **TypeScript**: Fully typed for better development experience
 - 🛡️ **Robust Error Handling**: Comprehensive error management and debugging
@@ -13,12 +16,20 @@ Interactive Terminal User Interface (TUI) for creating Claude Code workflows.
 ## Installation
 
 ```bash
-npm install -g cc-flow-cli
+# Run via npx (recommended)
+npx @hiraoku/cc-flow-cli
+
+# Or install globally
+npm install -g @hiraoku/cc-flow-cli
 ```
 
 ## Usage
 
 ```bash
+# npx
+npx @hiraoku/cc-flow-cli
+
+# or, if installed globally
 cc-flow
 ```
 
@@ -32,8 +43,8 @@ The CLI will guide you through:
 
 ## Requirements
 
-- Node.js ≥16.0.0
-- NPM ≥7.0.0
+- Node.js ≥18.0.0
+- npm ≥8.0.0
 - Claude Code project with `.claude/agents` directory
 
 ## Development
