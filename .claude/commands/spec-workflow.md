@@ -1,6 +1,6 @@
 ---
 description: Execute spec workflow
-argument-hint: [type] [context]
+argument-hint: [context]
 allowed-tools: [Read, Bash]
 ---
 
@@ -11,24 +11,19 @@ Execute multiple sub-agents sequentially based on workflow type.
 ## Usage
 
 ```bash
-/spec-workflow implementation
-/spec-workflow implementation "context description"
+/spec-workflow "context description"
 ```
 
 ## Execution
 
 ```bash
 # Parse arguments
-eval "args=($ARGUMENTS)"
-WORKFLOW_TYPE="${args[0]}"
-USER_CONTEXT="${args[@]:1}"
-
-[[ -z "$WORKFLOW_TYPE" ]] && { echo "Error: Workflow type required"; exit 1; }
+USER_CONTEXT="$ARGUMENTS"
 
 # Get agent list from POML
-WORKFLOW_DEF=$(npx pomljs --file "poml/commands/workflow.poml" \
-  --context "workflow_type=$WORKFLOW_TYPE" \
-  --context "user_context=$USER_CONTEXT")
+WORKFLOW_DEF=$(npx pomljs --file "poml/commands/spec-workflow.poml" \
+  --context "user_input=$USER_CONTEXT" \
+  --context "context=$USER_CONTEXT")
 
 AGENT_LIST=$(echo "$WORKFLOW_DEF" | grep "AGENTS:" | sed 's/AGENTS: *//' | tr ',' ' ')
 [[ -z "$AGENT_LIST" ]] && { echo "Error: No agents found"; exit 1; }
@@ -50,16 +45,14 @@ echo "✅ Workflow completed"
 ## Template Variables
 
 - `Execute spec workflow`: Brief workflow description
-- `[type] [context]`: Expected arguments format  
+- `[context]`: Expected arguments format  
 - `spec-workflow`: Command name (matches filename)
-- `implementation`: Example workflow type
 
 ## Example
 
 For `spec-workflow.md`:
 - `Execute spec workflow` → "Execute specification workflow"
-- `[type] [context]` → "[type] [context]"
+- `[context]` → "[context]"
 - `spec-workflow` → "spec-workflow"
-- `implementation` → "spec-implementation"
 
-Usage: `/spec-workflow spec-implementation "create auth system"`
+Usage: `/spec-workflow "create auth system"`
