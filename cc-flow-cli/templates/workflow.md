@@ -10,44 +10,67 @@ Execute multiple sub-agents sequentially based on workflow type.
 
 ## Usage
 
-```bash
-/{WORKFLOW_NAME} "context description"
+```
+/{WORKFLOW_NAME} "your task or requirement"
 ```
 
-## Execution
+## Execution Instructions
 
-```bash
-# Parse arguments
-USER_CONTEXT="$*"
+You are asked to execute a sequential workflow with the following agents:
+`{WORKFLOW_AGENT_LIST}`
 
-# Define agent list directly
-AGENT_LIST="{WORKFLOW_AGENT_LIST}"
+Please perform these steps:
 
-echo "Executing: $AGENT_LIST"
+1. **Parse Input**: Receive the user's context from the command arguments provided as "$*"
 
-# Execute agents sequentially
-CONTEXT="$USER_CONTEXT"
-for agent in $AGENT_LIST; do
-  echo "→ $agent"
-  RESPONSE=$(echo "Task: $agent. Context: $CONTEXT" | claude subagent "$agent" 2>/dev/null || echo "Failed")
-  CONTEXT="$CONTEXT. $agent: $RESPONSE"
-  echo "$RESPONSE"
-done
+2. **Sequential Agent Execution**: For each agent in the list above, execute in order:
+   
+   a. Display progress indicator: "→ [agent-name]"
+   
+   b. Invoke the sub-agent with the current accumulated context:
+      - Pass the task description and current context to the agent
+      - Use the pattern: "Task: [agent-name]. Context: [accumulated-context]"
+   
+   c. Capture and display the agent's response
+   
+   d. Update the accumulated context by appending:
+      "[agent-name]: [response]" to the existing context
+   
+   e. Continue to the next agent with the updated context
 
-echo "✅ Workflow completed"
-```
+3. **Completion**: After all agents have been executed successfully, display:
+   "✅ Workflow completed"
 
-## Template Variables
+## Context Management
+
+- Initial context: User-provided command arguments
+- Context accumulation: Each agent's output enriches the context for subsequent agents
+- Final output: Complete trace of all agent executions and their responses
+
+## Error Handling
+
+If any agent fails to execute:
+- Display "Failed" for that agent
+- Continue with remaining agents using the available context
+- Include failure notation in the accumulated context
+
+## Template Variables Reference
 
 - `{DESCRIPTION}`: Brief workflow description
 - `{ARGUMENT_HINT}`: Expected arguments format  
 - `{WORKFLOW_NAME}`: Command name (matches filename)
+- `{WORKFLOW_AGENT_LIST}`: Space-separated list of agent names
 
 ## Example
 
-For `example-workflow.md`:
-- `{DESCRIPTION}` → "Execute example workflow"
-- `{ARGUMENT_HINT}` → "[context]"
-- `{WORKFLOW_NAME}` → "example-workflow"
+For a workflow named `example-workflow` with agents `agent1 agent2`:
 
-Usage: `/example-workflow "your task description"`
+```
+/example-workflow "implement user authentication with JWT tokens"
+
+→ agent1
+[agent1 analyzes requirements and creates design]
+→ agent2  
+[agent2 implements the authentication logic]
+✅ Workflow completed
+```
