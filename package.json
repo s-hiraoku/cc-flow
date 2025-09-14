@@ -8,5 +8,6 @@
   "scripts": {
     "test": "bats test/*.bats",
     "test:watch": "bats test/*.bats --watch"
-  }
+  },
+  "version": "0.0.1"
 }

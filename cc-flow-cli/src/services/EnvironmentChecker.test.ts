@@ -70,7 +70,7 @@ describe('EnvironmentChecker', () => {
       
       // Should have "all" directory containing direct files
       const allDir = result.availableDirectories[0]!;
-      expect(allDir.displayName).toBe('all');
+      expect(allDir.displayName).toBe('root');
       expect(allDir.agentCount).toBe(2);
       expect(allDir.agents).toHaveLength(2);
       expect(allDir.agents[0]!.name).toBe('demo-agent');
@@ -170,7 +170,7 @@ describe('EnvironmentChecker', () => {
       const result = await checker.checkEnvironment();
 
       expect(result.isValid).toBe(true);
-      const allDir = result.availableDirectories.find(d => d.displayName === 'all');
+      const allDir = result.availableDirectories.find(d => d.displayName === 'root');
       expect(allDir).toBeDefined();
       
       const agents = allDir!.agents;

@@ -72,9 +72,9 @@ describe('DirectoryScreen', () => {
       expect(result).toBe(directories[0]);
       expect(mockSelect).not.toHaveBeenCalled(); // Should not prompt user
       expect(console.clear).toHaveBeenCalled();
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Agent Directory Detected'));
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Found 2 agent(s) in all'));
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('This will create: /workflow'));
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('エージェントディレクトリ検出'));
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('all に 2個のエージェントが見つかりました'));
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('エージェント選択画面に進みます'));
     });
 
     it('should show selection when multiple directories are available', async () => {
