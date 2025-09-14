@@ -19,7 +19,7 @@ export class PreviewScreen {
       
       const choices = [
         {
-          name: '🚀 ワークフローを実行する',
+          name: '🚀 ワークフローを作成する',
           value: 'generate'
         },
         {
@@ -109,9 +109,9 @@ export class PreviewScreen {
     console.log('│   ワークフロー設定を確認し、実行前の     │');
     console.log('│   最終チェックを行います。               │');
     console.log('│                                         │');
-    console.log('│ 🚀 ' + chalk.cyan('ワークフローを実行する:') + '               │');
+    console.log('│ 🚀 ' + chalk.cyan('ワークフローを作成する:') + '               │');
     console.log('│   設定内容でワークフローファイルを       │');
-    console.log('│   生成し、実行準備を完了します。         │');
+    console.log('│   生成し、使用準備を完了します。         │');
     console.log('│                                         │');
     console.log('│ ✏️ ' + chalk.cyan('設定を編集する:') + '                     │');
     console.log('│   エージェント選択や実行順序を           │');

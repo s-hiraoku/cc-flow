@@ -12,14 +12,17 @@ load_templates() {
     local workflow_md_template
     local workflow_poml_template
     
+    # スクリプトからテンプレートディレクトリへのパス
+    local template_dir="$LIB_SCRIPT_DIR/../../templates"
+    
     # workflow.mdテンプレートを読み込み
-    if ! workflow_md_template=$(cat templates/workflow.md 2>/dev/null); then
-        error_exit "テンプレートファイル 'templates/workflow.md' が見つかりません"
+    if ! workflow_md_template=$(cat "$template_dir/workflow.md" 2>/dev/null); then
+        error_exit "テンプレートファイル '$template_dir/workflow.md' が見つかりません"
     fi
     
     # workflow.pomlテンプレートを読み込み
-    if ! workflow_poml_template=$(cat templates/workflow.poml 2>/dev/null); then
-        error_exit "テンプレートファイル 'templates/workflow.poml' が見つかりません"
+    if ! workflow_poml_template=$(cat "$template_dir/workflow.poml" 2>/dev/null); then
+        error_exit "テンプレートファイル '$template_dir/workflow.poml' が見つかりません"
     fi
     
     # グローバル変数に設定

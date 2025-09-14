@@ -1,7 +1,19 @@
 {
-  "name": "cc-flow-cli",
-  "version": "0.0.1",
+  "name": "@hiraoku/cc-flow-cli",
+  "version": "0.0.4",
   "description": "Interactive TUI for creating Claude Code workflows",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist/",
+    "bin/",
+    "scripts/",
+    "templates/",
+    "README.md",
+    "LICENSE"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -11,7 +23,8 @@
     "./cli": {
       "import": "./dist/cli/main.js",
       "types": "./dist/cli/main.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -72,16 +85,6 @@
     "typescript": "~5.6.0",
     "vitest": "^2.0.5",
     "@vitest/coverage-v8": "^2.0.5"
-  },
-  "files": [
-    "dist/",
-    "bin/",
-    "README.md",
-    "LICENSE"
-  ],
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
   },
   "funding": {
     "type": "github",

@@ -1,6 +1,8 @@
 import { execSync, type ExecSyncOptions } from 'child_process';
-import { join } from 'path';
+import { join, dirname, resolve } from 'path';
 import { existsSync, accessSync, constants } from 'fs';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import type { WorkflowConfig } from '../models/Agent.js';
 import { CLIError } from '../utils/ErrorHandler.js';
 
@@ -55,7 +57,59 @@ export class ScriptExecutor {
   }
 
   private getScriptPath(): string {
-    // Path to the create-workflow.sh script relative to user's project root
+    console.log('🔍 Debug: Searching for script...');
+    
+    // First try to find script in user's project root (for development)
+    const userProjectScript = join(this.basePath, 'scripts/create-workflow.sh');
+    console.log(`🔍 Debug: Checking user project: ${userProjectScript}`);
+    if (existsSync(userProjectScript)) {
+      console.log('✅ Debug: Found in user project');
+      return userProjectScript;
+    }
+    
+    // Fall back to package's built-in script (for npx usage)
+    try {
+      // Method 1: Try to resolve package location using require.resolve
+      const require = createRequire(import.meta.url);
+      const packagePath = require.resolve('@hiraoku/cc-flow-cli/package.json');
+      const packageRoot = dirname(packagePath);
+      const packageScript1 = join(packageRoot, 'scripts/create-workflow.sh');
+      console.log(`🔍 Debug: Package method 1: ${packageScript1}`);
+      if (existsSync(packageScript1)) {
+        console.log('✅ Debug: Found via package resolution');
+        return packageScript1;
+      }
+    } catch (error) {
+      console.log(`❌ Debug: Package resolution failed: ${error}`);
+    }
+    
+    try {
+      // Method 2: Use current file location
+      const currentFile = fileURLToPath(import.meta.url);
+      const currentDir = dirname(currentFile);
+      console.log(`🔍 Debug: Current file: ${currentFile}`);
+      console.log(`🔍 Debug: Current dir: ${currentDir}`);
+      
+      // Try different possible paths
+      const possiblePaths = [
+        join(currentDir, '../../scripts/create-workflow.sh'),  // dist/services -> root
+        join(currentDir, '../../../scripts/create-workflow.sh'), // node_modules case
+        join(currentDir, '../../../../scripts/create-workflow.sh'), // deeper nesting
+      ];
+      
+      for (const packageScript of possiblePaths) {
+        console.log(`🔍 Debug: Checking package path: ${packageScript}`);
+        if (existsSync(packageScript)) {
+          console.log('✅ Debug: Found in package');
+          return packageScript;
+        }
+      }
+    } catch (error) {
+      console.log(`❌ Debug: Error in module path detection: ${error}`);
+    }
+    
+    console.log('❌ Debug: Script not found anywhere');
+    // Return default path for error reporting
     return join(this.basePath, 'scripts/create-workflow.sh');
   }
 
