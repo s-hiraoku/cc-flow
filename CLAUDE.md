@@ -12,11 +12,13 @@ CC-Flow is a Claude Code workflow platform that enables sequential execution of 
 # Install dependencies
 npm install
 
-# Run workflow creation interactively
-/create-workflow <agent-directory>
+# Create workflow - NON-INTERACTIVE mode required for Claude Code
+# Interactive mode doesn't work in Claude Code (no stdin support)
+/create-workflow spec "3 4 1 6 2"  # Specify agent order numbers
 
-# Example: Create spec workflow
-/create-workflow spec
+# Example workflow creation with standard spec order
+# 3=spec-init, 4=spec-requirements, 1=spec-design, 6=spec-tasks, 2=spec-impl
+/create-workflow spec "3 4 1 6 2"
 
 # Execute generated workflow
 /spec-workflow "Your task context"
@@ -28,7 +30,7 @@ npm install
 - **Location**: `.claude/commands/`
 - **Format**: Markdown files with YAML frontmatter and bash code blocks
 - **Key insight**: Each `.md` file becomes a slash command. The bash code block is executed when the command runs.
-- **Argument handling**: Use `$*` to capture all arguments, pass to scripts as `"$ARGUMENTS"`
+- **Argument handling**: Commands receive arguments via `$*` or `$1`, `$2`, etc.
 
 ### POML Integration
 - **Templates**: `templates/workflow.poml` uses `{WORKFLOW_AGENT_LIST}` placeholder for agent arrays
@@ -39,13 +41,19 @@ npm install
 ### Script Architecture
 ```
 scripts/
-├── create-workflow.sh      # Main entry, handles interactive agent selection
+├── create-workflow.sh      # Main entry, supports both interactive and non-interactive modes
 ├── lib/
 │   ├── agent-discovery.sh  # Finds agents in directories
 │   ├── template-processor.sh # Processes templates with variable substitution
 │   └── user-interaction.sh # Interactive prompts and confirmations
 └── utils/
     └── common.sh           # Error handling and utilities
+```
+
+**Non-interactive usage** (required for Claude Code):
+```bash
+./scripts/create-workflow.sh <agent-dir> "<order>"
+# Example: ./scripts/create-workflow.sh spec "3 4 1 6 2"
 ```
 
 ### Agent Structure
@@ -68,10 +76,11 @@ When creating a workflow, two files are generated:
 - `.claude/commands/poml/<workflow-name>.poml` - POML orchestration logic
 
 ### Template Variables
-The template system replaces these placeholders:
-- `{WORKFLOW_NAME}` - Name of the workflow
-- `{WORKFLOW_AGENT_LIST}` - Array of agents in POML format
-- `{ARGUMENTS}` - User-provided arguments
+The template system (`template-processor.sh`) replaces these placeholders:
+- `{WORKFLOW_NAME}` - Name of the workflow (e.g., "spec-workflow")
+- `{WORKFLOW_AGENT_LIST}` - Array of agents (POML: `['agent1', 'agent2']`, Bash: `agent1 agent2`)
+- `{DESCRIPTION}` - Command description
+- `{ARGUMENT_HINT}` - Argument hint for command usage
 
 ## Important Implementation Details
 
@@ -117,4 +126,4 @@ ARGUMENTS="$*"
 - POML version: 0.0.8 (see package.json)
 - Script permissions: Ensure `.sh` files are executable (`chmod +x`)
 - Error messages: Use Japanese emoji patterns (❌, ✅, 🔍, 📂) for consistency
-- Interactive scripts: Handle user input through `printf "selection\n" |` pattern
+- **Claude Code limitation**: No interactive input support - always use non-interactive mode with order specification
