@@ -25,8 +25,8 @@ WORKFLOW_DEF=$(npx pomljs --file "poml/commands/{WORKFLOW_NAME}.poml" \
   --context "user_input=$USER_CONTEXT" \
   --context "context=$USER_CONTEXT")
 
-AGENT_LIST=$(echo "$WORKFLOW_DEF" | grep "AGENTS:" | sed 's/AGENTS: *//' | tr ',' ' ')
-[[ -z "$AGENT_LIST" ]] && { echo "Error: No agents found"; exit 1; }
+# Define agent list directly (from POML loop)
+AGENT_LIST="{WORKFLOW_AGENT_LIST}"
 
 echo "Executing: $AGENT_LIST"
 

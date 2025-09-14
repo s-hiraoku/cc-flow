@@ -20,11 +20,8 @@ allowed-tools: [Bash]
 
 ```bash
 # 引数を取得
-AGENT_DIR="$1"
-if [[ -z "$AGENT_DIR" && -n "$ARGUMENTS" ]]; then
-    AGENT_DIR="$ARGUMENTS"
-fi
+ARGUMENTS="$*"
 
 # スクリプトを実行
-exec ./scripts/create-workflow.sh "$AGENT_DIR"
+./scripts/create-workflow.sh "$ARGUMENTS"
 ```

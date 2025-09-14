@@ -32,7 +32,7 @@ create_agent_list_json() {
     
     for i in "${!SELECTED_AGENTS[@]}"; do
         [[ $i -gt 0 ]] && json+=", "
-        json+="\"${SELECTED_AGENTS[$i]}\""
+        json+="'${SELECTED_AGENTS[$i]}'"
     done
     
     json+="]"
@@ -54,6 +54,10 @@ process_templates() {
     WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{DESCRIPTION\}/$description}"
     WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{ARGUMENT_HINT\}/$argument_hint}"
     WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{WORKFLOW_NAME\}/$workflow_name}"
+    
+    # エージェントリストをスペース区切り形式に変換
+    local agent_list_space="${SELECTED_AGENTS[*]}"
+    WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{WORKFLOW_AGENT_LIST\}/$agent_list_space}"
     
     # workflow.pomlテンプレートの変数置換
     WORKFLOW_POML_CONTENT="$WORKFLOW_POML_TEMPLATE"

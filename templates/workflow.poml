@@ -15,19 +15,19 @@
       
       <!-- Execute workflow-specific sub-agents -->
       <item for="subagent in {WORKFLOW_AGENT_LIST}">
-        Execute sub-agent {{subagent.type}}:
+        Execute sub-agent {{subagent}}:
         <list>
-          <item>Create context-aware prompt for sub-agent "{{subagent.type}}":
+          <item>Create context-aware prompt for sub-agent "{{subagent}}":
             
-            Task: {{subagent.task}}
+            Task: {{subagent}}
             Context: {{context}}
-            Previous Results: {ACCUMULATED_CONTEXT}
+            Previous Results: 
             
-            {WORKFLOW_SPECIFIC_INSTRUCTIONS}</item>
-          <item>Call sub-agent using claude subagent "{{subagent.type}}"</item>
-          <item>Receive and validate response from sub-agent {{subagent.type}}</item>
-          <item>Display response as "→ {{subagent.type}}: [response]"</item>
-          <item>Update accumulated context with {{subagent.type}} results</item>
+            </item>
+          <item>Call sub-agent using claude subagent "{{subagent}}"</item>
+          <item>Receive and validate response from sub-agent {{subagent}}</item>
+          <item>Display response as "→ {{subagent}}: [response]"</item>
+          <item>Update accumulated context with {{subagent}} results</item>
         </list>
       </item>
       
@@ -47,6 +47,5 @@
   </output-format>
   
   <!-- Workflow Configuration Templates -->
-  {WORKFLOW_TYPE_DEFINITIONS}
   
 </poml>
