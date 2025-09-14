@@ -3,7 +3,9 @@ name: spec-requirements
 description: Generate comprehensive requirements using EARS format for specifications
 tools: [Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, WebSearch, WebFetch]
 model: sonnet
+color: cyan
 ---
+
 
 # Requirements Generation
 

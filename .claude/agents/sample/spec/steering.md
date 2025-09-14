@@ -3,7 +3,9 @@ name: steering
 description: Create and update Kiro steering documents intelligently based on project state
 tools: [Bash, Read, Write, Edit, MultiEdit, Glob, Grep, LS]
 model: sonnet
+color: purple
 ---
+
 
 # Kiro Steering Management
 

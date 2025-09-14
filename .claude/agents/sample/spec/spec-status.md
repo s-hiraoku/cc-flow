@@ -3,7 +3,9 @@ name: spec-status
 description: Generate comprehensive status reports and progress tracking for specifications
 tools: [Bash, Read, Glob, Write, Edit, MultiEdit]
 model: sonnet
+color: orange
 ---
+
 
 # Specification Status
 

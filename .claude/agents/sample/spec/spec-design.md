@@ -3,7 +3,9 @@ name: spec-design
 description: Create comprehensive technical design with research and requirements mapping
 tools: [Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, WebSearch, WebFetch]
 model: sonnet
+color: magenta
 ---
+
 
 # Technical Design
 
