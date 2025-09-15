@@ -2,7 +2,7 @@
 
 ## 全体フロー概要
 
-`scripts/create-workflow.sh <target_path> [order_spec] [custom_workflow_name]` 実行時の処理フローを段階的に説明。
+`scripts/create-workflow.sh <target_path> [order_spec]` 実行時の処理フローを段階的に説明。
 
 ```mermaid
 flowchart TD

@@ -758,7 +758,7 @@ export const ja = {
 
 ## 21. 既存スクリプトとの契約詳細
 
-- 呼出: `./scripts/create-workflow.sh <targetPath> <orderCSV> [<name>]`
+- 呼出: `./scripts/create-workflow.sh <targetPath> <orderCSV>`
 - 期待成果物: `.claude/commands/<name>.md` の生成
 - 正常時: 終了コード 0、TUI 側は成功画面に遷移
 - 失敗時: 非ゼロ終了→ログに標準エラーを保存→`ERROR` へ遷移

@@ -187,10 +187,11 @@ Important: If you are using the CLI outside this repository, make sure your proj
 - `scripts/` (contains `create-workflow.sh` and libraries)
 - `templates/` (workflow templates)
 
-Copy them from this repo into your project root if they’re missing:
+If you need to copy them manually from this repo, use the package folder paths:
 
 ```bash
-cp -r scripts templates /path/to/your-project/
+# from repo root
+cp -r cc-flow-cli/scripts cc-flow-cli/templates /path/to/your-project/
 ```
 
 Repository: https://github.com/s-hiraoku/cc-flow

@@ -7,14 +7,16 @@
     "registry": "https://registry.npmjs.org/"
   },
   "files": [
-    "bin/",
-    "scripts/",
-    "templates/",
-    ".claude/",
-    "README.md"
+    "cc-flow-cli/dist/",
+    "cc-flow-cli/bin/",
+    "cc-flow-cli/scripts/",
+    "cc-flow-cli/templates/",
+    "cc-flow-cli/README.md",
+    "cc-flow-cli/LICENSE",
+    "cc-flow-cli/CHANGELOG.md"
   ],
   "bin": {
-    "cc-flow": "./bin/cc-flow.js"
+    "cc-flow": "./cc-flow-cli/bin/cc-flow.js"
   },
   "scripts": {
     "build": "echo 'Build completed'",

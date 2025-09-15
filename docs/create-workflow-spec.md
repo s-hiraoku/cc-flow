@@ -40,7 +40,7 @@ scripts/create-workflow.sh spec "1 3 4"
 
 ### コマンド構文
 ```bash
-scripts/create-workflow.sh <target_path> [order_spec] [custom_workflow_name]
+scripts/create-workflow.sh <target_path> [order_spec]
 ```
 
 ### 引数
@@ -51,7 +51,8 @@ scripts/create-workflow.sh <target_path> [order_spec] [custom_workflow_name]
 - `[order_spec]`: 実行順序指定（省略時は対話モード）
   - 数値インデックス（スペース区切り）例: `"1 3 4"`
   - アイテム名（カンマ区切り）例: `"spec-init,spec-requirements,spec-design"`
-- `[custom_workflow_name]`（任意）: 出力するワークフロー名を明示指定（省略時は `<dir>-workflow`／`all-workflow`）
+  
+備考: 現時点ではカスタムのワークフロー名引数は未対応です（既定の `<dir>-workflow`／`all-workflow` が使用されます）。
 
 ### モード
 - インタラクティブ: `order_spec` を省略すると対話的に番号入力で順序を決定します。
