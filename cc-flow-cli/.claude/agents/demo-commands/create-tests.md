@@ -17,7 +17,7 @@ color: blue
 This sub-agent was automatically converted from a custom slash command.
 
 - **Source**: `.claude/commands/demo-commands/create-tests.md`
-- **Conversion Date**: 2025-09-15 10:47:43
+- **Conversion Date**: 2025-09-15 10:56:42
 - **Conversion Version**: {CONVERSION_VERSION}
 - **Functionality**: 100% equivalent to the original slash command
 
