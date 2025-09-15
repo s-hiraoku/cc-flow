@@ -34,54 +34,65 @@ export class WelcomeScreen {
   }
 
   async show(): Promise<boolean> {
-    console.clear();
-    
-    // Get responsive banner based on terminal width
-    const rawBanner = this.getResponsiveBanner();
-    
-    // Center the banner
-    const banner = this.centerText(rawBanner);
+    try {
+      console.clear();
+      
+      // Get responsive banner based on terminal width
+      const rawBanner = this.getResponsiveBanner();
+      
+      // Center the banner
+      const banner = this.centerText(rawBanner);
 
-    // Display 3-color logo: sophisticated blue gradient
-    const lines = banner.split('\n');
-    lines.forEach((line, index) => {
-      if (line.trim() === '') {
-        console.log(line);
-      } else if (index <= 2) {
-        // CC part - blue (professional)
-        console.log(chalk.blue.bold(line));
-      } else if (index <= 4) {
-        // FLOW part - cyan (elegant)  
-        console.log(chalk.cyan.bold(line));
-      } else {
-        // Bottom border - green (success)
-        console.log(chalk.green.bold(line));
+      // Display 3-color logo: sophisticated blue gradient
+      const lines = banner.split('\n');
+      lines.forEach((line, index) => {
+        if (line.trim() === '') {
+          console.log(line);
+        } else if (index <= 2) {
+          // CC part - blue (professional)
+          console.log(chalk.blue.bold(line));
+        } else if (index <= 4) {
+          // FLOW part - cyan (elegant)  
+          console.log(chalk.cyan.bold(line));
+        } else {
+          // Bottom border - green (success)
+          console.log(chalk.green.bold(line));
+        }
+      });
+
+      console.log();
+      console.log(chalk.yellow.bold('                    ⚡ Claude Code Workflow Orchestration Platform ⚡'));
+      console.log();
+      console.log(chalk.green('🚀 Create custom workflows for your Claude Code agents'));
+      console.log(chalk.dim('   Build powerful agent orchestration with visual TUI'));
+      console.log();
+      
+      // Create a rainbow effect manually and center it
+      const rainbowLine = chalk.red('✦ ') + chalk.yellow('Ready to ') + chalk.green('build ') + 
+                         chalk.cyan('amazing ') + chalk.blue('workflows? ') + chalk.magenta('✦');
+      console.log(this.centerText(rainbowLine));
+      console.log();
+      
+      const action = await input({
+        message: 'Press Enter to get started, or type "q" to quit',
+        default: ''
+      });
+      
+      if (action.toLowerCase() === 'q' || action.toLowerCase() === 'quit') {
+        console.log(chalk.yellow('\n👋 Goodbye!'));
+        return false;
       }
-    });
-
-    console.log();
-    console.log(chalk.yellow.bold('                    ⚡ Claude Code Workflow Orchestration Platform ⚡'));
-    console.log();
-    console.log(chalk.green('🚀 Create custom workflows for your Claude Code agents'));
-    console.log(chalk.dim('   Build powerful agent orchestration with visual TUI'));
-    console.log();
-    
-    // Create a rainbow effect manually and center it
-    const rainbowLine = chalk.red('✦ ') + chalk.yellow('Ready to ') + chalk.green('build ') + 
-                       chalk.cyan('amazing ') + chalk.blue('workflows? ') + chalk.magenta('✦');
-    console.log(this.centerText(rainbowLine));
-    console.log();
-    
-    const action = await input({
-      message: 'Press Enter to get started, or type "q" to quit',
-      default: ''
-    });
-    
-    if (action.toLowerCase() === 'q' || action.toLowerCase() === 'quit') {
-      console.log(chalk.yellow('\n👋 Goodbye!'));
-      return false;
+      
+      return true;
+    } catch (error) {
+      // Handle user cancellation (Ctrl+C)
+      if (error instanceof Error && error.message.includes('User force closed')) {
+        console.log(chalk.yellow('\n👋 Goodbye!'));
+        return false;
+      }
+      
+      // Re-throw other errors
+      throw error;
     }
-    
-    return true;
   }
 }
