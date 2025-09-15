@@ -129,6 +129,76 @@ agent_name=$(get_agent_name_by_index <index>)
 - 成功時: エージェント名（文字列）
 - 失敗時: 戻り値1
 
+#### 1.4.6 discover_all_items()
+**目的**: `.claude/agents`（将来的には `.claude/commands` も）配下から全アイテムを検索
+
+**構文**:
+```bash
+discover_all_items ".claude/agents"
+```
+
+**処理フロー**:
+1. 基底ディレクトリの存在検証
+2. `find -name "*.md"` で再帰検索し、ソート
+3. `ITEM_FILES[]` と後方互換のため `AGENT_FILES[]` に格納（0件は `error_exit`）
+
+**戻り値**: なし (グローバル変数に結果格納)
+
+#### 1.4.7 discover_directory_items()
+**目的**: 指定ディレクトリ配下のアイテムを検索
+
+**構文**:
+```bash
+discover_directory_items ".claude/agents/<dir>"
+```
+
+**処理フロー**:
+1. ディレクトリの存在を検証（`check_directory`）
+2. `*.md` を検索し `ITEM_FILES[]`（および `AGENT_FILES[]`）に格納（0件は `error_exit`）
+
+**戻り値**: なし (グローバル変数に結果格納)
+
+#### 1.4.8 discover_items()
+**目的**: `.claude/` 配下の汎用パスに基づき、全体/特定ディレクトリのアイテムを検索
+
+**構文**:
+```bash
+discover_items "./agents"|"./agents/<dir>"|"./commands"|"./commands/<dir>"
+```
+
+**処理フロー**:
+1. `./agents`/`./commands` のいずれかを判定
+2. 全体は `discover_all_items`、特定は `discover_directory_items` を呼び出し
+3. サポート外の形式は `error_exit`
+
+**戻り値**: なし
+
+#### 1.4.9 extract_item_info_from_path()
+**目的**: ファイルパスから `category/directory/name` 形式の情報を抽出
+
+**構文**:
+```bash
+extract_item_info_from_path ".claude/agents/spec/spec-init.md"
+```
+
+**出力**: `agents/spec/spec-init`
+
+**戻り値**: 0（標準出力にパス要素を出力）
+
+#### 1.4.10 extract_item_names()
+**目的**: `ITEM_FILES[]`（なければ `AGENT_FILES[]`）からアイテム名配列を生成
+
+**構文**:
+```bash
+extract_item_names
+```
+
+**処理フロー**:
+1. 各パスのベース名から拡張子 `.md` を除去
+2. 後方互換のため `AGENT_NAMES[]` と `ITEM_NAMES[]` の両方に格納
+
+**戻り値**: なし (グローバル変数に結果格納)
+
 ## 2. template-processor.sh - テンプレート処理ライブラリ
 
 ### 2.1 概要
@@ -422,6 +492,44 @@ show_final_confirmation
 
 **戻り値**: なし (標準出力に表示)
 
+#### 3.4.6 process_item_names_specification()
+**目的**: アイテム名（エージェント名）を直接指定して順序を決定する非対話モードを処理する
+
+**構文**:
+```bash
+process_item_names_specification
+```
+
+**前提**:
+- `ITEM_NAMES_SPECIFIED[]`: ユーザーが指定したアイテム名の配列
+- `AGENT_NAMES[]`: 利用可能なエージェント名の配列
+
+**処理フロー**:
+1. `ITEM_NAMES_SPECIFIED` を順に走査
+2. 各アイテム名が `AGENT_NAMES` に存在するか検証
+3. 存在しない場合は `error_exit` で終了
+4. 検証済みの名前を `SELECTED_AGENTS[]` に設定
+5. `show_item_names_result` で結果を表示
+
+**エラーハンドリング**:
+- 未知のアイテム名指定時: `error_exit "指定されたアイテム '<name>' が見つかりません"`
+
+**戻り値**: なし (グローバル変数 `SELECTED_AGENTS` に結果格納)
+
+#### 3.4.7 show_item_names_result()
+**目的**: アイテム名指定モードで選択された順序を視覚的に表示する
+
+**構文**:
+```bash
+show_item_names_result <selected_agents...>
+```
+
+**処理フロー**:
+1. 引数の配列を受け取り、開始・中間・完了で装飾して出力
+2. `get_execution_order`/`process_order_specification` と同一の表示形式を用いる
+
+**戻り値**: なし (標準出力に表示)
+
 ## 4. slash-command-discovery.sh - スラッシュコマンド検索ライブラリ
 
 ### 4.1 概要
@@ -498,26 +606,79 @@ extract_command_names
 #### 4.4.3 display_command_list()
 **目的**: コマンド一覧を表示
 
-**構文**:
+**構文**: 
 ```bash
 display_command_list <command_dir>
 ```
 
 **処理フロー**:
-1. コマンド名を番号付きで表示
-2. 各コマンドにアイコンと説明を追加
-3. agent-discovery.sh と同様の表示形式
+1. `command_dir` に応じたヘッダーを表示（`all` の場合は全体）
+2. `COMMAND_NAMES` を番号付きで列挙
+3. 名前パターンに応じてアイコン/説明を付与
+   - `*convert*` → 🔄 変換・変更
+   - `*create*` → 🏗️ 作成・生成
+   - `*utility*` → ⚙️ ユーティリティ
+   - `*workflow*` → 🚀 ワークフロー
+   - `*analysis*` → 📊 分析・解析
+   - `*test*` → 🧪 テスト・検証
+   - `*deploy*` → 🚀 デプロイメント
+   - その他 → 📝 コマンド
+
+**戻り値**: なし (標準出力に表示)
+
+#### 4.4.4 get_command_count()
+**目的**: 利用可能なコマンド数を取得
+
+**構文**:
 ```bash
-categorize_commands [--auto-detect] [--custom-rules]
+count=$(get_command_count)
+```
+
+**戻り値**: コマンド数（整数）
+
+#### 4.4.5 get_command_name_by_index()
+**目的**: インデックスに対応するコマンド名を取得
+
+**構文**:
+```bash
+name=$(get_command_name_by_index <index>)
 ```
 
 **パラメータ**:
-- `--auto-detect`: ディレクトリ構造とメタデータから自動分類
-- `--custom-rules`: カスタム分類ルールファイルを使用
+- `index` (必須): 0ベースのインデックス
 
-**分類カテゴリ**:
-- `utility`: ユーティリティ系コマンド
-- `workflow`: ワークフロー関連コマンド
+**戻り値**:
+- 成功時: コマンド名（文字列）
+- 失敗時: 戻り値1
+
+#### 4.4.6 discover_all_commands()
+**目的**: `.claude/commands` 配下の全ディレクトリからコマンドを検索
+
+**構文**:
+```bash
+discover_all_commands ".claude/commands"
+```
+
+**処理フロー**:
+1. 基底ディレクトリの存在を検証
+2. `find -name "*.md"` で再帰検索し、ソート
+3. `COMMAND_FILES[]` に格納（0件は `error_exit`）
+
+**戻り値**: なし (グローバル変数に結果格納)
+
+#### 4.4.7 discover_directory_commands()
+**目的**: 特定ディレクトリ配下のコマンドを検索
+
+**構文**:
+```bash
+discover_directory_commands ".claude/commands/<dir>"
+```
+
+**処理フロー**:
+1. ディレクトリの存在を検証（`check_directory`）
+2. `*.md` を検索し `COMMAND_FILES[]` に格納（0件は `error_exit`）
+
+**戻り値**: なし (グローバル変数に結果格納)
 ## 5. conversion-processor.sh - スラッシュコマンド変換処理ライブラリ
 
 ### 5.1 概要
@@ -558,67 +719,83 @@ CONVERSION_RESULTS["/path/to/cmd.md:message"]="Conversion completed"
 
 **構文**:
 ```bash
-convert_command_to_agent <source_path> <target_path> [--template] [--validate]
+convert_command_to_agent <source_file> <target_directory> [template_file]
 ```
 
 **パラメータ**:
-- `source_path`: 変換元スラッシュコマンドファイル
-- `target_path`: 変換先エージェントファイル
-- `--template`: 使用するテンプレートファイル（デフォルト: `templates/agent-template.md`）
-- `--validate`: 変換後に検証を実行
+- `source_file` (必須): 変換元の `.md` ファイル
+- `target_directory` (必須): 出力先ディレクトリ（存在しない場合は作成）
+- `template_file` (任意): テンプレートファイル（デフォルト: `templates/agent-template.md`）
 
 **処理フロー**:
-1. ソースファイルのメタデータ確認
-2. テンプレート変数の準備
-3. テンプレート処理による変換
-4. 変換結果の検証（オプション）
-5. ターゲットファイルの書き込み
+1. 入力ファイル/テンプレートの存在検証（無い場合は `error_exit`）
+2. コマンド名・メタデータ・本文の抽出（`extract_command_metadata`）
+3. 引数ヒントの抽出（`extract_argument_hint`）
+4. テンプレート変数を構築し `process_template` を実行
+5. 変換完了メッセージを出力
 
-**戻り値**:
-- 成功: 0
-- ソースファイルエラー: 1
-- テンプレート処理エラー: 2
-- 書き込みエラー: 3
+**戻り値**: 0（エラー時は `error_exit` により終了）
 
 #### 5.4.2 batch_convert_commands()
-**目的**: 複数のスラッシュコマンドを一括変換
+**目的**: ディレクトリ配下のコマンドを一括変換
 
 **構文**:
 ```bash
-batch_convert_commands [--parallel] [--max-jobs] [--continue-on-error]
+batch_convert_commands <source_directory> <target_base_directory> [template_file]
 ```
 
-**パラメータ**:
-- `--parallel`: 並列処理で変換実行
-- `--max-jobs`: 最大並列ジョブ数（デフォルト: 4）
-- `--continue-on-error`: エラー時も処理継続
-
 **処理フロー**:
-1. `CONVERSION_CANDIDATES` から変換対象取得
-2. 各コマンドに対して `convert_command_to_agent` 実行
-3. 進捗状況の追跡と表示
-4. 変換結果のサマリー生成
+1. 入力/出力ディレクトリの検証と作成
+2. `find -name "*.md"` で再帰的にソースを列挙
+3. 各ファイルに対し `convert_command_to_agent` を実行
+4. 成功/失敗数を集計・表示
 
-**戻り値**: 成功した変換数
-
-#### 5.4.3 validate_converted_agent()
-**目的**: 変換されたエージェントファイルの妥当性を検証
+**戻り値**: 0（処理結果は標準出力に表示）
+#### 5.4.3 extract_command_metadata()
+**目的**: スラッシュコマンドのフロントマターと本文を抽出
 
 **構文**:
 ```bash
-validate_converted_agent <agent_file_path> [--strict]
+extract_command_metadata <source_file> name_ref description_ref tools_ref content_ref
+```
+
+**説明**:
+- YAMLフロントマターから `name`/`description`/`tools` を取得
+- 未指定時のデフォルト値を補完
+- 本文はフロントマター以降のMarkdownを抽出
+
+**戻り値**: 参照引数に値を設定
+
+#### 5.4.4 extract_argument_hint()
+**目的**: フロントマターから `argument-hint` を抽出
+
+**構文**:
+```bash
+extract_argument_hint <source_file>
+```
+
+**戻り値**:
+- 指定あり: その値
+- 指定なし: `"<args>"`
+
+#### 5.4.5 check_conversion_compatibility()
+**目的**: コマンドが変換対象として妥当かの簡易チェック
+
+**構文**:
+```bash
+check_conversion_compatibility <source_file>
 ```
 
 **検証項目**:
-1. エージェント仕様への準拠
-2. 必須フィールドの存在
-3. ツール指定の妥当性
-4. 機能的等価性の確認
+1. ファイルの存在
+2. YAMLフロントマターの有無
+3. `name` または `description` の存在
 
 **戻り値**:
-- 有効: 0
-- 警告: 1  
-- 無効: 2
+- 0: 変換可能
+- 1: ファイル無し
+- 2: フロントマター無し
+- 3: メタデータ不足
 
 ### 5.5 テンプレート仕様
 

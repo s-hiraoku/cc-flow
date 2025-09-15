@@ -488,7 +488,7 @@ make install PREFIX=/usr/local
 
 **必須要件**
 - [ ] 有効なYAMLフロントマター
-- [ ] `name`, `description`, `tools` フィールド存在
+- [ ] `name` または `description` のいずれかが存在
 - [ ] Markdownコンテンツ存在
 
 **除外条件**
