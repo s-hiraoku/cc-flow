@@ -9,8 +9,13 @@ setup() {
     export ORIGINAL_PWD="$PWD"
     
     # slash-command-discovery.shをテスト環境にコピー
+    mkdir -p "$TEST_DIR/utils"
+    mkdir -p "$TEST_DIR/lib"
     cp "$SCRIPT_DIR/lib/slash-command-discovery.sh" "$TEST_DIR/"
-    cp "$SCRIPT_DIR/utils/common.sh" "$TEST_DIR/"
+    cp "$SCRIPT_DIR/utils/common.sh" "$TEST_DIR/utils/"
+    
+    # slash-command-discovery.sh内のパスを修正
+    sed -i.bak 's|$LIB_SCRIPT_DIR/../utils/common.sh|$TEST_DIR/utils/common.sh|' "$TEST_DIR/slash-command-discovery.sh"
     
     # テスト用のコマンドディレクトリ構造を作成
     mkdir -p "$TEST_DIR/.claude/commands/utility"
@@ -87,26 +92,23 @@ error_exit() {
 }
 
 @test "discover_commands finds commands in utility directory" {
-    run discover_commands "utility"
+    discover_commands "utility"
     
-    [ "$status" -eq 0 ]
     [ "${#COMMAND_FILES[@]}" -eq 2 ]
     [[ "${COMMAND_FILES[0]}" =~ "helper.md" ]]
     [[ "${COMMAND_FILES[1]}" =~ "test-util.md" ]]
 }
 
 @test "discover_commands finds commands in workflow directory" {
-    run discover_commands "workflow"
+    discover_commands "workflow"
     
-    [ "$status" -eq 0 ]
     [ "${#COMMAND_FILES[@]}" -eq 1 ]
     [[ "${COMMAND_FILES[0]}" =~ "create-flow.md" ]]
 }
 
 @test "discover_commands with 'all' finds all commands" {
-    run discover_commands "all"
+    discover_commands "all"
     
-    [ "$status" -eq 0 ]
     [ "${#COMMAND_FILES[@]}" -eq 4 ]
 }
 
@@ -211,9 +213,8 @@ error_exit() {
 }
 
 @test "discover_all_commands finds all markdown files" {
-    run discover_all_commands ".claude/commands"
+    discover_all_commands ".claude/commands"
     
-    [ "$status" -eq 0 ]
     [ "${#COMMAND_FILES[@]}" -eq 4 ]
     
     # ファイルがソート順であることを確認
@@ -228,9 +229,8 @@ error_exit() {
 }
 
 @test "discover_directory_commands finds commands in specific directory" {
-    run discover_directory_commands ".claude/commands/workflow"
+    discover_directory_commands ".claude/commands/workflow"
     
-    [ "$status" -eq 0 ]
     [ "${#COMMAND_FILES[@]}" -eq 1 ]
     [[ "${COMMAND_FILES[0]}" =~ "create-flow.md" ]]
 }

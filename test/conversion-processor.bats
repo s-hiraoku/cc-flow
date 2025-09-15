@@ -9,9 +9,19 @@ setup() {
     export ORIGINAL_PWD="$PWD"
     
     # conversion-processor.shをテスト環境にコピー
-    cp "$SCRIPT_DIR/lib/conversion-processor.sh" "$TEST_DIR/"
-    cp "$SCRIPT_DIR/lib/template-processor.sh" "$TEST_DIR/"
-    cp "$SCRIPT_DIR/utils/common.sh" "$TEST_DIR/"
+    mkdir -p "$TEST_DIR/lib"
+    mkdir -p "$TEST_DIR/utils"
+    cp "$SCRIPT_DIR/lib/conversion-processor.sh" "$TEST_DIR/lib/"
+    cp "$SCRIPT_DIR/lib/template-processor.sh" "$TEST_DIR/lib/"
+    cp "$SCRIPT_DIR/lib/poml-processor.sh" "$TEST_DIR/lib/"
+    cp "$SCRIPT_DIR/utils/common.sh" "$TEST_DIR/utils/"
+    
+    # 各ファイル内のパスを修正
+    sed -i.bak 's|$LIB_SCRIPT_DIR/../utils/common.sh|$TEST_DIR/utils/common.sh|' "$TEST_DIR/lib/conversion-processor.sh"
+    sed -i.bak 's|$LIB_SCRIPT_DIR/template-processor.sh|$TEST_DIR/lib/template-processor.sh|' "$TEST_DIR/lib/conversion-processor.sh"
+    sed -i.bak 's|$LIB_SCRIPT_DIR/../utils/common.sh|$TEST_DIR/utils/common.sh|' "$TEST_DIR/lib/template-processor.sh"
+    sed -i.bak 's|$LIB_SCRIPT_DIR/poml-processor.sh|$TEST_DIR/lib/poml-processor.sh|' "$TEST_DIR/lib/template-processor.sh"
+    sed -i.bak 's|$LIB_SCRIPT_DIR/../utils/common.sh|$TEST_DIR/utils/common.sh|' "$TEST_DIR/lib/poml-processor.sh"
     
     # テスト用のソースコマンドファイルを作成
     mkdir -p "$TEST_DIR/.claude/commands/test"
@@ -89,7 +99,7 @@ EOF
     cd "$TEST_DIR"
     
     # conversion-processor.shを読み込み
-    source "$TEST_DIR/conversion-processor.sh"
+    source "$TEST_DIR/lib/conversion-processor.sh"
 }
 
 teardown() {

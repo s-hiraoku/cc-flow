@@ -14,6 +14,22 @@ setup() {
     mkdir -p "$TEST_DIR/scripts/utils"
     cp "$SCRIPT_DIR/lib/"*.sh "$TEST_DIR/scripts/lib/"
     cp "$SCRIPT_DIR/utils/"*.sh "$TEST_DIR/scripts/utils/"
+    cp "$SCRIPT" "$TEST_DIR/scripts/"
+    
+    # スクリプト内のパスを修正
+    for file in "$TEST_DIR/scripts/lib/"*.sh; do
+        sed -i.bak 's|$SCRIPT_DIR/utils/common.sh|$TEST_DIR/scripts/utils/common.sh|' "$file"
+        sed -i.bak 's|$SCRIPT_DIR/lib/|$TEST_DIR/scripts/lib/|g' "$file"
+        sed -i.bak 's|$LIB_SCRIPT_DIR/../utils/common.sh|$TEST_DIR/scripts/utils/common.sh|' "$file"
+        sed -i.bak 's|$LIB_SCRIPT_DIR/|$TEST_DIR/scripts/lib/|g' "$file"
+    done
+    
+    # convert-slash-commands.shのパスも修正
+    sed -i.bak 's|$SCRIPT_DIR/utils/common.sh|$TEST_DIR/scripts/utils/common.sh|' "$TEST_DIR/scripts/convert-slash-commands.sh"
+    sed -i.bak 's|$SCRIPT_DIR/lib/|$TEST_DIR/scripts/lib/|g' "$TEST_DIR/scripts/convert-slash-commands.sh"
+    
+    # テスト用に新しいスクリプトパスを設定
+    export SCRIPT="$TEST_DIR/scripts/convert-slash-commands.sh"
     
     # テスト用のコマンドディレクトリ構造を作成
     mkdir -p "$TEST_DIR/.claude/commands/utility"

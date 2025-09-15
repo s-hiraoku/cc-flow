@@ -89,7 +89,7 @@ CC-Flowプロジェクトにおいて、カスタムスラッシュコマンド�
 ### 3.3 ConversionScreen.ts (新規作成)
 **役割**: 変換機能のTUIインターフェース
 
-#### 3.3.1 画面構成
+#### 3.3.1 画面構成（概要）
 ```
 ┌─ 🔄 スラッシュコマンド → エージェント変換 ─────┐
 │                                               │
@@ -114,6 +114,107 @@ CC-Flowプロジェクトにおいて、カスタムスラッシュコマンド�
 3. **設定**: 出力先、テンプレート、オプション設定
 4. **実行**: バッチ変換処理 + 進捗表示
 5. **完了**: 結果サマリー + エージェント選択画面への遷移
+
+#### 3.3.3 画面レイアウト（詳細）
+
+ステップ1: コマンド一覧（カテゴリ別・チェックボックス）
+```
+┌─ 🔄 スラッシュコマンド → エージェント変換 ─────────────────────┐
+│                                                               │
+│ 📋 検出されたスラッシュコマンド: (12個)                        │
+│                                                               │
+│ ┌─ utility ─────────────────────────────────────────────────┐ │
+│ │ ☐ my-tool          - Custom development utility          │ │
+│ │ ☐ code-formatter   - Automatic code formatting tool     │ │
+│ │ ☐ log-analyzer     - Parse and analyze log files        │ │
+│ └───────────────────────────────────────────────────────────┘ │
+│                                                               │
+│ ┌─ workflow ────────────────────────────────────────────────┐ │
+│ │ ☐ deploy-checker   - Deployment validation workflow     │ │
+│ │ ☐ test-runner      - Automated testing pipeline        │ │
+│ └───────────────────────────────────────────────────────────┘ │
+│                                                               │
+│ ┌─ analysis ────────────────────────────────────────────────┐ │
+│ │ ☐ security-scan    - Security vulnerability scanner     │ │
+│ │ ☐ performance-test - Performance benchmarking tool      │ │
+│ └───────────────────────────────────────────────────────────┘ │
+│                                                               │
+│ 💡 ヒント: スペースキーで選択/解除、Enterで次へ                │
+│                                                               │
+│ 🚀 [次へ: 設定] 🔙 [戻る] 📊 [プレビュー]                      │
+└───────────────────────────────────────────────────────────────┘
+```
+
+ステップ2: 変換設定
+```
+┌─ ⚙️ 変換設定 ───────────────────────────────────────────────┐
+│                                                               │
+│ 📂 出力設定:                                                  │
+│   ベースディレクトリ: .claude/agents/                         │
+│   ☑ カテゴリ別に分類して保存                                   │
+│                                                               │
+│ 🎨 エージェント設定:                                          │
+│   デフォルトモデル: [sonnet ▼]                                │
+│   デフォルトカラー: [blue   ▼]                                │
+│   ☑ 既存エージェントとの名前衝突をチェック                      │
+│                                                               │
+│ 🔍 検証設定:                                                  │
+│   ☑ 変換後に妥当性をチェック                                  │
+│   ☑ 機能等価性を検証                                          │
+│                                                               │
+│ 🚀 [変換実行] 🔙 [戻る]                                       │
+└───────────────────────────────────────────────────────────────┘
+```
+
+ステップ3: 進捗表示
+```
+┌─ ⏳ 変換を実行中… ───────────────────────────────────────────┐
+│                                                               │
+│ 進捗: ████▉  78% (28/36)                                      │
+│ 現在: analysis/security-scan.md → agents/analysis/security…    │
+│ 検証: validate_tool_equivalence…                               │
+│                                                               │
+│ 詳細ログ:                                                     │
+│   - Parsed metadata: name=security-scan, tools=[Read,Bash]     │
+│   - Template: templates/agent-template.md                      │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
+```
+
+ステップ4: 結果サマリー
+```
+┌─ ✅ 変換が完了しました ───────────────────────────────────────┐
+│                                                               │
+│ 📊 変換結果:                                                  │
+│   ✅ 成功: 5個   ⚠️ 警告: 1個   ❌ エラー: 0個                 │
+│                                                               │
+│ 📁 出力先: .claude/agents                                     │
+│ 📄 作成:                                                       │
+│   • .claude/agents/utility/my-tool.md                        │
+│   • .claude/agents/workflow/deploy-checker.md                │
+│   • .claude/agents/analysis/security-scan.md                 │
+│                                                               │
+│ ⚠️ 警告: utility/log-analyzer → 大きなシェルスクリプト検出      │
+│                                                               │
+│ 🚀 [ワークフロー作成へ] 🔙 [メインメニューへ] 📊 [詳細表示]     │
+└───────────────────────────────────────────────────────────────┘
+```
+
+#### 3.3.4 操作とキーバインド
+- 選択: Space（チェック/解除）
+- 決定/遷移: Enter
+- 戻る: `b` または `Esc`
+- プレビュー: `p`（選択中コマンドのフロントマター/本文を表示）
+- ページング: ↑/↓/PgUp/PgDn（一覧が長い場合）
+
+#### 3.3.5 アクセシビリティ
+- 画面遷移/主要操作時に `TUIManager.announceToScreenReader()` を呼び出す。
+- 進捗更新時は一定間隔で割合と対象ファイル名を読み上げ用テキストに反映。
+
+#### 3.3.6 画面遷移
+```
+コマンド一覧 → 変換設定 → 進捗表示 → 結果サマリー → （成功時）エージェント選択画面
+```
 
 ### 3.4 templates/agent-template.md (新規作成)
 **役割**: スラッシュコマンド→エージェント変換用テンプレート
@@ -152,6 +253,63 @@ color: {AGENT_COLOR}
 | `(なし)` | `model: sonnet` | デフォルト値 |
 | `(なし)` | `color: blue` | デフォルト値 |
 | Markdown本文 | Markdown本文 | 完全保持 |
+
+### 3.5 convert-slash-commands.sh (CLI)
+**役割**: スラッシュコマンド→エージェント変換のエントリポイント。検索・表示・一括変換を司る。
+
+#### 3.5.1 Usage
+```bash
+scripts/convert-slash-commands.sh <command_directory> [options]
+
+Arguments:
+  command_directory   変換対象ディレクトリ
+                      (例: utility, workflow, analysis, all)
+
+Options:
+  --output-dir DIR    出力先ディレクトリ (既定: .claude/agents)
+  --template FILE     テンプレートファイル (既定: templates/agent-template.md)
+  --dry-run           変換は行わず対象のみ表示
+  --help, -h          ヘルプ表示
+```
+
+#### 3.5.2 動作仕様
+- 検出: `discover_commands <dir>` で `.claude/commands/<dir>` を走査し `COMMAND_FILES[]` を生成。
+- 表示: `extract_command_names` → `display_command_list <dir>` で一覧表示（アイコン/説明付き）。
+- 変換: `--dry-run` 未指定時、各ファイルに対し `convert_command_to_agent` を実行。
+- 出力先の決定:
+  - `<dir> == all` の場合: 入力のサブディレクトリ構造を保持する。
+    - 例) `.claude/commands/workflow/deploy.md` → `--output-dir/workflow/deploy.md`
+  - それ以外: `--output-dir/<dir>/` 配下に出力。
+- テンプレート解決: `--template` は実行時のカレントディレクトリ基準で存在確認する。
+- 進捗/結果: 成功・失敗件数と出力先をサマリー表示する。
+
+#### 3.5.3 事前条件と異常系
+- 事前条件:
+  - `.claude/commands/<dir>` が存在し、`.md` が1件以上存在すること（`all` は `.claude/commands` 配下）
+  - `--template` 指定時はファイルが存在すること
+- エラー時の挙動:
+  - 検索対象が存在しない/0件: エラーメッセージを表示して終了
+  - テンプレート不存在: エラーメッセージを表示して終了
+  - いずれも非0で終了（`set -euo pipefail` 準拠）
+
+#### 3.5.4 使用例
+```bash
+# utility ディレクトリを既定の出力先に変換
+scripts/convert-slash-commands.sh utility
+
+# 全ディレクトリを構造維持で custom/ に出力（ドライラン）
+scripts/convert-slash-commands.sh all --output-dir custom --dry-run
+
+# workflow ディレクトリを指定テンプレートで変換
+scripts/convert-slash-commands.sh workflow \
+  --template templates/agent-template.md \
+  --output-dir .claude/agents
+```
+
+#### 3.5.5 連携コンポーネント
+- 検索/表示: `scripts/lib/slash-command-discovery.sh`
+- 変換処理: `scripts/lib/conversion-processor.sh`
+- テンプレート適用: `scripts/lib/template-processor.sh`
 
 ## 4. 統合仕様
 
