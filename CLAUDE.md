@@ -12,13 +12,18 @@ CC-Flow is a Claude Code workflow platform that enables sequential execution of 
 # Install dependencies
 npm install
 
-# Create workflow - NON-INTERACTIVE mode required for Claude Code
-# Interactive mode doesn't work in Claude Code (no stdin support)
-/create-workflow spec "3 4 1 6 2"  # Specify agent order numbers
+# Inside Claude Code (slash command)
+# Non-interactive mode is required in Claude Code (no stdin support)
+/create-workflow spec "3 4 1 6 2"  # index-based order
 
-# Example workflow creation with standard spec order
+# Example with the same order:
 # 3=spec-init, 4=spec-requirements, 1=spec-design, 6=spec-tasks, 2=spec-impl
 /create-workflow spec "3 4 1 6 2"
+
+Note:
+- "/create-workflow" is a slash command executed inside Claude Code. It is distinct from the shell script `scripts/create-workflow.sh` that you run in a terminal.
+- Slash command uses a category name like `spec`; the script uses a path like `./agents/spec`.
+- This repository does not ship `/create-workflow` by default. If it isn’t present in your project, use the terminal script examples below or add a corresponding `.claude/commands/create-workflow.md` in your project.
 
 # Execute generated workflow
 /spec-workflow "Your task context"
@@ -56,8 +61,15 @@ scripts/
 **Non-interactive usage** (required for Claude Code):
 
 ```bash
-./scripts/create-workflow.sh <agent-dir> "<order>"
-# Example: ./scripts/create-workflow.sh spec "3 4 1 6 2"
+# Recommended new path format
+./scripts/create-workflow.sh ./agents/<dir> "<order>"
+
+# Examples
+./scripts/create-workflow.sh ./agents/spec "3 4 1 6 2"        # index-based
+./scripts/create-workflow.sh ./agents/spec "spec-init,spec-impl" # name-based
+
+# Back-compat short form (deprecated; emits a warning)
+./scripts/create-workflow.sh spec "3 4 1 6 2"
 ```
 
 ### Agent Structure
@@ -78,10 +90,10 @@ scripts/
 
 ### Generated Files
 
-When creating a workflow, two files are generated:
+By default, the script generates a single final command file and cleans up intermediates:
 
-- `.claude/commands/<workflow-name>.md` - The slash command
-- `.claude/commands/poml/<workflow-name>.poml` - POML orchestration logic
+- `.claude/commands/<workflow-name>.md` - The slash command (final)
+- POML is created only as a temporary intermediate and removed in the default flow
 
 ### Template Variables
 

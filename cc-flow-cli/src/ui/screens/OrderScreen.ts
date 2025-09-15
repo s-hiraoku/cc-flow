@@ -3,7 +3,7 @@ import { select, confirm } from '@inquirer/prompts';
 import type { Agent } from '../../models/Agent.js';
 
 export class OrderScreen {
-  async show(selectedAgents: Agent[]): Promise<Agent[]> {
+  async show(selectedAgents: Agent[]): Promise<Agent[] | null> {
     let orderedAgents = [...selectedAgents];
     
     // If only one agent, skip ordering
@@ -39,12 +39,21 @@ export class OrderScreen {
           {
             name: '📚 ヘルプを表示',
             value: 'help'
+          },
+          {
+            name: '↩️ 前の画面に戻る',
+            value: 'back'
           }
         ]
       });
       
       if (action === 'confirm') {
         break;
+      }
+      
+      if (action === 'back') {
+        // Return null to indicate user wants to go back
+        return null;
       }
       
       if (action === 'help') {

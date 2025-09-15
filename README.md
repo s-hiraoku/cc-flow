@@ -19,6 +19,7 @@ CC-Flow lets you:
 
 - **Chain Claude Code agents** together in custom workflows
 - **Create workflows visually** with an intuitive terminal interface
+- **Convert slash commands to agents** for better organization and reusability
 - **Automate complex tasks** by combining multiple specialized agents
 - **Save time** by reusing workflows for similar tasks
 
@@ -37,7 +38,9 @@ cc-flow
 **You'll see a beautiful welcome screen with:**
 
 - 🎨 Colorful ASCII art logo
-- 📋 Clear menu options
+- 📋 Clear menu options with two main workflows:
+  - 🚀 **Create workflow from existing agents** - Build workflows using existing sub-agents
+  - 🔄 **Convert slash commands to agents** - Transform custom slash commands into reusable sub-agents
 - ⌨️ Keyboard shortcuts
 - 🌐 Bilingual UI (English/Japanese labels)
 
@@ -117,6 +120,31 @@ npx @hiraoku/cc-flow-cli
 📁 Select Directory → 🔍 Choose Agents → 📋 Set Order → ✅ Confirm → 🎉 Ready!
 ```
 
+### **Slash Command Conversion**
+
+Transform your custom slash commands into reusable sub-agents:
+
+```bash
+# Convert slash commands to agents
+npx @hiraoku/cc-flow-cli
+# Select: "Convert slash commands to agents"
+# Choose directory: demo (contains 3 example commands)
+# Select commands: analyze-code, generate-docs, create-tests
+# Result: Converted to .claude/agents/demo/ for workflow use
+```
+
+**Conversion Process:**
+
+```
+🔍 Search Commands → ☑️ Select Commands → ⚙️ Configure → 🔄 Convert → ✅ Ready for Workflows!
+```
+
+**Example Demo Commands Available:**
+
+- 📊 **analyze-code** - Comprehensive code quality analysis
+- 📚 **generate-docs** - Automatic documentation generation  
+- 🧪 **create-tests** - Test suite generation
+
 ### **Code Review Process**
 
 ```bash
@@ -159,10 +187,11 @@ Important: If you are using the CLI outside this repository, make sure your proj
 - `scripts/` (contains `create-workflow.sh` and libraries)
 - `templates/` (workflow templates)
 
-Copy them from this repo into your project root if they’re missing:
+If you need to copy them manually from this repo, use the package folder paths:
 
 ```bash
-cp -r scripts templates /path/to/your-project/
+# from repo root
+cp -r cc-flow-cli/scripts cc-flow-cli/templates /path/to/your-project/
 ```
 
 Repository: https://github.com/s-hiraoku/cc-flow
@@ -220,6 +249,26 @@ scripts/create-workflow.sh spec "1 3 4"
 ```
 
 This generates `.claude/commands/<dir>-workflow.md` which you run inside Claude Code as a slash command, for example: `/spec-workflow "your context"`.
+
+### **Can I convert slash commands without the TUI?**
+
+Yes. You can use the conversion script directly:
+
+```bash
+# Convert all commands in demo directory
+scripts/convert-slash-commands.sh demo
+
+# Dry run to see what would be converted
+scripts/convert-slash-commands.sh demo --dry-run
+
+# Convert with custom output directory
+scripts/convert-slash-commands.sh demo --output-dir .claude/agents/custom
+
+# Convert specific directory with template
+scripts/convert-slash-commands.sh utility --template templates/custom-agent-template.md
+```
+
+This converts slash commands from `.claude/commands/` to sub-agents in `.claude/agents/` that can be used in workflows.
 
 ### **Can I edit from the preview screen?**
 

@@ -22,10 +22,10 @@ export class PreviewScreen {
           name: '🚀 ワークフローを作成する',
           value: 'generate'
         },
-        {
-          name: '✏️  設定を編集する',
-          value: 'edit'
-        },
+        // {
+        //   name: '✏️  設定を編集する',
+        //   value: 'edit'
+        // },
         {
           name: '📚 ヘルプを表示',
           value: 'help'

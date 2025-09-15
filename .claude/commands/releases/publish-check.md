@@ -19,47 +19,39 @@ CC-Flow CLIパッケージのnpm publish準備状況を包括的にチェック�
 - LICENSE ファイルの存在
 - .gitignore の適切な設定
 
-### 🔍 2. Package.json 詳細検証
-- name, version, description の設定確認
-- author, repository, homepage の設定
-- files配列の適切な設定（dist/, bin/, scripts/, templates/）
-- exports/main/types の正しい設定
-- dependencies/devDependencies の整合性
-- publishConfig の npm organization 設定
+### 🔍 2. Package.json 詳細検証（実装準拠）
+- 必須フィールド: name, version, description の確認
+- 追加メタ: author, repository(url), homepage の有無確認
+- files 配列の基本構成: 少なくとも `bin/`, `README.md` を含むか確認
+- publishConfig.access が `public` であることを確認
+  - それ以外の詳細（`exports`/`main`/`types`/依存整合性 等）は現時点では未チェック
 
-### 🏗️ 3. ビルドとコンパイル検証
-- TypeScript コンパイル成功確認
-- npm run build の実行成功
-- dist/ ディレクトリの生成確認
-- bin/ スクリプトの実行可能性
-- 型定義ファイル(.d.ts)の生成確認
+### 🏗️ 3. ビルドとコンパイル検証（実装準拠）
+- `npm run build` の実行結果のみを評価（0終了で合格）
+- 生成物（`dist/` や `.d.ts`）の存在チェックは現時点では未実装
+- `bin/cc-flow.js` の実行権限は「6. CLI機能テスト」で検証
 
-### 🧪 4. テストとコード品質
-- npm run lint の実行（TypeScript型チェック）
-- npm run test の実行成功
-- テストカバレッジの確認
-- npm run validate の実行成功
+### 🧪 4. テストとコード品質（実装準拠）
+- `npm test` の実行（0終了で合格）
+- `lint`/`validate`/カバレッジの評価は現時点では未実装
 
-### 📁 5. パッケージ内容検証
-- templates/ ディレクトリの内容確認
-- scripts/ ディレクトリの実行可能性
-- .claude/agents/ サンプルエージェントの存在
-- 不要ファイルの除外確認（node_modules/, .env等）
+### 📁 5. パッケージ内容検証（実装準拠）
+- `templates/` ディレクトリの存在確認
+- `scripts/` ディレクトリの存在確認
+- `.claude/agents/` ディレクトリの存在確認
+- 実行可能性/不要ファイル除外の検証は現時点では未実装
 
-### 🔧 6. CLI機能テスト
-- bin/cc-flow.js の実行可能性
-- CLIコマンドのヘルプ表示確認
-- 基本的な動作確認
+### 🔧 6. CLI機能テスト（実装準拠）
+- `bin/cc-flow.js` の存在と実行権限の確認
+- ヘルプ表示/基本動作の検証は現時点では未実装
 
-### 📈 7. パッケージサイズとパフォーマンス
-- パッケージサイズの適切性（< 10MB推奨）
-- 依存関係のサイズ確認
-- 不要なファイルの除外確認
+### 📈 7. パッケージサイズとパフォーマンス（実装準拠）
+- `--dry-run` または `--fix` 指定時のみ `npm pack --dry-run` を実行しサイズ表示
+- しきい値判定/依存サイズ/混入ファイル検知は現時点では未実装
 
-### 🚀 8. 公開前最終確認
-- npm publish --dry-run の実行
-- package tarball 内容確認
-- version の重複チェック
+### 🚀 8. 公開前最終確認（実装準拠）
+- `--dry-run` 指定時のみ `npm publish --dry-run` を実行
+- tarball 内容/バージョン重複の検証は現時点では未実装
 
 ## 使用方法
 
@@ -105,3 +97,13 @@ npm publish
 ```
 
 このコマンドにより、品質の高いパッケージのみがnpmに公開されることを保証します。
+
+## 実行
+
+```bash
+# Get arguments
+ARGUMENTS="$*"
+
+# Execute publish-check script
+./scripts/releases/publish-check.sh $ARGUMENTS
+```
