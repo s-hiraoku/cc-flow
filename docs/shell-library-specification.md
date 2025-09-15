@@ -425,23 +425,241 @@ show_final_confirmation
 ## 4. slash-command-discovery.sh - スラッシュコマンド検索ライブラリ
 
 ### 4.1 概要
-TBD - スラッシュコマンドファイルの検索、抽出、管理に関する機能を提供予定
+`.claude/commands/` 配下のスラッシュコマンドファイルを検索・一覧表示する機能を提供します。
+agent-discovery.sh のスラッシュコマンド版として、シンプルな検索・表示機能を実装します。
 
 ### 4.2 依存関係
-TBD
+- `../utils/common.sh` - 共通ユーティリティ関数
+- `find`, `basename` - 標準Unix コマンド
 
 ### 4.3 グローバル変数
-TBD
+
+#### 4.3.1 COMMAND_FILES
+**目的**: 検出されたスラッシュコマンドファイルのパス配列
+
+**形式**: 
+```bash
+COMMAND_FILES=("path1" "path2" "path3")
+```
+
+#### 4.3.2 COMMAND_NAMES
+**目的**: スラッシュコマンド名の配列
+
+**形式**:
+```bash
+COMMAND_NAMES=("command1" "command2" "command3")
+```
 
 ### 4.4 関数仕様
-TBD
 
-## 5. poml-processor.sh - POML実行処理ライブラリ（現状は任意）
+#### 4.4.1 discover_commands()
+**目的**: 指定ディレクトリ配下のスラッシュコマンドファイルを検索
+
+**構文**:
+```bash
+discover_commands <command_dir>
+```
+
+**パラメータ**:
+- `command_dir`: 検索対象ディレクトリ（"utility", "workflow" など）
+
+**処理フロー**:
+1. `.claude/commands/$command_dir` の存在確認
+2. `.md` ファイルを検索
+3. 検出結果を `COMMAND_FILES` に格納
+
+
+
+**使用例**:
+```bash
+discover_commands "utility"
+echo "Found ${#COMMAND_FILES[@]} commands"
+```
+
+#### 4.4.2 extract_command_names()
+**目的**: コマンドファイルからコマンド名を抽出
+
+**構文**:
+```bash
+extract_command_names
+```
+
+
+
+**処理フロー**:
+1. `COMMAND_FILES` 配列を走査
+2. ファイル名から `.md` 拡張子を除去
+3. 結果を `COMMAND_NAMES` に格納
+
+
+
+
+
+#### 4.4.3 display_command_list()
+**目的**: コマンド一覧を表示
+
+**構文**:
+```bash
+display_command_list <command_dir>
+```
+
+**処理フロー**:
+1. コマンド名を番号付きで表示
+2. 各コマンドにアイコンと説明を追加
+3. agent-discovery.sh と同様の表示形式
+```bash
+categorize_commands [--auto-detect] [--custom-rules]
+```
+
+**パラメータ**:
+- `--auto-detect`: ディレクトリ構造とメタデータから自動分類
+- `--custom-rules`: カスタム分類ルールファイルを使用
+
+**分類カテゴリ**:
+- `utility`: ユーティリティ系コマンド
+- `workflow`: ワークフロー関連コマンド
+## 5. conversion-processor.sh - スラッシュコマンド変換処理ライブラリ
+
+### 5.1 概要
+スラッシュコマンドファイルをサブエージェント形式に変換する処理を提供します。
+`slash-command-discovery.sh` で準備されたデータを基に、テンプレートエンジンを使用して確実な変換を実行します。
+
+### 5.2 依存関係
+- `../utils/common.sh` - 共通ユーティリティ関数
+- `slash-command-discovery.sh` - スラッシュコマンド検索機能
+- `template-processor.sh` - テンプレート処理機能
+
+### 5.3 グローバル変数
+
+#### 5.3.1 CONVERSION_STATUS
+**目的**: 各コマンドの変換状態を追跡
+
+**形式**:
+```bash
+declare -A CONVERSION_STATUS
+CONVERSION_STATUS["/path/to/cmd.md"]="pending|processing|completed|failed"
+```
+
+#### 5.3.2 CONVERSION_RESULTS
+**目的**: 変換結果の詳細情報
+
+**形式**:
+```bash
+declare -A CONVERSION_RESULTS
+CONVERSION_RESULTS["/path/to/cmd.md:target"]="/path/to/agent.md"
+CONVERSION_RESULTS["/path/to/cmd.md:status"]="success"
+CONVERSION_RESULTS["/path/to/cmd.md:message"]="Conversion completed"
+```
+
+### 5.4 関数仕様
+
+#### 5.4.1 convert_command_to_agent()
+**目的**: 単一のスラッシュコマンドをエージェント形式に変換
+
+**構文**:
+```bash
+convert_command_to_agent <source_path> <target_path> [--template] [--validate]
+```
+
+**パラメータ**:
+- `source_path`: 変換元スラッシュコマンドファイル
+- `target_path`: 変換先エージェントファイル
+- `--template`: 使用するテンプレートファイル（デフォルト: `templates/agent-template.md`）
+- `--validate`: 変換後に検証を実行
+
+**処理フロー**:
+1. ソースファイルのメタデータ確認
+2. テンプレート変数の準備
+3. テンプレート処理による変換
+4. 変換結果の検証（オプション）
+5. ターゲットファイルの書き込み
+
+**戻り値**:
+- 成功: 0
+- ソースファイルエラー: 1
+- テンプレート処理エラー: 2
+- 書き込みエラー: 3
+
+#### 5.4.2 batch_convert_commands()
+**目的**: 複数のスラッシュコマンドを一括変換
+
+**構文**:
+```bash
+batch_convert_commands [--parallel] [--max-jobs] [--continue-on-error]
+```
+
+**パラメータ**:
+- `--parallel`: 並列処理で変換実行
+- `--max-jobs`: 最大並列ジョブ数（デフォルト: 4）
+- `--continue-on-error`: エラー時も処理継続
+
+**処理フロー**:
+1. `CONVERSION_CANDIDATES` から変換対象取得
+2. 各コマンドに対して `convert_command_to_agent` 実行
+3. 進捗状況の追跡と表示
+4. 変換結果のサマリー生成
+
+**戻り値**: 成功した変換数
+
+#### 5.4.3 validate_converted_agent()
+**目的**: 変換されたエージェントファイルの妥当性を検証
+
+**構文**:
+```bash
+validate_converted_agent <agent_file_path> [--strict]
+```
+
+**検証項目**:
+1. エージェント仕様への準拠
+2. 必須フィールドの存在
+3. ツール指定の妥当性
+4. 機能的等価性の確認
+
+**戻り値**:
+- 有効: 0
+- 警告: 1  
+- 無効: 2
+
+### 5.5 テンプレート仕様
+
+#### 5.5.1 基本テンプレート構造
+```markdown
+---
+name: {AGENT_NAME}
+description: {AGENT_DESCRIPTION}
+model: {AGENT_MODEL}
+tools: {AGENT_TOOLS}
+color: {AGENT_COLOR}
+---
+
+# {AGENT_NAME}
+
+{AGENT_CONTENT}
+
+## 変換情報
+
+- **変換元**: {SOURCE_PATH}
+- **変換日時**: {CONVERSION_DATE}
+- **変換バージョン**: {CONVERSION_VERSION}
+```
+
+#### 5.5.2 テンプレート変数
+- `{AGENT_NAME}`: エージェント名
+- `{AGENT_DESCRIPTION}`: エージェントの説明
+- `{AGENT_MODEL}`: 使用モデル（sonnet/opus/haiku）
+- `{AGENT_TOOLS}`: ツール配列
+- `{AGENT_COLOR}`: エージェント色
+- `{AGENT_CONTENT}`: Markdown本文
+- `{SOURCE_PATH}`: 変換元ファイルパス
+- `{CONVERSION_DATE}`: 変換実行日時
+- `{CONVERSION_VERSION}`: 変換スクリプトバージョン
+
+## 6. poml-processor.sh - POML実行処理ライブラリ（現状は任意）
 
 ### 5.1 概要
 POMLファイルを処理してマークダウンファイルを生成する機能を提供します。将来拡張用として `pomljs` による POML→Markdown 変換を行えますが、現行の `create-workflow.sh` 既定フローでは使用していません（テンプレート置換で生成した `.md` を最終出力とし、POML は中間ファイルとして削除）。
 
-### 5.2 依存関係（POML処理を行う場合）
+### 6.2 依存関係（POML処理を行う場合）
 - `../utils/common.sh` - 共通ユーティリティ関数
 - Node.js 実行環境
 - npm パッケージマネージャー
