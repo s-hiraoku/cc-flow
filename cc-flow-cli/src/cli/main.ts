@@ -287,7 +287,10 @@ export class WorkflowBuilder {
           const nameScreen = new WorkflowNameScreen();
           const newName = await nameScreen.show({ 
             path: currentConfig.targetPath, 
-            name: currentConfig.targetPath.split('/').pop() || 'agents' 
+            displayName: currentConfig.targetPath.split('/').pop() || 'agents',
+            category: 'agents',
+            agentCount: currentConfig.selectedAgents.length,
+            agents: currentConfig.selectedAgents
           });
           configChanges.workflowName = newName;
           console.log(chalk.green('\n✅ ワークフロー名を更新しました: ' + newName));
@@ -318,7 +321,10 @@ export class WorkflowBuilder {
           const agentScreen = new AgentSelectionScreen();
           const directory = { 
             path: currentConfig.targetPath, 
-            name: currentConfig.targetPath.split('/').pop() || 'agents' 
+            displayName: currentConfig.targetPath.split('/').pop() || 'agents',
+            category: 'agents',
+            agentCount: currentConfig.selectedAgents.length,
+            agents: currentConfig.selectedAgents
           };
           const selectionResult = await agentScreen.show(directory, currentConfig.purpose);
           
