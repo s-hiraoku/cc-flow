@@ -135,6 +135,11 @@ export class WorkflowBuilder {
         const orderScreen = new OrderScreen();
         const orderedAgents = await orderScreen.show(selectionResult.selectedAgents);
         
+        if (!orderedAgents) {
+          // User chose to go back from order screen
+          continue;
+        }
+        
         // Create workflow config
         const config: WorkflowConfig = {
           targetPath: selectedDirectory.path,
@@ -235,27 +240,30 @@ export class WorkflowBuilder {
    */
   private async editWorkflowConfiguration(currentConfig: WorkflowConfig): Promise<Partial<WorkflowConfig> | null> {
     try {
-      console.clear();
-      console.log(chalk.cyan.bold('┌─ ✏️ ワークフロー設定編集 ────────────────┐'));
-      console.log(chalk.cyan('│                                         │'));
-      console.log(chalk.cyan('│') + '  編集する項目を選択してください          ' + chalk.cyan('│'));
-      console.log(chalk.cyan('│                                         │'));
-      console.log(chalk.cyan('└─────────────────────────────────────────┘'));
-      console.log();
-
-      const { select } = await import('@inquirer/prompts');
+      let configChanges: Partial<WorkflowConfig> = {};
       
-      const editChoice = await select({
+      while (true) {
+        console.clear();
+        console.log(chalk.cyan.bold('┌─ ✏️ ワークフロー設定編集 ────────────────┐'));
+        console.log(chalk.cyan('│                                         │'));
+        console.log(chalk.cyan('│') + '  編集する項目を選択してください          ' + chalk.cyan('│'));
+        console.log(chalk.cyan('│                                         │'));
+        console.log(chalk.cyan('└─────────────────────────────────────────┘'));
+        console.log();
+
+        const { select } = await import('@inquirer/prompts');
+        
+        const editChoice = await select({
         message: '編集する項目を選択してください:',
         choices: [
           {
             name: '📝 ワークフロー名を変更',
             value: 'name'
           },
-          {
-            name: '🎯 目的を変更',
-            value: 'purpose'
-          },
+          // {
+          //   name: '🎯 目的を変更',
+          //   value: 'purpose'
+          // },
           {
             name: '🔧 エージェント選択を変更',
             value: 'agents'
@@ -271,57 +279,104 @@ export class WorkflowBuilder {
         ]
       });
 
-      if (editChoice === 'back') {
-        return null;
-      }
+        if (editChoice === 'back') {
+          return Object.keys(configChanges).length > 0 ? configChanges : null;
+        }
 
-      if (editChoice === 'name') {
-        const nameScreen = new WorkflowNameScreen();
-        const newName = await nameScreen.show({ 
-          path: currentConfig.targetPath, 
-          name: currentConfig.targetPath.split('/').pop() || 'agents' 
-        });
-        return { workflowName: newName };
-      }
+        if (editChoice === 'name') {
+          const nameScreen = new WorkflowNameScreen();
+          const newName = await nameScreen.show({ 
+            path: currentConfig.targetPath, 
+            name: currentConfig.targetPath.split('/').pop() || 'agents' 
+          });
+          configChanges.workflowName = newName;
+          console.log(chalk.green('\n✅ ワークフロー名を更新しました: ' + newName));
+          console.log(chalk.blue('Enter キーで編集メニューに戻る...'));
+          
+          // Wait for user input
+          process.stdin.setRawMode?.(true);
+          process.stdin.resume();
+          await new Promise(resolve => {
+            process.stdin.once('data', () => {
+              process.stdin.setRawMode?.(false);
+              process.stdin.pause();
+              resolve(undefined);
+            });
+          });
+          continue;
+        }
 
-      if (editChoice === 'purpose') {
-        const agentScreen = new AgentSelectionScreen();
-        const newPurpose = await agentScreen.getPurpose();
-        return { purpose: newPurpose };
-      }
+      // TODO: Implement purpose editing screen
+      // if (editChoice === 'purpose') {
+      //   const agentScreen = new AgentSelectionScreen();
+      //   const newPurpose = await agentScreen.getPurpose();
+      //   return { purpose: newPurpose };
+      // }
 
-      if (editChoice === 'agents') {
-        // Re-run agent selection
-        const agentScreen = new AgentSelectionScreen();
-        const directory = { 
-          path: currentConfig.targetPath, 
-          name: currentConfig.targetPath.split('/').pop() || 'agents' 
-        };
-        const selectionResult = await agentScreen.show(directory, currentConfig.purpose);
-        
-        // Re-run order configuration with new agents
-        const orderScreen = new OrderScreen();
-        const orderedAgents = await orderScreen.show(selectionResult.selectedAgents);
-        
-        return {
-          selectedAgents: orderedAgents,
-          executionOrder: orderedAgents.map(a => a.name),
-          purpose: selectionResult.purpose
-        };
-      }
+        if (editChoice === 'agents') {
+          // Re-run agent selection
+          const agentScreen = new AgentSelectionScreen();
+          const directory = { 
+            path: currentConfig.targetPath, 
+            name: currentConfig.targetPath.split('/').pop() || 'agents' 
+          };
+          const selectionResult = await agentScreen.show(directory, currentConfig.purpose);
+          
+          // Re-run order configuration with new agents
+          const orderScreen = new OrderScreen();
+          const orderedAgents = await orderScreen.show(selectionResult.selectedAgents);
+          
+          if (orderedAgents) {
+            Object.assign(configChanges, {
+              selectedAgents: orderedAgents,
+              executionOrder: orderedAgents.map(a => a.name),
+              purpose: selectionResult.purpose
+            });
+            console.log(chalk.green('\n✅ エージェント選択と順序を更新しました'));
+            console.log(chalk.blue('Enter キーで編集メニューに戻る...'));
+            
+            // Wait for user input
+            process.stdin.setRawMode?.(true);
+            process.stdin.resume();
+            await new Promise(resolve => {
+              process.stdin.once('data', () => {
+                process.stdin.setRawMode?.(false);
+                process.stdin.pause();
+                resolve(undefined);
+              });
+            });
+          }
+          continue;
+        }
 
-      if (editChoice === 'order') {
-        // Re-run order configuration with current agents
-        const orderScreen = new OrderScreen();
-        const orderedAgents = await orderScreen.show(currentConfig.selectedAgents);
-        
-        return {
-          selectedAgents: orderedAgents,
-          executionOrder: orderedAgents.map(a => a.name)
-        };
+        if (editChoice === 'order') {
+          // Re-run order configuration with current agents
+          const orderScreen = new OrderScreen();
+          const currentAgents = configChanges.selectedAgents || currentConfig.selectedAgents;
+          const orderedAgents = await orderScreen.show(currentAgents);
+          
+          if (orderedAgents) {
+            Object.assign(configChanges, {
+              selectedAgents: orderedAgents,
+              executionOrder: orderedAgents.map(a => a.name)
+            });
+            console.log(chalk.green('\n✅ 実行順序を更新しました'));
+            console.log(chalk.blue('Enter キーで編集メニューに戻る...'));
+            
+            // Wait for user input
+            process.stdin.setRawMode?.(true);
+            process.stdin.resume();
+            await new Promise(resolve => {
+              process.stdin.once('data', () => {
+                process.stdin.setRawMode?.(false);
+                process.stdin.pause();
+                resolve(undefined);
+              });
+            });
+          }
+          continue;
+        }
       }
-
-      return null;
 
     } catch (error) {
       ErrorHandler.logError(error, {

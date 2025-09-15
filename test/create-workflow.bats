@@ -28,8 +28,8 @@ Test agent 3
 EOF
     
     # テンプレートファイルをコピー
-    cp "$ORIGINAL_PWD/templates/workflow.md" "$TEST_DIR/templates/"
-    cp "$ORIGINAL_PWD/templates/workflow.poml" "$TEST_DIR/templates/"
+    cp "$ORIGINAL_PWD/cc-flow-cli/templates/workflow.md" "$TEST_DIR/templates/"
+    cp "$ORIGINAL_PWD/cc-flow-cli/templates/workflow.poml" "$TEST_DIR/templates/"
     
     # テストディレクトリに移動
     cd "$TEST_DIR"
@@ -82,16 +82,16 @@ teardown() {
     [[ "$output" =~ "選択する番号を入力してください" ]]
 }
 
-@test "create-workflow with valid order creates workflow files" {
+@test "create-workflow with valid order creates MD file and cleans POML" {
     # 正常な順序でワークフローを作成
     run "$SCRIPT_DIR/create-workflow.sh" test-agents "1 2 3"
     
     [ "$status" -eq 0 ]
     [[ "$output" =~ "ワークフローコマンドを作成しました" ]]
     
-    # 生成されたファイルが存在することを確認
+    # 最終出力(MD)のみが存在することを確認（POMLは中間生成後に削除）
     [ -f ".claude/commands/test-agents-workflow.md" ]
-    [ -f ".claude/commands/poml/test-agents-workflow.poml" ]
+    [ ! -f ".claude/commands/poml/test-agents-workflow.poml" ]
 }
 
 @test "create-workflow generates correct agent list in md file" {
@@ -101,15 +101,17 @@ teardown() {
     
     # 生成されたMDファイルに正しい順序でエージェントが含まれていることを確認
     content=$(cat ".claude/commands/test-agents-workflow.md")
-    [[ "$content" =~ "AGENT_LIST=\"agent2 agent1 agent3\"" ]]
+    # 新テンプレートでは、説明文中にバッククォートでエージェント一覧が埋め込まれる
+    [[ "$content" =~ "You are asked to execute a sequential workflow with the following agents:" ]]
+    [[ "$content" =~ \`agent2\ agent1\ agent3\` ]]
 }
 
-@test "create-workflow generates correct agent list in poml file" {
+@test "create-workflow cleans up POML intermediate file" {
     run "$SCRIPT_DIR/create-workflow.sh" test-agents "2 1 3"
     
     [ "$status" -eq 0 ]
     
-    # 生成されたPOMLファイルに正しい形式のエージェント配列が含まれていることを確認
-    content=$(cat ".claude/commands/poml/test-agents-workflow.poml")
-    [[ "$content" =~ "for=\"subagent in ['agent2', 'agent1', 'agent3']\"" ]]
+    # 中間POMLは削除され、空ディレクトリも削除される想定
+    [ ! -e ".claude/commands/poml/test-agents-workflow.poml" ]
+    [ ! -d ".claude/commands/poml" ]
 }

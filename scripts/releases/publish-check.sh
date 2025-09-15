@@ -78,40 +78,40 @@ check_required_files() {
     print_success "package.json 存在確認"
   fi
   
-  # Check README.md
-  if [ ! -f "README.md" ]; then
-    print_warning "README.md が見つかりません"
+  # Check README.md in cc-flow-cli
+  if [ ! -f "cc-flow-cli/README.md" ]; then
+    print_warning "cc-flow-cli/README.md が見つかりません"
     if [ "$FIX_MODE" = true ]; then
-      print_info "README.md を作成しています..."
-      create_readme
+      print_info "cc-flow-cli/README.md を作成しています..."
+      create_readme_in_cli
     fi
     errors=$((errors + 1))
   else
-    print_success "README.md 存在確認"
+    print_success "cc-flow-cli/README.md 存在確認"
   fi
   
-  # Check CHANGELOG.md
-  if [ ! -f "CHANGELOG.md" ]; then
-    print_warning "CHANGELOG.md が見つかりません"
+  # Check CHANGELOG.md in cc-flow-cli
+  if [ ! -f "cc-flow-cli/CHANGELOG.md" ]; then
+    print_warning "cc-flow-cli/CHANGELOG.md が見つかりません"
     if [ "$FIX_MODE" = true ]; then
-      print_info "CHANGELOG.md を作成しています..."
-      create_changelog
+      print_info "cc-flow-cli/CHANGELOG.md を作成しています..."
+      create_changelog_in_cli
     fi
     errors=$((errors + 1))
   else
-    print_success "CHANGELOG.md 存在確認"
+    print_success "cc-flow-cli/CHANGELOG.md 存在確認"
   fi
   
-  # Check LICENSE
-  if [ ! -f "LICENSE" ] && [ ! -f "LICENSE.md" ]; then
-    print_warning "LICENSE/LICENSE.md が見つかりません"
+  # Check LICENSE in cc-flow-cli
+  if [ ! -f "cc-flow-cli/LICENSE" ] && [ ! -f "cc-flow-cli/LICENSE.md" ]; then
+    print_warning "cc-flow-cli/LICENSE/LICENSE.md が見つかりません"
     if [ "$FIX_MODE" = true ]; then
-      print_info "LICENSE (MIT) を作成しています..."
-      create_license
+      print_info "cc-flow-cli/LICENSE (MIT) を作成しています..."
+      create_license_in_cli
     fi
     errors=$((errors + 1))
   else
-    print_success "LICENSE 存在確認"
+    print_success "cc-flow-cli/LICENSE 存在確認"
   fi
   
   # Check .gitignore
@@ -387,6 +387,41 @@ MIT
 EOF
 }
 
+create_readme_in_cli() {
+  cat > cc-flow-cli/README.md << 'EOF'
+# CC-Flow CLI
+
+Claude Code workflow platform that enables sequential execution of sub-agents through custom slash commands.
+
+## Installation
+
+```bash
+npm install -g @hiraoku/cc-flow-cli
+```
+
+## Usage
+
+```bash
+# Create a new workflow
+cc-flow create-workflow spec "3 4 1 6 2"
+
+# Execute workflow
+cc-flow spec-workflow "Your task context"
+```
+
+## Features
+
+- POML (Prompt Orchestration Markup Language) integration
+- Modular script architecture
+- Custom slash commands
+- Sequential sub-agent execution
+
+## License
+
+MIT
+EOF
+}
+
 create_gitignore() {
   cat > .gitignore << 'EOF'
 node_modules/
@@ -412,8 +447,46 @@ All notable changes to this project will be documented in this file.
 EOF
 }
 
+create_changelog_in_cli() {
+  cat > cc-flow-cli/CHANGELOG.md << 'EOF'
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+- Initial release preparations
+
+EOF
+}
+
 create_license() {
   cat > LICENSE << 'EOF'
+MIT License
+
+Copyright (c) CC-Flow Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+EOF
+}
+
+create_license_in_cli() {
+  cat > cc-flow-cli/LICENSE << 'EOF'
 MIT License
 
 Copyright (c) CC-Flow Team

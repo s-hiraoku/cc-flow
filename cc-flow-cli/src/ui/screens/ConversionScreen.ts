@@ -126,6 +126,10 @@ export class ConversionScreen extends BaseScreen {
           {
             name: '📂 all (全ディレクトリ)',
             value: 'all'
+          },
+          {
+            name: '↩️ 前の画面に戻る',
+            value: 'back'
           }
         ],
         theme: {
@@ -135,6 +139,11 @@ export class ConversionScreen extends BaseScreen {
           }
         }
       });
+
+      // Check if user wants to go back
+      if (selectedDirectory === 'back') {
+        return false;
+      }
 
       // 選択されたディレクトリのコマンドを検索
       this.commands = await this.discoverCommandsInDirectory(selectedDirectory);
