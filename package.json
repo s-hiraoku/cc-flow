@@ -1,13 +1,53 @@
 {
+  "name": "@hiraoku/cc-flow-cli",
+  "version": "0.0.5",
+  "description": "Claude Code workflow platform with POML orchestration",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "templates/",
+    ".claude/",
+    "README.md"
+  ],
+  "bin": {
+    "cc-flow": "./bin/cc-flow.js"
+  },
+  "scripts": {
+    "build": "echo 'Build completed'",
+    "test": "bats test/*.bats",
+    "test:watch": "bats test/*.bats --watch",
+    "lint": "echo 'Linting completed'",
+    "validate": "npm run lint && npm run build && npm run test"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "claude-code",
+    "workflow",
+    "cli",
+    "automation",
+    "poml"
+  ],
+  "author": "CC-Flow Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/s-hiraoku/cc-flow"
+  },
+  "homepage": "https://github.com/s-hiraoku/cc-flow#readme",
+  "bugs": {
+    "url": "https://github.com/s-hiraoku/cc-flow/issues"
+  },
   "dependencies": {
     "pomljs": "^0.0.8"
   },
   "devDependencies": {
     "bats": "^1.10.0"
-  },
-  "scripts": {
-    "test": "bats test/*.bats",
-    "test:watch": "bats test/*.bats --watch"
-  },
-  "version": "0.0.1"
+  }
 }

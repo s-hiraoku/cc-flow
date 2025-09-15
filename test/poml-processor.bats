@@ -5,7 +5,7 @@
 setup() {
     # テスト用の一時ディレクトリ
     export TEST_DIR="$(mktemp -d)"
-    export SCRIPT_DIR="$BATS_TEST_DIRNAME/../scripts"
+    export SCRIPT_DIR="$BATS_TEST_DIRNAME/../cc-flow-cli/scripts"
     export ORIGINAL_PWD="$PWD"
     
     # テスト用のプロジェクト構造を作成

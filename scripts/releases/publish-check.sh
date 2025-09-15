@@ -90,6 +90,30 @@ check_required_files() {
     print_success "README.md 存在確認"
   fi
   
+  # Check CHANGELOG.md
+  if [ ! -f "CHANGELOG.md" ]; then
+    print_warning "CHANGELOG.md が見つかりません"
+    if [ "$FIX_MODE" = true ]; then
+      print_info "CHANGELOG.md を作成しています..."
+      create_changelog
+    fi
+    errors=$((errors + 1))
+  else
+    print_success "CHANGELOG.md 存在確認"
+  fi
+  
+  # Check LICENSE
+  if [ ! -f "LICENSE" ] && [ ! -f "LICENSE.md" ]; then
+    print_warning "LICENSE/LICENSE.md が見つかりません"
+    if [ "$FIX_MODE" = true ]; then
+      print_info "LICENSE (MIT) を作成しています..."
+      create_license
+    fi
+    errors=$((errors + 1))
+  else
+    print_success "LICENSE 存在確認"
+  fi
+  
   # Check .gitignore
   if [ ! -f ".gitignore" ]; then
     print_warning ".gitignore が見つかりません"
@@ -142,6 +166,42 @@ check_package_json() {
     errors=$((errors + 1))
   else
     print_success "description: $description"
+  fi
+  
+  # Additional metadata checks
+  local author=$(node -e "console.log(require('./package.json').author || '')")
+  if [ -z "$author" ]; then
+    print_warning "author が未設定です"
+  else
+    print_success "author: $author"
+  fi
+
+  local repository=$(node -e "const p=require('./package.json'); const r=(p.repository && (typeof p.repository==='string'?p.repository:p.repository.url))||''; console.log(r)")
+  if [ -z "$repository" ]; then
+    print_warning "repository が未設定です"
+  else
+    print_success "repository: $repository"
+  fi
+
+  local homepage=$(node -e "console.log(require('./package.json').homepage || '')")
+  if [ -z "$homepage" ]; then
+    print_warning "homepage が未設定です"
+  else
+    print_success "homepage: $homepage"
+  fi
+
+  local files_ok=$(node -e "const p=require('./package.json'); const ok=Array.isArray(p.files)&&['bin/','README.md'].every(f=>p.files.includes(f)); process.exit(ok?0:1)")
+  if [ $? -ne 0 ]; then
+    print_warning "files 配列に bin/ または README.md が含まれていません"
+  else
+    print_success "files 配列の基本構成を確認"
+  fi
+
+  local access=$(node -e "const p=require('./package.json'); console.log(p.publishConfig&&p.publishConfig.access||'')")
+  if [ "$access" != "public" ]; then
+    print_warning "publishConfig.access が public ではありません"
+  else
+    print_success "publishConfig.access: public"
   fi
   
   return $errors
@@ -201,19 +261,19 @@ check_package_contents() {
   print_info "📁 パッケージ内容検証中..."
   
   # Check templates directory
-  if [ ! -d "templates" ]; then
-    print_error "templates/ ディレクトリが見つかりません"
+  if [ ! -d "cc-flow-cli/templates" ]; then
+    print_error "cc-flow-cli/templates/ ディレクトリが見つかりません"
     errors=$((errors + 1))
   else
-    print_success "templates/ ディレクトリ存在確認"
+    print_success "cc-flow-cli/templates/ ディレクトリ存在確認"
   fi
   
   # Check scripts directory
-  if [ ! -d "scripts" ]; then
-    print_error "scripts/ ディレクトリが見つかりません"
+  if [ ! -d "cc-flow-cli/scripts" ]; then
+    print_error "cc-flow-cli/scripts/ ディレクトリが見つかりません"
     errors=$((errors + 1))
   else
-    print_success "scripts/ ディレクトリ存在確認"
+    print_success "cc-flow-cli/scripts/ ディレクトリ存在確認"
   fi
   
   # Check .claude/agents directory
@@ -233,16 +293,16 @@ check_cli_functionality() {
   print_info "🔧 CLI機能テスト中..."
   
   # Check bin script
-  if [ ! -f "bin/cc-flow.js" ]; then
-    print_error "bin/cc-flow.js が見つかりません"
+  if [ ! -f "cc-flow-cli/bin/cc-flow.js" ]; then
+    print_error "cc-flow-cli/bin/cc-flow.js が見つかりません"
     errors=$((errors + 1))
   else
-    if [ -x "bin/cc-flow.js" ]; then
-      print_success "bin/cc-flow.js 実行可能"
+    if [ -x "cc-flow-cli/bin/cc-flow.js" ]; then
+      print_success "cc-flow-cli/bin/cc-flow.js 実行可能"
     else
-      print_error "bin/cc-flow.js に実行権限がありません"
+      print_error "cc-flow-cli/bin/cc-flow.js に実行権限がありません"
       if [ "$FIX_MODE" = true ]; then
-        chmod +x bin/cc-flow.js
+        chmod +x cc-flow-cli/bin/cc-flow.js
         print_success "実行権限を付与しました"
       fi
       errors=$((errors + 1))
@@ -337,6 +397,44 @@ dist/
 *.tgz
 coverage/
 .nyc_output/
+EOF
+}
+
+create_changelog() {
+  cat > CHANGELOG.md << 'EOF'
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+- Initial release preparations
+
+EOF
+}
+
+create_license() {
+  cat > LICENSE << 'EOF'
+MIT License
+
+Copyright (c) CC-Flow Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 EOF
 }
 
