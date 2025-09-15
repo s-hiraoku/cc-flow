@@ -1,151 +1,132 @@
 # CC-Flow CLI
 
-Interactive Terminal User Interface (TUI) for creating Claude Code workflows.
+Interactive TUI to create Claude Code workflows from your local agents. It discovers agents under `.claude/agents`, lets you pick and order them, then generates a runnable slash command (Markdown) in `.claude/commands/`.
 
+Links
 - npm: https://www.npmjs.com/package/@hiraoku/cc-flow-cli
-- repo: https://github.com/s-hiraoku/cc-flow
+- Repo: https://github.com/s-hiraoku/cc-flow
 
-## Features
-
-- 🎯 **Interactive Agent Selection**: Choose from available Claude Code agents
-- 📋 **Workflow Ordering**: Configure execution order with step-by-step selection
-- 🔄 **Slash Command Conversion**: Convert custom slash commands to reusable agents
-- 🎨 **Modern TUI Design**: Clean, accessible terminal interface
-- ⚡ **TypeScript**: Fully typed for better development experience
-- 🛡️ **Robust Error Handling**: Comprehensive error management and debugging
-
-## Installation
+## Quick Start
 
 ```bash
-# Run via npx (recommended)
+# Recommended
 npx @hiraoku/cc-flow-cli
 
 # Or install globally
 npm install -g @hiraoku/cc-flow-cli
-```
-
-## Usage
-
-```bash
-# npx
-npx @hiraoku/cc-flow-cli
-
-# or, if installed globally
 cc-flow
 ```
 
-The CLI will guide you through:
+Then follow the TUI:
+- Environment check → Directory select → Agent select → Order → Preview → Generate
 
-### Workflow Creation Mode
-1. **Environment Check**: Validates Claude Code project structure
-2. **Directory Selection**: Choose agent directory (spec, utility, etc.)
-3. **Agent Selection**: Pick agents to include in your workflow
-4. **Order Configuration**: Arrange execution order
-5. **Preview & Generate**: Review and create the workflow
+Result:
+- Generates `.claude/commands/<workflow-name>.md`
+- POML is created as an intermediate and removed in the default flow
 
-### Slash Command Conversion Mode  
-1. **Command Discovery**: Automatically finds custom slash commands
-2. **Selection**: Choose which commands to convert to agents
-3. **Configuration**: Review conversion settings and output location
-4. **Conversion**: Transform slash commands to agent format with compatibility warnings
-
-## Requirements
-
-- Node.js ≥18.0.0
-- npm ≥8.0.0
-- Claude Code project with `.claude/agents` directory
-
-## Slash Command Conversion Limitations
-
-While CC-Flow can convert most custom slash commands to agents, some features require manual adjustment:
-
-### ❌ Not Directly Compatible
-- **Bash Scripts**: Agents cannot execute bash code blocks directly
-- **Arguments**: `$1`, `$2` style arguments work differently in agents
-- **System Commands**: `exit`, `kill`, `sudo` are not available in agents
-- **Interactive Input**: Commands that wait for user input (`read -p`)
-- **OS-Specific Commands**: Platform-dependent operations (e.g., `pbcopy`, `apt-get`)
-
-### ⚠️ Requires Manual Adjustment
-- **Simple Commands**: Basic shell operations can be rewritten using agent tools
-- **File Operations**: Direct file manipulation should use agent's Read/Write tools
-- **External Tools**: Dependencies on `jq`, `docker`, etc. need alternative approaches
-
-### ✅ Fully Compatible
-- **Documentation Commands**: Information display and documentation generation
-- **Configuration Files**: Reading and processing configuration
-- **Text Processing**: Markdown and text manipulation tasks
-
-**Conversion Process**: The tool automatically detects compatibility issues and provides warnings during conversion, helping you identify what needs manual adjustment.
-
-### Examples
-
-**✅ Fully Compatible Command**
-```markdown
----
-description: Generate project documentation  
-tools: [Read, Glob, Write]
----
-
-# generate-docs
-
-Scans project files and creates comprehensive documentation.
-
-## Features
-- Analyzes code structure
-- Generates API documentation  
-- Creates usage examples
-```
-
-**❌ Requires Manual Adjustment**
-```markdown
----
-description: System cleanup utility
-tools: [Bash]
----
-
-# cleanup-system
+Run your command in Claude Code:
 
 ```bash
-#!/bin/bash
-sudo rm -rf /tmp/*
-docker system prune -f
-read -p "Restart system? (y/N): " choice
-```
+# Example
+/spec-workflow "Build an authentication system"
 ```
 
-This command needs rewriting because it uses system commands, external tools, and interactive input.
+## Requirements
+- Node.js ≥ 18
+- A Claude Code project with agents at `.claude/agents/**.md`
+- Script execution permission where applicable (`chmod +x` on shell scripts)
+
+## How It Works
+
+The TUI delegates actual file generation to a shell script:
+
+- Script: `scripts/create-workflow.sh`
+- Arguments passed: `"<targetPath>" "<agentName,agentName,...>"`
+- Workflow name: set via env var `WORKFLOW_NAME` (falls back to `<dir>-workflow`)
+
+Script lookup order
+1. Your project’s `scripts/create-workflow.sh` (preferred)
+2. Built-in script bundled with this package
+
+Target path format (new style)
+- `./agents/<dir>` (e.g., `./agents/spec`)
+- `./agents` (cross-category selection)
+
+Notes
+- Short form `spec` is still accepted by the script for back-compat but emits a warning.
+- In the default flow, the POML intermediate file is cleaned up; only the final `.md` remains.
+
+## Examples (script, without TUI)
+
+You can call the script directly (useful for CI):
+
+```bash
+# Index-based order
+scripts/create-workflow.sh ./agents/spec "1 3 4"
+
+# Name-based order (comma-separated agent IDs)
+scripts/create-workflow.sh ./agents/spec "spec-init,spec-requirements,spec-design"
+
+# Cross-category selection
+scripts/create-workflow.sh ./agents "spec-init,utility-date"
+```
+
+This generates `.claude/commands/<dir>-workflow.md`. Run it in Claude Code as `/spec-workflow "..."`.
+
+## TUI Flow (Overview)
+- Welcome screen
+- Environment check (validates `.claude` and available agent directories)
+- Directory selection (`spec`, `utility`, or all)
+- Workflow name input (press Enter to use default)
+- Agent selection (checkboxes)
+- Execution order builder (step-by-step)
+- Preview and confirm
+- Execute generator script and show completion
+
+For a detailed design, see `docs/cc-flow-tui-design.md` (sections 4, 14–22).
+
+## Troubleshooting
+- “Script not found or not executable”
+  - Ensure `scripts/create-workflow.sh` exists and is executable.
+  - If your project doesn’t have it, the CLI uses the packaged fallback. If both are missing, copy from this repo: `cc-flow-cli/scripts` and `cc-flow-cli/templates` into your project root.
+- “No agents found”
+  - Ensure `.claude/agents/<dir>/*.md` exist.
+- “POML file is expected in tests”
+  - Current default deletes the intermediate POML; update tests or run in a mode that retains it.
 
 ## Development
 
 ```bash
-# Install dependencies
+cd cc-flow-cli
 npm install
 
-# Run in development mode
+# Dev (TypeScript, ESM)
 npm run dev
 
-# Build for production
+# Build and fix bin
 npm run build
 
-# Type checking
+# Lint/type-check
 npm run type-check
 
-# Start built version
-npm start
+# Run tests
+npm test
 ```
 
-## Project Structure
-
+Project layout
 ```
-src/
-├── cli/           # Main CLI application
-├── models/        # TypeScript interfaces and types
-├── services/      # Core business logic
-├── ui/screens/    # TUI screen components
-└── utils/         # Utilities and error handling
+cc-flow-cli/
+├─ bin/cc-flow.js            # Entry for npx / global
+├─ scripts/                  # Bash helpers (create-workflow.sh etc.)
+├─ templates/                # workflow.md / workflow.poml
+├─ src/
+│  ├─ cli/main.ts            # TUI entry
+│  ├─ services/ScriptExecutor.ts # Locates and invokes the script
+│  └─ ui/screens/*           # Screens (Welcome, Env, Directory, Agents, Order, Preview, Complete)
+└─ dist/                     # Compiled output
 ```
 
 ## License
 
 ISC
+

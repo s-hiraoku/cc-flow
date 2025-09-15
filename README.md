@@ -35,6 +35,8 @@ npx @hiraoku/cc-flow-cli
 cc-flow
 ```
 
+> 📖 **For detailed CLI usage, installation options, and troubleshooting**, see the [CC-Flow CLI documentation](./cc-flow-cli/README.md)
+
 **You'll see a beautiful welcome screen with:**
 
 - 🎨 Colorful ASCII art logo
