@@ -105,3 +105,13 @@ npm publish
 ```
 
 このコマンドにより、品質の高いパッケージのみがnpmに公開されることを保証します。
+
+## 実行
+
+```bash
+# Get arguments
+ARGUMENTS="$*"
+
+# Execute publish-check script
+./scripts/releases/publish-check.sh $ARGUMENTS
+```
