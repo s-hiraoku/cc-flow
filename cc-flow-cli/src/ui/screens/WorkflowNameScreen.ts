@@ -1,15 +1,17 @@
 import chalk from 'chalk';
 import { input } from '@inquirer/prompts';
 import type { DirectoryInfo } from '../../models/Agent.js';
+import { BaseScreen } from './BaseScreen.js';
 
-export class WorkflowNameScreen {
-  async show(directory: DirectoryInfo): Promise<string> {
+export class WorkflowNameScreen extends BaseScreen {
+  constructor() {
+    super();
+  }
+  async show(directory: DirectoryInfo): Promise<string | null> {
     while (true) {
-      console.clear();
-      this.showHeader(directory);
-      this.showInstructions();
-      console.log('└─────────────────────────────────────────┘');
-      console.log();
+      this.showScreenFrame(`ワークフロー名入力 - ${directory.displayName}`, this.theme.icons.edit, () => {
+        this.showInstructions();
+      });
       
       const userInput = await input({
         message: 'ワークフロー名を入力:\n> ',
@@ -24,6 +26,11 @@ export class WorkflowNameScreen {
         this.showHelp();
         await this.waitForKey();
         continue;
+      }
+      
+      // Check if user wants to go back using BaseScreen method
+      if (this.isBackNavigation(workflowName)) {
+        return null;
       }
       
       if (workflowName === '') {
@@ -44,47 +51,40 @@ export class WorkflowNameScreen {
     }
   }
   
-  private showHeader(directory: DirectoryInfo) {
-    console.log(chalk.bold('┌─ 📝 ワークフロー名の設定 ───────────────┐'));
-    console.log('│                                         │');
-    console.log(`│ 📁 対象: ${directory.displayName.padEnd(30)} │`);
-    console.log('│                                         │');
-  }
+  // Removed showHeader method - now using SimpleUITheme.createHeader()
   
   private showInstructions() {
-    console.log('│ 💡 ワークフロー名を入力してください:     │');
-    console.log('│                                         │');
-    console.log('│   • 英数字、ハイフン、アンダースコア    │');
-    console.log('│   • 例: my-workflow, test_flow          │');
-    console.log('│   • 空白でデフォルト名を使用            │');
-    console.log('│   • ヘルプ: ' + chalk.cyan('help') + '                    │');
-    console.log('│                                         │');
+    console.log(this.theme.createContentLine('💡 ワークフロー名を入力してください:'));
+    console.log(this.theme.createEmptyLine());
+    console.log(this.theme.createContentLine('  • 英数字、ハイフン、アンダースコア'));
+    console.log(this.theme.createContentLine('  • 例: my-workflow, test_flow'));
+    console.log(this.theme.createContentLine('  • 空白でデフォルト名を使用'));
+    console.log(this.theme.createContentLine(`  • ヘルプ: ${this.theme.colors.accent('help')}`));
+    console.log(this.theme.createContentLine(`  • 前に戻る: ${this.theme.colors.accent('back')} または ${this.theme.colors.accent('b')}`));
+    console.log(this.theme.createEmptyLine());
   }
   
   private showHelp() {
-    console.clear();
-    console.log(chalk.bold('┌─ 📚 ヘルプ - ワークフロー名設定 ─────────┐'));
-    console.log('│                                         │');
-    console.log('│ 📝 ' + chalk.cyan('ワークフロー名の設定:') + '                │');
-    console.log('│   任意の名前を入力してワークフローに    │');
-    console.log('│   名前を付けることができます。          │');
-    console.log('│                                         │');
-    console.log('│ ✅ ' + chalk.cyan('使用可能な文字:') + '                     │');
-    console.log('│   • 英数字 (a-z, A-Z, 0-9)             │');
-    console.log('│   • ハイフン (-)                        │');
-    console.log('│   • アンダースコア (_)                  │');
-    console.log('│                                         │');
-    console.log('│ 📋 ' + chalk.cyan('例:') + '                                │');
-    console.log('│   • ' + chalk.green('my-workflow') + ' → /my-workflow          │');
-    console.log('│   • ' + chalk.green('test_flow') + ' → /test_flow              │');
-    console.log('│   • ' + chalk.green('project-v1') + ' → /project-v1           │');
-    console.log('│                                         │');
-    console.log('│ 🎯 ' + chalk.cyan('デフォルト名:') + '                        │');
-    console.log('│   空白で Enter を押すとデフォルト名    │');
-    console.log('│   が自動的に設定されます。              │');
-    console.log('│                                         │');
-    console.log('└─────────────────────────────────────────┘');
-    console.log(chalk.dim('\nPress any key to continue...'));
+    this.showScreenFrame('ヘルプ - ワークフロー名設定', this.theme.icons.info, () => {
+      console.log(this.theme.createContentLine(this.theme.colors.accent('📝 ワークフロー名の設定:')));
+      console.log(this.theme.createContentLine('  任意の名前を入力してワークフローに'));
+      console.log(this.theme.createContentLine('  名前を付けることができます。'));
+      console.log(this.theme.createEmptyLine());
+      console.log(this.theme.createContentLine(this.theme.colors.accent('✅ 使用可能な文字:')));
+      console.log(this.theme.createContentLine('  • 英数字 (a-z, A-Z, 0-9)'));
+      console.log(this.theme.createContentLine('  • ハイフン (-)'));
+      console.log(this.theme.createContentLine('  • アンダースコア (_)'));
+      console.log(this.theme.createEmptyLine());
+      console.log(this.theme.createContentLine(this.theme.colors.accent('📋 例:')));
+      console.log(this.theme.createContentLine(`  • ${this.theme.colors.success('my-workflow')} → /my-workflow`));
+      console.log(this.theme.createContentLine(`  • ${this.theme.colors.success('test_flow')} → /test_flow`));
+      console.log(this.theme.createContentLine(`  • ${this.theme.colors.success('project-v1')} → /project-v1`));
+      console.log(this.theme.createEmptyLine());
+      console.log(this.theme.createContentLine(this.theme.colors.accent('🎯 デフォルト名:')));
+      console.log(this.theme.createContentLine('  空白で Enter を押すとデフォルト名'));
+      console.log(this.theme.createContentLine('  が自動的に設定されます。'));
+    });
+    console.log(chalk.blue('Enterキーで戻る...'));
   }
   
   private isValidWorkflowName(name: string): boolean {
@@ -100,15 +100,5 @@ export class WorkflowNameScreen {
     return `${directory.displayName}-workflow`;
   }
   
-  private async waitForKey(): Promise<void> {
-    return new Promise(resolve => {
-      process.stdin.setRawMode?.(true);
-      process.stdin.resume();
-      process.stdin.once('data', () => {
-        process.stdin.setRawMode?.(false);
-        process.stdin.pause();
-        resolve();
-      });
-    });
-  }
+  // Removed waitForKey - now using inherited method from BaseScreen
 }

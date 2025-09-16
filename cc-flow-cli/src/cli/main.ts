@@ -120,9 +120,22 @@ export class WorkflowBuilder {
         const dirScreen = new DirectoryScreen();
         const selectedDirectory = await dirScreen.show(envStatus.availableDirectories);
         
+        // Check if user wants to go back
+        if (selectedDirectory === null) {
+          // Return to main menu
+          createAnother = false;
+          break;
+        }
+        
         // Workflow name input
         const nameScreen = new WorkflowNameScreen();
         const workflowName = await nameScreen.show(selectedDirectory);
+        
+        // Check if user wants to go back
+        if (workflowName === null) {
+          // Go back to directory selection
+          continue;
+        }
         
         // Purpose input (optional)
         const agentScreen = new AgentSelectionScreen();
@@ -211,6 +224,13 @@ export class WorkflowBuilder {
         const conversionScreen = new ConversionScreen();
         const result = await conversionScreen.show();
         
+        // Check if user selected back button
+        if (result === null) {
+          // Return to main menu
+          continueConversion = false;
+          break;
+        }
+        
         // Show conversion complete screen
         const completeScreen = new ConversionCompleteScreen();
         const completeResult = await completeScreen.show(result);
@@ -292,20 +312,22 @@ export class WorkflowBuilder {
             agentCount: currentConfig.selectedAgents.length,
             agents: currentConfig.selectedAgents
           });
-          configChanges.workflowName = newName;
-          console.log(chalk.green('\n✅ ワークフロー名を更新しました: ' + newName));
-          console.log(chalk.blue('Enter キーで編集メニューに戻る...'));
-          
-          // Wait for user input
-          process.stdin.setRawMode?.(true);
-          process.stdin.resume();
-          await new Promise(resolve => {
-            process.stdin.once('data', () => {
-              process.stdin.setRawMode?.(false);
-              process.stdin.pause();
-              resolve(undefined);
+          if (newName !== null) {
+            configChanges.workflowName = newName;
+            console.log(chalk.green('\n✅ ワークフロー名を更新しました: ' + newName));
+            console.log(chalk.blue('Enter キーで編集メニューに戻る...'));
+            
+            // Wait for user input
+            process.stdin.setRawMode?.(true);
+            process.stdin.resume();
+            await new Promise(resolve => {
+              process.stdin.once('data', () => {
+                process.stdin.setRawMode?.(false);
+                process.stdin.pause();
+                resolve(undefined);
+              });
             });
-          });
+          }
           continue;
         }
 

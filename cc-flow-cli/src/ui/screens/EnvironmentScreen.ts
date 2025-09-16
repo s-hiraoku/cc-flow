@@ -1,16 +1,19 @@
 import chalk from 'chalk';
 import { select } from '@inquirer/prompts';
 import type { EnvironmentStatus } from '../../models/Agent.js';
+import { BaseScreen } from './BaseScreen.js';
+import { SimpleUITheme } from '../themes/SimpleUITheme.js';
 
-export class EnvironmentScreen {
+export class EnvironmentScreen extends BaseScreen {
+  constructor() {
+    super();
+  }
   async show(status: EnvironmentStatus): Promise<boolean> {
     while (true) {
-      console.clear();
-      this.showHeader();
-      this.showEnvironmentStatus(status);
-      this.showAvailableAgents(status);
-      console.log('└─────────────────────────────────────────┘');
-      console.log();
+      this.showScreenFrame('プロジェクト環境チェック', this.theme.icons.gear, () => {
+        this.showEnvironmentStatus(status);
+        this.showAvailableAgents(status);
+      });
       
       if (!status.isValid) {
         console.log(chalk.red('⚠️  プロジェクトセットアップが不完全です'));
@@ -23,7 +26,7 @@ export class EnvironmentScreen {
       
       if (status.isValid) {
         choices.push({
-          name: '▶️  次へ進む',
+          name: `${this.theme.icons.next} 次へ進む`,
           value: 'continue'
         });
       }
@@ -34,7 +37,7 @@ export class EnvironmentScreen {
           value: 'help'
         },
         {
-          name: '❌ 終了',
+          name: '↩️ メインメニューに戻る',
           value: 'exit'
         }
       );
@@ -60,90 +63,72 @@ export class EnvironmentScreen {
     }
   }
   
-  private showHeader() {
-    console.log(chalk.bold('┌─ 🔍 プロジェクト環境チェック ───────────┐'));
-    console.log('│                                         │');
-  }
-  
   private showEnvironmentStatus(status: EnvironmentStatus) {
-    console.log('│ プロジェクト構成をチェック中...         │');
-    console.log('│                                         │');
+    console.log(SimpleUITheme.createContentLine('プロジェクト構成をチェック中...'));
+    console.log(SimpleUITheme.createEmptyLine());
     
     const claudeDirStatus = status.claudeDir ? '✅' : '❌';
     const agentsDirStatus = status.agentsDir ? '✅' : '❌';
     
-    console.log(`│ ${claudeDirStatus} .claude ディレクトリ                 │`);
-    console.log(`│ ${agentsDirStatus} agents ディレクトリ                 │`);
-    console.log('│                                         │');
+    console.log(SimpleUITheme.createContentLine(`${claudeDirStatus} .claude ディレクトリ`));
+    console.log(SimpleUITheme.createContentLine(`${agentsDirStatus} agents ディレクトリ`));
+    console.log(SimpleUITheme.createEmptyLine());
   }
   
   private showAvailableAgents(status: EnvironmentStatus) {
     if (status.isValid) {
-      console.log('│ 利用可能なエージェント:                 │');
-      console.log('│                                         │');
+      console.log(SimpleUITheme.createContentLine('利用可能なエージェント:'));
+      console.log(SimpleUITheme.createEmptyLine());
       
       // Show directory info (skip "all" option for display)
       const regularDirs = status.availableDirectories.filter(dir => dir.displayName !== 'all');
       for (const dir of regularDirs) {
-        const displayName = `${dir.displayName} (${dir.agentCount}個)`;
-        console.log(`│ • ${displayName.padEnd(35)} │`);
+        const displayName = `• ${dir.displayName} (${dir.agentCount}個)`;
+        console.log(SimpleUITheme.createContentLine(displayName));
       }
       
       // Show total count
       const totalText = `• 全て (合計${status.totalAgents}個のエージェント)`;
-      console.log(`│ ${totalText.padEnd(39)} │`);
-      console.log('│                                         │');
+      console.log(SimpleUITheme.createContentLine(totalText));
+      console.log(SimpleUITheme.createEmptyLine());
     } else {
-      console.log(chalk.red('│ ❌ セットアップが不完全です             │'));
+      console.log(SimpleUITheme.createContentLine('❌ セットアップが不完全です'));
+      console.log(SimpleUITheme.createEmptyLine());
       
       if (!status.claudeDir) {
-        console.log('│    .claude ディレクトリが見つかりません │');
+        console.log(SimpleUITheme.createContentLine('   .claude ディレクトリが見つかりません'));
       }
       if (!status.agentsDir) {
-        console.log('│    agents ディレクトリが見つかりません  │');
+        console.log(SimpleUITheme.createContentLine('   agents ディレクトリが見つかりません'));
       }
       if (status.totalAgents === 0) {
-        console.log('│    エージェントが見つかりません         │');
+        console.log(SimpleUITheme.createContentLine('   エージェントが見つかりません'));
       }
-      console.log('│                                         │');
+      console.log(SimpleUITheme.createEmptyLine());
     }
   }
   
   
   private showHelp() {
-    console.clear();
-    console.log(chalk.bold('┌─ 📚 ヘルプ - 環境チェック ──────────────┐'));
-    console.log('│                                         │');
-    console.log('│ 🔍 ' + chalk.cyan('環境チェックについて:') + '                │');
-    console.log('│   このツールはClaudeCodeプロジェクトの  │');
-    console.log('│   エージェント構成を確認し、利用可能な  │');
-    console.log('│   エージェントを表示します。            │');
-    console.log('│                                         │');
-    console.log('│ 📁 ' + chalk.cyan('必要なディレクトリ:') + '                 │');
-    console.log('│   • .claude/agents/ - エージェントファイル │');
-    console.log('│   • 各カテゴリフォルダ (spec, utility等) │');
-    console.log('│                                         │');
-    console.log('│ 🚀 ' + chalk.cyan('次のステップ:') + '                       │');
-    console.log('│   環境が正常な場合、ディレクトリ選択    │');
-    console.log('│   画面に進みます。                      │');
-    console.log('│                                         │');
-    console.log('│ 💡 ' + chalk.cyan('メニュー操作:') + '                       │');
-    console.log('│   上下矢印キーでメニューを選択          │');
-    console.log('│   Enterキーで決定します                 │');
-    console.log('│                                         │');
-    console.log('└─────────────────────────────────────────┘');
-    console.log(chalk.dim('\nPress any key to continue...'));
-  }
-  
-  private async waitForKey(): Promise<void> {
-    return new Promise(resolve => {
-      process.stdin.setRawMode?.(true);
-      process.stdin.resume();
-      process.stdin.once('data', () => {
-        process.stdin.setRawMode?.(false);
-        process.stdin.pause();
-        resolve();
-      });
+    this.showScreenFrame('ヘルプ - 環境チェック', this.theme.icons.info, () => {
+      console.log(SimpleUITheme.createContentLine('🔍 ' + chalk.cyan('環境チェックについて:')));
+      console.log(SimpleUITheme.createContentLine('  このツールはClaudeCodeプロジェクトの'));
+      console.log(SimpleUITheme.createContentLine('  エージェント構成を確認し、利用可能な'));
+      console.log(SimpleUITheme.createContentLine('  エージェントを表示します。'));
+      console.log(SimpleUITheme.createEmptyLine());
+      console.log(SimpleUITheme.createContentLine('📁 ' + chalk.cyan('必要なディレクトリ:')));
+      console.log(SimpleUITheme.createContentLine('  • .claude/agents/ - エージェントファイル'));
+      console.log(SimpleUITheme.createContentLine('  • 各カテゴリフォルダ (spec, utility等)'));
+      console.log(SimpleUITheme.createEmptyLine());
+      console.log(SimpleUITheme.createContentLine('🚀 ' + chalk.cyan('次のステップ:')));
+      console.log(SimpleUITheme.createContentLine('  環境が正常な場合、ディレクトリ選択'));
+      console.log(SimpleUITheme.createContentLine('  画面に進みます。'));
+      console.log(SimpleUITheme.createEmptyLine());
+      console.log(SimpleUITheme.createContentLine('💡 ' + chalk.cyan('メニュー操作:')));
+      console.log(SimpleUITheme.createContentLine('  上下矢印キーでメニューを選択'));
+      console.log(SimpleUITheme.createContentLine('  Enterキーで決定します'));
     });
   }
+  
+  // Removed waitForKey - now using inherited method from BaseScreen
 }

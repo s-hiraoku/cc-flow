@@ -1,21 +1,24 @@
 import chalk from 'chalk';
 import { select } from '@inquirer/prompts';
 import type { ConversionResult } from './ConversionScreen.js';
+import { BaseScreen } from './BaseScreen.js';
+import { SimpleUITheme } from '../themes/SimpleUITheme.js';
 
 export interface ConversionCompleteResult {
   returnToMenu: boolean;
   startWorkflowCreation: boolean;
 }
 
-export class ConversionCompleteScreen {
+export class ConversionCompleteScreen extends BaseScreen {
   async show(result: ConversionResult): Promise<ConversionCompleteResult> {
     while (true) {
-      console.clear();
-      this.showHeader(result);
-      this.showConversionInfo(result);
-      this.showUsageInfo();
-      console.log('└─────────────────────────────────────────┘');
-      console.log();
+      const title = result.success ? 'スラッシュコマンド変換完了' : 'スラッシュコマンド変換完了';
+      const icon = result.success ? this.theme.icons.success : '⚠️';
+      
+      this.showScreenFrame(title, icon, () => {
+        this.showConversionInfo(result);
+        this.showUsageInfo();
+      });
       
       const choices = [
         {
@@ -61,88 +64,65 @@ export class ConversionCompleteScreen {
     }
   }
   
-  private showHeader(result: ConversionResult) {
-    if (result.success) {
-      console.log(chalk.bold('┌─ ✅ スラッシュコマンド変換完了 ──────────┐'));
-      console.log('│                                         │');
-      console.log(chalk.green('│            🎉 変換成功！                │'));
-    } else {
-      console.log(chalk.bold('┌─ ⚠️ スラッシュコマンド変換完了 ───────────┐'));
-      console.log('│                                         │');
-      console.log(chalk.yellow('│          ⚠️ 変換で問題発生              │'));
-    }
-    console.log('│                                         │');
-  }
-  
   private showConversionInfo(result: ConversionResult) {
-    console.log('│ 変換結果:                               │');
-    console.log('│                                         │');
+    if (result.success) {
+      console.log(SimpleUITheme.createContentLine(chalk.green('🎉 変換成功！')));
+    } else {
+      console.log(SimpleUITheme.createContentLine(chalk.yellow('⚠️ 変換で問題発生')));
+    }
+    console.log(SimpleUITheme.createEmptyLine());
+    
+    console.log(SimpleUITheme.createContentLine('変換結果:'));
+    console.log(SimpleUITheme.createEmptyLine());
     
     if (result.success && result.convertedCount > 0) {
-      console.log(`│ 成功: ${result.convertedCount.toString().padEnd(30)} │`);
-      console.log(`│ 出力先: ${result.targetDirectory.padEnd(25)} │`);
+      console.log(SimpleUITheme.createContentLine(`成功: ${result.convertedCount}個のコマンド`));
+      console.log(SimpleUITheme.createContentLine(`出力先: ${result.targetDirectory}`));
     } else {
-      console.log(`│ 失敗: ${result.message.padEnd(29)} │`);
+      console.log(SimpleUITheme.createContentLine(`失敗: ${result.message}`));
     }
     
-    console.log('│                                         │');
+    console.log(SimpleUITheme.createEmptyLine());
     
     if (result.success && result.convertedCount > 0) {
-      console.log('│ 生成されたエージェント:                 │');
-      console.log(`│ • ${result.targetDirectory}/* にエージェント │`);
-      console.log('│   ファイルが保存されました              │');
-      console.log('│                                         │');
+      console.log(SimpleUITheme.createContentLine('生成されたエージェント:'));
+      console.log(SimpleUITheme.createContentLine(`• ${result.targetDirectory}/* にエージェント`));
+      console.log(SimpleUITheme.createContentLine('  ファイルが保存されました'));
+      console.log(SimpleUITheme.createEmptyLine());
     }
   }
   
   private showUsageInfo() {
-    console.log('│ 次のステップ:                           │');
-    console.log('│ • ワークフロー作成機能でエージェントを   │');
-    console.log('│   組み合わせて新しいワークフローを作成   │');
-    console.log('│ • 変換されたエージェントは既存の         │');
-    console.log('│   エージェント選択画面で使用可能です     │');
-    console.log('│                                         │');
+    console.log(SimpleUITheme.createContentLine('次のステップ:'));
+    console.log(SimpleUITheme.createContentLine('• ワークフロー作成機能でエージェントを'));
+    console.log(SimpleUITheme.createContentLine('  組み合わせて新しいワークフローを作成'));
+    console.log(SimpleUITheme.createContentLine('• 変換されたエージェントは既存の'));
+    console.log(SimpleUITheme.createContentLine('  エージェント選択画面で使用可能です'));
   }
   
   private showHelp() {
-    console.clear();
-    console.log(chalk.bold('┌─ 📚 ヘルプ - 変換完了画面 ──────────────┐'));
-    console.log('│                                         │');
-    console.log('│ 🎉 ' + chalk.cyan('変換完了:') + '                         │');
-    console.log('│   スラッシュコマンドがエージェント形式   │');
-    console.log('│   に正常に変換されました。               │');
-    console.log('│                                         │');
-    console.log('│ 🔄 ' + chalk.cyan('新しい変換を実行する:') + '              │');
-    console.log('│   別のスラッシュコマンドを変換したい     │');
-    console.log('│   場合に選択してください。               │');
-    console.log('│                                         │');
-    console.log('│ 🚀 ' + chalk.cyan('ワークフロー作成に進む:') + '            │');
-    console.log('│   変換されたエージェントを使って         │');
-    console.log('│   ワークフローを作成できます。           │');
-    console.log('│                                         │');
-    console.log('│ 👋 ' + chalk.cyan('メインメニューに戻る:') + '              │');
-    console.log('│   CC-Flowのメインメニューに戻ります。    │');
-    console.log('│                                         │');
-    console.log('│ 💡 ' + chalk.dim('変換されたエージェントについて:') + '     │');
-    console.log('│   • .claude/agents/ に保存されています   │');
-    console.log('│   • ワークフロー作成で選択可能です       │');
-    console.log('│   • 元のスラッシュコマンドは保持されます │');
-    console.log('│                                         │');
-    console.log('│ 💡 ' + chalk.dim('上下矢印キーで選択、Enterで決定') + '       │');
-    console.log('│                                         │');
-    console.log('└─────────────────────────────────────────┘');
-    console.log(chalk.dim('\nPress any key to continue...'));
-  }
-  
-  private async waitForKey(): Promise<void> {
-    return new Promise(resolve => {
-      process.stdin.setRawMode?.(true);
-      process.stdin.resume();
-      process.stdin.once('data', () => {
-        process.stdin.setRawMode?.(false);
-        process.stdin.pause();
-        resolve();
-      });
+    this.showScreenFrame('ヘルプ - 変換完了画面', this.theme.icons.info, () => {
+      console.log(SimpleUITheme.createContentLine('🎉 ' + chalk.cyan('変換完了:')));
+      console.log(SimpleUITheme.createContentLine('  スラッシュコマンドがエージェント形式'));
+      console.log(SimpleUITheme.createContentLine('  に正常に変換されました。'));
+      console.log(SimpleUITheme.createEmptyLine());
+      console.log(SimpleUITheme.createContentLine('🔄 ' + chalk.cyan('新しい変換を実行する:')));
+      console.log(SimpleUITheme.createContentLine('  別のスラッシュコマンドを変換したい'));
+      console.log(SimpleUITheme.createContentLine('  場合に選択してください。'));
+      console.log(SimpleUITheme.createEmptyLine());
+      console.log(SimpleUITheme.createContentLine('🚀 ' + chalk.cyan('ワークフロー作成に進む:')));
+      console.log(SimpleUITheme.createContentLine('  変換されたエージェントを使って'));
+      console.log(SimpleUITheme.createContentLine('  ワークフローを作成できます。'));
+      console.log(SimpleUITheme.createEmptyLine());
+      console.log(SimpleUITheme.createContentLine('👋 ' + chalk.cyan('メインメニューに戻る:')));
+      console.log(SimpleUITheme.createContentLine('  CC-Flowのメインメニューに戻ります。'));
+      console.log(SimpleUITheme.createEmptyLine());
+      console.log(SimpleUITheme.createContentLine('💡 ' + chalk.dim('変換されたエージェントについて:')));
+      console.log(SimpleUITheme.createContentLine('  • .claude/agents/ に保存されています'));
+      console.log(SimpleUITheme.createContentLine('  • ワークフロー作成で選択可能です'));
+      console.log(SimpleUITheme.createContentLine('  • 元のスラッシュコマンドは保持されます'));
+      console.log(SimpleUITheme.createEmptyLine());
+      console.log(SimpleUITheme.createContentLine('💡 ' + chalk.dim('上下矢印キーで選択、Enterで決定')));
     });
   }
 }

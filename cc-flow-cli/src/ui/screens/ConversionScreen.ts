@@ -1,7 +1,6 @@
 import { checkbox, confirm, select } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { BaseScreen } from './BaseScreen.js';
-import { KeyboardHelper } from '../components/TUIComponents.js';
 import { ShellExecutor } from '../../services/ShellExecutor.js';
 
 interface ConversionCommand {
@@ -36,16 +35,20 @@ export class ConversionScreen extends BaseScreen {
     super();
   }
 
-  async show(): Promise<ConversionResult> {
+  async show(): Promise<ConversionResult | null> {
     try {
       console.clear();
       this.showHeader();
       
       // 日本語入力強制リセット
-      KeyboardHelper.forceEnglishInput();
+      this.forceEnglishInput();
 
       // ステップ1: コマンド検索
       const searchResult = await this.searchForCommands();
+      if (searchResult === 'back') {
+        // User wants to go back to main menu
+        return null;
+      }
       if (!searchResult) {
         return {
           success: false,
@@ -92,17 +95,14 @@ export class ConversionScreen extends BaseScreen {
   }
 
   private showHeader(): void {
-    console.log(chalk.cyan.bold('┌─ 🔄 スラッシュコマンド → エージェント変換 ─────┐'));
-    console.log(chalk.cyan('│' + ' '.repeat(47) + '│'));
-    console.log(chalk.cyan('│') + '  カスタムスラッシュコマンドをサブエージェント  ' + chalk.cyan('│'));
-    console.log(chalk.cyan('│') + '  形式に変換し、ワークフロー作成で使用可能に    ' + chalk.cyan('│'));
-    console.log(chalk.cyan('│') + '  します。                                    ' + chalk.cyan('│'));
-    console.log(chalk.cyan('│' + ' '.repeat(47) + '│'));
-    console.log(chalk.cyan('└' + '─'.repeat(47) + '┘'));
-    console.log();
+    this.showScreenFrame('スラッシュコマンド → エージェント変換', this.theme.icons.gear, () => {
+      console.log(this.theme.createContentLine('カスタムスラッシュコマンドをサブエージェント'));
+      console.log(this.theme.createContentLine('形式に変換し、ワークフロー作成で使用可能に'));
+      console.log(this.theme.createContentLine('します。'));
+    });
   }
 
-  private async searchForCommands(): Promise<boolean> {
+  private async searchForCommands(): Promise<boolean | 'back'> {
     try {
       console.log(chalk.yellow('🔍 ステップ1: コマンド検索中...'));
       console.log();
@@ -142,7 +142,7 @@ export class ConversionScreen extends BaseScreen {
 
       // Check if user wants to go back
       if (selectedDirectory === 'back') {
-        return false;
+        return 'back';
       }
 
       // 選択されたディレクトリのコマンドを検索
@@ -234,7 +234,7 @@ export class ConversionScreen extends BaseScreen {
       return true;
 
     } catch (error) {
-      if (error instanceof Error && error.message.includes('User force closed')) {
+      if (this.handleUserCancellation(error)) {
         return false;
       }
       throw error;
@@ -272,7 +272,7 @@ export class ConversionScreen extends BaseScreen {
       return proceed;
 
     } catch (error) {
-      if (error instanceof Error && error.message.includes('User force closed')) {
+      if (this.handleUserCancellation(error)) {
         return false;
       }
       throw error;

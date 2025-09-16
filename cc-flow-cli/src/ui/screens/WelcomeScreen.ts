@@ -1,24 +1,10 @@
-import figlet from 'figlet';
 import chalk from 'chalk';
 import { input } from '@inquirer/prompts';
+import { BaseScreen } from './BaseScreen.js';
 
-export class WelcomeScreen {
-  private centerText(text: string, width?: number): string {
-    const terminalWidth = width || process.stdout.columns || 80;
-    const lines = text.split('\n');
-    
-    return lines.map(line => {
-      // Remove ANSI codes to calculate actual display width
-      const cleanLine = line.replace(/\x1b\[[0-9;]*m/g, '');
-      
-      // If terminal is too narrow, don't center (just return original)
-      if (terminalWidth < cleanLine.length + 4) {
-        return line;
-      }
-      
-      const padding = Math.max(0, Math.floor((terminalWidth - cleanLine.length) / 2));
-      return ' '.repeat(padding) + line;
-    }).join('\n');
+export class WelcomeScreen extends BaseScreen {
+  constructor() {
+    super();
   }
 
   private getResponsiveBanner(): string {
@@ -61,10 +47,10 @@ export class WelcomeScreen {
       });
 
       console.log();
-      console.log(chalk.yellow.bold('                    ⚡ Claude Code Workflow Orchestration Platform ⚡'));
+      console.log(this.centerText(chalk.yellow.bold('⚡ Claude Code Workflow Orchestration Platform ⚡')));
       console.log();
-      console.log(chalk.green('🚀 Create custom workflows for your Claude Code agents'));
-      console.log(chalk.dim('   Build powerful agent orchestration with visual TUI'));
+      console.log(this.centerText(chalk.green('🚀 Create custom workflows for your Claude Code agents')));
+      console.log(this.centerText(chalk.dim('Build powerful agent orchestration with visual TUI')));
       console.log();
       
       // Create a rainbow effect manually and center it
@@ -73,8 +59,11 @@ export class WelcomeScreen {
       console.log(this.centerText(rainbowLine));
       console.log();
       
+      const promptMessage = 'Press Enter to get started, or type "q" to quit';
+      const centeredPrompt = this.centerText(promptMessage);
+      
       const action = await input({
-        message: 'Press Enter to get started, or type "q" to quit',
+        message: centeredPrompt,
         default: ''
       });
       
@@ -85,8 +74,8 @@ export class WelcomeScreen {
       
       return true;
     } catch (error) {
-      // Handle user cancellation (Ctrl+C)
-      if (error instanceof Error && error.message.includes('User force closed')) {
+      // Handle user cancellation using BaseScreen method
+      if (this.handleUserCancellation(error)) {
         console.log(chalk.yellow('\n👋 Goodbye!'));
         return false;
       }

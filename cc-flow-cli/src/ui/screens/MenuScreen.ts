@@ -1,7 +1,6 @@
 import { select } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { BaseScreen } from './BaseScreen.js';
-import { KeyboardHelper } from '../components/TUIComponents.js';
 
 export interface MenuChoice {
   name: string;
@@ -17,41 +16,45 @@ export class MenuScreen extends BaseScreen {
 
   async show(): Promise<string> {
     try {
-      console.clear();
-      this.showHeader();
+      this.showScreenFrame('CC-Flow メインメニュー', this.theme.icons.clipboard, () => {
+        console.log(this.theme.createContentLine('複数のエージェントを連携させた強力なワークフローを作成'));
+        console.log(this.theme.createContentLine('実行順序を設定して自動化されたタスクフローを構築'));
+        console.log(this.theme.createEmptyLine());
+        console.log(this.theme.createContentLine('アクションを選択してください'));
+      });
       
       // 日本語入力強制リセット
-      KeyboardHelper.forceEnglishInput();
+      this.forceEnglishInput();
 
       const choices: MenuChoice[] = [
         {
-          name: '🚀 既存エージェントからワークフローを作成',
+          name: `${this.theme.icons.rocket} 既存エージェントを連携してワークフロー作成`,
           value: 'create-workflow',
-          description: '既存のサブエージェントを使用してワークフローを構築'
+          description: '複数のサブエージェントを選択・順序設定して連携ワークフローを構築します'
         },
         {
-          name: '🔄 スラッシュコマンドをエージェントに変換',
+          name: `${this.theme.icons.gear} カスタムコマンドをエージェント化→ワークフロー作成`,
           value: 'convert-commands',
-          description: 'カスタムスラッシュコマンドをサブエージェントに変換'
+          description: 'カスタムスラッシュコマンドをサブエージェントに変換してワークフロー作成まで一括実行'
         },
         {
-          name: '❓ ヘルプ',
+          name: `${this.theme.icons.info} ヘルプ`,
           value: 'help',
           description: 'ヘルプと使用方法を表示'
         },
         {
-          name: '🚪 終了',
+          name: `${this.theme.icons.cross} 終了`,
           value: 'exit',
           description: 'アプリケーションを終了'
         }
       ];
 
       let choice = await select({
-        message: '何をしますか？',
+        message: '\n何をしますか？',
         choices: choices.map(choice => ({
           name: choice.name,
           value: choice.value,
-          description: choice.description || ''
+          description: choice.description ? `\n${choice.description}` : ''
         })),
         theme: {
           prefix: {
@@ -69,8 +72,8 @@ export class MenuScreen extends BaseScreen {
 
       return choice;
     } catch (error) {
-      // Handle user cancellation (Ctrl+C)
-      if (error instanceof Error && error.message.includes('User force closed')) {
+      // Handle user cancellation using BaseScreen method
+      if (this.handleUserCancellation(error)) {
         return 'exit';
       }
       
@@ -79,45 +82,22 @@ export class MenuScreen extends BaseScreen {
     }
   }
 
-  private showHeader(): void {
-    console.log(chalk.cyan.bold('┌─ 📋 CC-Flow メインメニュー ──────────────────────┐'));
-    console.log(chalk.cyan('│' + ' '.repeat(47) + '│'));
-    console.log(chalk.cyan('│') + '  Claude Code Workflow Orchestration Platform  ' + chalk.cyan('│'));
-    console.log(chalk.cyan('│') + '  アクションを選択して開始してください            ' + chalk.cyan('│'));
-    console.log(chalk.cyan('│' + ' '.repeat(47) + '│'));
-    console.log(chalk.cyan('└' + '─'.repeat(47) + '┘'));
-    console.log();
-  }
+  // Removed showHeader method - now using BaseScreen's displayHeader
 
   private async showHelp(): Promise<void> {
-    console.clear();
-    console.log(chalk.cyan.bold('📖 CC-Flow ヘルプ'));
-    console.log();
-    console.log(chalk.green('利用可能なアクション:'));
-    console.log();
-    console.log(chalk.white('🚀 既存エージェントからワークフローを作成'));
-    console.log(chalk.gray('   既存のサブエージェントを選択・順序付けして強力なワークフローを構築'));
-    console.log(chalk.gray('   します。複雑な自動化シーケンスの作成に最適です。'));
-    console.log();
-    console.log(chalk.white('🔄 スラッシュコマンドをエージェントに変換'));
-    console.log(chalk.gray('   カスタムスラッシュコマンドをサブエージェントに変換'));
-    console.log(chalk.gray('   します。コマンドの整理と利用性を向上させます。'));
-    console.log();
-    console.log(chalk.yellow('操作方法:'));
-    console.log(chalk.gray('   ↑↓ - メニューオプションを移動'));
-    console.log(chalk.gray('   Enter - オプションを選択'));
-    console.log(chalk.gray('   Ctrl+C - アプリケーションを終了'));
-    console.log();
+    this.showScreenFrame('CC-Flow ヘルプ', this.theme.icons.info, () => {
+      console.log(this.theme.createContentLine(this.theme.colors.accent('利用可能なアクション:')));
+      console.log(this.theme.createEmptyLine());
+      console.log(this.theme.createContentLine(`${this.theme.icons.rocket} エージェント連携ワークフロー作成`));
+      console.log(this.theme.createContentLine('  複数エージェントを選択・順序設定して連携ワークフロー構築'));
+      console.log(this.theme.createEmptyLine());
+      console.log(this.theme.createContentLine(`${this.theme.icons.gear} カスタムコマンド→エージェント化→ワークフロー作成`));
+      console.log(this.theme.createContentLine('  スラッシュコマンドをサブエージェント化してワークフロー作成まで一括実行'));
+      console.log(this.theme.createEmptyLine());
+      console.log(this.theme.createContentLine(this.theme.colors.muted('操作: ↑↓で移動、Enterで選択')));
+    });
     console.log(chalk.blue('Enterキーでメインメニューに戻る...'));
     
-    return new Promise((resolve) => {
-      process.stdin.setRawMode(true);
-      process.stdin.resume();
-      process.stdin.once('data', () => {
-        process.stdin.setRawMode(false);
-        process.stdin.pause();
-        resolve();
-      });
-    });
+    await this.waitForKey();
   }
 }

@@ -1,20 +1,22 @@
 import chalk from 'chalk';
 import { select } from '@inquirer/prompts';
 import type { WorkflowConfig } from '../../models/Agent.js';
+import { BaseScreen } from './BaseScreen.js';
+import { SimpleUITheme } from '../themes/SimpleUITheme.js';
 
 export interface CompleteResult {
   createAnother: boolean;
 }
 
-export class CompleteScreen {
+export class CompleteScreen extends BaseScreen {
   async show(config: WorkflowConfig): Promise<CompleteResult> {
     while (true) {
-      console.clear();
-      this.showHeader();
-      this.showSuccessInfo(config);
-      this.showExecutionFlow(config);
-      console.log('└─────────────────────────────────────────┘');
-      console.log();
+      this.showScreenFrame('ワークフロー作成完了', this.theme.icons.success, () => {
+        console.log(SimpleUITheme.createContentLine(chalk.green('🎉 成功しました！')));
+        console.log(SimpleUITheme.createEmptyLine());
+        this.showSuccessInfo(config);
+        this.showExecutionFlow(config);
+      });
       
       const choices = [
         {
@@ -52,68 +54,44 @@ export class CompleteScreen {
     }
   }
   
-  private showHeader() {
-    console.log(chalk.bold('┌─ ✅ ワークフロー作成完了 ────────────────┐'));
-    console.log('│                                         │');
-    console.log(chalk.green('│            🎉 成功しました！             │'));
-    console.log('│                                         │');
-  }
-  
   private showSuccessInfo(config: WorkflowConfig) {
-    console.log('│ ワークフローが作成されました:           │');
-    console.log('│                                         │');
-    
     const workflowName = config.workflowName || this.generateWorkflowName(config.targetPath);
-    console.log(`│ コマンド: /${workflowName.padEnd(25)} │`);
     
-    console.log('│ 生成されたファイル:                     │');
-    console.log(`│ • .claude/commands/${workflowName}.md     │`);
-    console.log('│                                         │');
-    console.log('│ 使用方法:                               │');
-    console.log(`│ /${workflowName} "タスクの内容"           │`);
-    console.log('│                                         │');
+    console.log(SimpleUITheme.createContentLine('ワークフローが作成されました:'));
+    console.log(SimpleUITheme.createEmptyLine());
+    console.log(SimpleUITheme.createContentLine(`コマンド: /${workflowName}`));
+    console.log(SimpleUITheme.createEmptyLine());
+    console.log(SimpleUITheme.createContentLine('生成されたファイル:'));
+    console.log(SimpleUITheme.createContentLine(`• .claude/commands/${workflowName}.md`));
+    console.log(SimpleUITheme.createEmptyLine());
+    console.log(SimpleUITheme.createContentLine('使用方法:'));
+    console.log(SimpleUITheme.createContentLine(`/${workflowName} "タスクの内容"`));
+    console.log(SimpleUITheme.createEmptyLine());
   }
   
   private showExecutionFlow(config: WorkflowConfig) {
-    console.log('│ 実行フロー:                             │');
+    console.log(SimpleUITheme.createContentLine('実行フロー:'));
     config.selectedAgents.forEach((agent, index) => {
-      console.log(`│   ${index + 1}. ${agent.name.padEnd(31)} │`);
+      console.log(SimpleUITheme.createContentLine(`  ${index + 1}. ${agent.name}`));
     });
-    console.log('│                                         │');
   }
   
   private showHelp() {
-    console.clear();
-    console.log(chalk.bold('┌─ 📚 ヘルプ - 完了画面 ──────────────────┐'));
-    console.log('│                                         │');
-    console.log('│ 🎉 ' + chalk.cyan('ワークフロー作成完了:') + '                │');
-    console.log('│   ワークフローファイルが正常に生成され、 │');
-    console.log('│   使用準備が完了しました。               │');
-    console.log('│                                         │');
-    console.log('│ 🔄 ' + chalk.cyan('新しいワークフローを作成する:') + '        │');
-    console.log('│   別のワークフローを作成したい場合に     │');
-    console.log('│   選択してください。                     │');
-    console.log('│                                         │');
-    console.log('│ 👋 ' + chalk.cyan('アプリケーションを終了:') + '              │');
-    console.log('│   CC-Flowアプリケーションを終了します。  │');
-    console.log('│   作成されたワークフローはそのまま       │');
-    console.log('│   使用できます。                         │');
-    console.log('│                                         │');
-    console.log('│ 💡 ' + chalk.dim('上下矢印キーで選択、Enterで決定') + '       │');
-    console.log('│                                         │');
-    console.log('└─────────────────────────────────────────┘');
-    console.log(chalk.dim('\nPress any key to continue...'));
-  }
-  
-  private async waitForKey(): Promise<void> {
-    return new Promise(resolve => {
-      process.stdin.setRawMode?.(true);
-      process.stdin.resume();
-      process.stdin.once('data', () => {
-        process.stdin.setRawMode?.(false);
-        process.stdin.pause();
-        resolve();
-      });
+    this.showScreenFrame('ヘルプ - 完了画面', this.theme.icons.info, () => {
+      console.log(SimpleUITheme.createContentLine('🎉 ' + chalk.cyan('ワークフロー作成完了:')));
+      console.log(SimpleUITheme.createContentLine('  ワークフローファイルが正常に生成され、'));
+      console.log(SimpleUITheme.createContentLine('  使用準備が完了しました。'));
+      console.log(SimpleUITheme.createEmptyLine());
+      console.log(SimpleUITheme.createContentLine('🔄 ' + chalk.cyan('新しいワークフローを作成する:')));
+      console.log(SimpleUITheme.createContentLine('  別のワークフローを作成したい場合に'));
+      console.log(SimpleUITheme.createContentLine('  選択してください。'));
+      console.log(SimpleUITheme.createEmptyLine());
+      console.log(SimpleUITheme.createContentLine('👋 ' + chalk.cyan('アプリケーションを終了:')));
+      console.log(SimpleUITheme.createContentLine('  CC-Flowアプリケーションを終了します。'));
+      console.log(SimpleUITheme.createContentLine('  作成されたワークフローはそのまま'));
+      console.log(SimpleUITheme.createContentLine('  使用できます。'));
+      console.log(SimpleUITheme.createEmptyLine());
+      console.log(SimpleUITheme.createContentLine('💡 ' + chalk.dim('上下矢印キーで選択、Enterで決定')));
     });
   }
   
