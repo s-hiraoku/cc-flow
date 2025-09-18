@@ -20,9 +20,9 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./cli": {
-      "import": "./dist/cli/main.js",
-      "types": "./dist/cli/main.d.ts"
+    "./ink": {
+      "import": "./dist/ink/main.js",
+      "types": "./dist/ink/main.d.ts"
     },
     "./package.json": "./package.json"
   },
@@ -35,8 +35,8 @@
     "build": "node scripts/build.js",
     "compile": "tsc",
     "clean": "rm -rf dist",
-    "dev": "tsx src/cli/main.ts",
-    "start": "node dist/cli/main.js",
+    "dev": "tsx src/ink/main.tsx",
+    "start": "node dist/ink/main.js",
     "prepublishOnly": "npm run build",
     "postbuild": "npm run fix-bin",
     "fix-bin": "node scripts/fix-bin.js",
@@ -47,8 +47,7 @@
     "test:coverage": "vitest run --coverage",
     "test:compile": "tsc src/test-compile.ts --outDir dist-test --module ESNext --target ES2022 --moduleResolution Node",
     "test:build": "node scripts/test-build.js",
-    "validate": "npm run type-check && npm run build",
-    "demo-reorder": "tsx src/demo-reorder.ts"
+    "validate": "npm run type-check && npm run build"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -74,12 +73,15 @@
     "url": "https://github.com/s-hiraoku/cc-flow/issues"
   },
   "dependencies": {
-    "@inquirer/checkbox": "^2.0.0",
-    "@inquirer/input": "^2.0.0",
-    "@inquirer/prompts": "^5.0.0",
-    "@inquirer/select": "^2.0.0",
-    "chalk": "^5.3.0",
-    "string-width": "^8.1.0"
+    "@types/react": "^19.1.13",
+    "date-and-time": "^4.0.5",
+    "ink": "^6.3.0",
+    "ink-big-text": "^2.0.0",
+    "ink-gradient": "^3.0.0",
+    "ink-select-input": "^6.2.0",
+    "ink-spinner": "^5.0.0",
+    "ink-text-input": "^6.0.0",
+    "react": "^19.1.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

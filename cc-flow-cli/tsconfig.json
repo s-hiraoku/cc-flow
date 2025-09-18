@@ -3,8 +3,9 @@
     // Target ES2022 for Node.js 18+ compatibility (import.meta support)
     "target": "ES2022",
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "lib": ["ES2022"],
+    "jsx": "react-jsx",
     
     // Output Configuration - ES Module output
     "outDir": "./dist",
