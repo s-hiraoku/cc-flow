@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Text, Spacer } from 'ink';
-import { Container, Card, Section, Flex } from '../components/Layout.js';
-import { FocusableMenu, StatusBar, MenuItem } from '../components/Interactive.js';
+import { Box, Text } from 'ink';
+import { UnifiedScreen, ScreenDescription, MenuSection, HintBox } from '../design-system/index.js';
+import { createScreenLayout } from '../design-system/ScreenPatterns.js';
+import { MenuItem } from '../components/Interactive.js';
+import { Section } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
 import { getAgentDirectories } from '../utils/directoryUtils.js';
 
@@ -53,81 +55,52 @@ const DirectoryScreenContent: React.FC<DirectoryScreenProps> = ({ onNext, onBack
     }
   };
 
+  // Screen configuration using design system patterns
+  const screenConfig = createScreenLayout('selection', {
+    title: 'エージェントディレクトリ選択',
+    subtitle: 'ワークフロー作成対象の選択',
+    icon: '📂'
+  });
+
+  const hintBoxContent = [
+    '• ./claude/agents/ 内の各ディレクトリでサブエージェントをカテゴリ分け',
+    '• ディレクトリを選択すると、その中のサブエージェントのみが表示されます',
+    '• 目的に応じてディレクトリを選ぶことで、適切なサブエージェントを見つけやすくなります',
+    '• 「全体」を選択すると、すべてのディレクトリのサブエージェントから選択できます'
+  ];
+
   return (
-    <Container centered>
-      <Card
-        title="エージェントディレクトリ選択"
-        subtitle="ワークフロー作成対象の選択"
-        icon="📂"
-        variant="primary"
-        fullHeight
-      >
-        {/* 説明セクション */}
-        <Section spacing="sm">
-          <Flex direction="column" align="center" gap={1}>
-            <Text color={theme.colors.info}>
-              選択したディレクトリ内のエージェントが
+    <UnifiedScreen config={screenConfig}>
+      {/* Screen Description */}
+      <ScreenDescription
+        heading="選択したディレクトリ内のエージェントが"
+        subheading="ワークフロー作成時に利用可能になります"
+        align="center"
+      />
+
+      {/* Directory Selection */}
+      <Section title="📁 利用可能なディレクトリ" spacing="sm">
+        {isLoading ? (
+          <Box padding={2}>
+            <Text color={theme.colors.hex.blue}>
+              🔍 ディレクトリを読み込み中...
             </Text>
-            <Text color={theme.colors.info}>
-              ワークフロー作成時に利用可能になります
-            </Text>
-          </Flex>
-        </Section>
-
-        <Spacer />
-
-        {/* ディレクトリ選択 */}
-        <Section title="📁 利用可能なディレクトリ" spacing="sm">
-          {isLoading ? (
-            <Box padding={2}>
-              <Text color={theme.colors.info}>
-                🔍 ディレクトリを読み込み中...
-              </Text>
-            </Box>
-          ) : (
-            <FocusableMenu
-              items={directories}
-              onSelect={handleSelect}
-              showDescription={true}
-              focusId="directory-menu"
-            />
-          )}
-        </Section>
-
-        <Spacer />
-
-        {/* ヒント */}
-        <Section spacing="xs">
-          <Box 
-            borderStyle="single"
-            borderColor={theme.colors.success}
-            padding={1}
-            width="100%"
-          >
-            <Flex direction="column" gap={1}>
-              <Text color={theme.colors.success} bold>
-                💡 ディレクトリ構成について
-              </Text>
-              <Text color={theme.colors.text.secondary}>
-                • spec/: プロジェクト仕様・要件定義・設計関連
-              </Text>
-              <Text color={theme.colors.text.secondary}>
-                • utility/: 汎用ツール・ヘルパー機能
-              </Text>
-              <Text color={theme.colors.text.secondary}>
-                • 全体: すべてのエージェントから自由に選択可能
-              </Text>
-            </Flex>
           </Box>
-        </Section>
+        ) : (
+          <MenuSection
+            items={directories}
+            onSelect={handleSelect}
+            showDescription={true}
+          />
+        )}
+      </Section>
 
-        {/* フッター */}
-        <StatusBar
-          center="↑↓: ナビゲート | Enter: 選択 | Esc: 戻る"
-          variant="default"
-        />
-      </Card>
-    </Container>
+      {/* Hint Box */}
+      <HintBox
+        title="💡 ディレクトリ構成について"
+        hints={hintBoxContent}
+      />
+    </UnifiedScreen>
   );
 };
 

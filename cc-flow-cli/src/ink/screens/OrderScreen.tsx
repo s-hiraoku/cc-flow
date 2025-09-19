@@ -1,6 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
-import { Frame, ContentLine } from '../components/Frame.js';
+import { UnifiedScreen, ScreenDescription, HintBox } from '../design-system/index.js';
+import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
+import { StatusBar } from '../components/Interactive.js';
+import { Section, Flex } from '../components/Layout.js';
+import { useTheme } from '../themes/theme.js';
 
 interface Agent {
   id: string;
@@ -23,6 +27,8 @@ export const OrderScreen: React.FC<OrderScreenProps> = ({
   const [orderedAgents, setOrderedAgents] = useState<Agent[]>(selectedAgents);
   const [currentIndex, setCurrentIndex] = useState(0);
   const { exit } = useApp();
+  const theme = useTheme();
+  const { contentWidth } = useScreenDimensions();
 
   // Memoized input handler for better performance
   const handleInput = useCallback((input: string, key: any) => {
@@ -71,74 +77,77 @@ export const OrderScreen: React.FC<OrderScreenProps> = ({
 
   useInput(handleInput);
 
-  const frameWidth = 85;
+  // Screen configuration using design system patterns
+  const screenConfig = createScreenLayout('configuration', {
+    title: '実行順序設定',
+    subtitle: 'エージェントの実行順序を設定してください',
+    icon: '📋'
+  });
+
+  const statusItems = [
+    { key: 'Total', value: `${orderedAgents.length}個` },
+    { key: 'Current', value: `${currentIndex + 1}/${orderedAgents.length}` },
+    { key: 'Status', value: 'Ready', color: '#00ff00' }
+  ];
+
+  const operationHints = [
+    '↑↓: 移動 | Ctrl+↑↓: 順序変更 | R: リセット',
+    'Enter: 確定 | Esc: 戻る | Q: 終了'
+  ];
 
   return (
-    <Box flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%">
-      <Frame title="実行順序設定" icon="📋" minWidth={80} maxWidth={100}>
-        <ContentLine align="center">
-          <Text color="cyan">エージェントの実行順序を設定してください</Text>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine >
-          <Text bold color="white">現在の実行順序:</Text>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        {orderedAgents.map((agent, index) => (
-          <ContentLine key={`${agent.id}-${index}`} >
-            <Box>
-              <Text color={index === currentIndex ? 'cyan' : 'white'}>
+    <UnifiedScreen
+      config={screenConfig}
+      statusItems={statusItems}
+      customStatusMessage="✅ 順序が決まったらEnterキーで次に進みます"
+    >
+      {/* Screen Description */}
+      <ScreenDescription
+        heading="エージェントの実行順序を設定してください"
+        subheading="エージェントは上から順番に実行されます"
+        align="center"
+      />
+
+      {/* Agent Order List */}
+      <Section title="🔄 現在の実行順序" spacing="sm">
+        <Box flexDirection="column" gap={1}>
+          {orderedAgents.map((agent, index) => (
+            <Box key={`${agent.id}-${index}`} width="100%">
+              <Text color={index === currentIndex ? theme.colors.hex.blue : theme.colors.cyan}>
                 {index === currentIndex ? '▶ ' : '  '}
               </Text>
-              <Text color={index === currentIndex ? 'cyan' : 'green'}>
+              <Text color={index === currentIndex ? theme.colors.hex.blue : theme.colors.hex.green}>
                 {(index + 1).toString().padStart(2, ' ')}. 
               </Text>
-              <Text color={index === currentIndex ? 'cyan' : 'white'}>
-                <Text> </Text>{agent.name}
+              <Text color={index === currentIndex ? theme.colors.hex.blue : theme.colors.white}>
+                {' '}{agent.name}
               </Text>
-              <Text color="gray"> - {agent.description}</Text>
+              <Text color={theme.colors.gray}> - {agent.description}</Text>
             </Box>
-          </ContentLine>
-        ))}
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine >
-          <Box>
-            <Text color="green">総エージェント数: </Text>
-            <Text color="cyan">{orderedAgents.length}</Text>
-            <Text color="green">個</Text>
-          </Box>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine align="center">
-          <Text color="yellow">💡 操作方法:</Text>
-        </ContentLine>
-        <ContentLine align="center">
-          <Text color="gray">↑↓: 移動 | Ctrl+↑↓: 順序変更 | R: リセット</Text>
-        </ContentLine>
-        <ContentLine align="center">
-          <Text color="gray">Enter: 確定 | Esc: 戻る | Q: 終了</Text>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine align="center">
-          <Text color="green">✅ 順序が決まったらEnterキーで次に進みます</Text>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine align="center">
-          <Text color="blue">📝 ヒント: エージェントは上から順番に実行されます</Text>
-        </ContentLine>
-      </Frame>
-    </Box>
+          ))}
+        </Box>
+      </Section>
+
+      {/* Statistics */}
+      <Section spacing="xs">
+        <Box
+          borderStyle="single"
+          borderColor={theme.colors.hex.green}
+          padding={1}
+          width="100%"
+        >
+          <Flex justify="space-between" align="center">
+            <Text color={theme.colors.hex.green}>総エージェント数:</Text>
+            <Text color={theme.colors.hex.blue} bold>{orderedAgents.length}個</Text>
+          </Flex>
+        </Box>
+      </Section>
+
+      {/* Operation Hints */}
+      <HintBox
+        title="💡 操作方法"
+        hints={operationHints}
+      />
+    </UnifiedScreen>
   );
 };

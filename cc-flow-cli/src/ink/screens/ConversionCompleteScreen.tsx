@@ -1,7 +1,11 @@
 import React, { useCallback } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
-import SelectInput from 'ink-select-input';
-import { Frame, ContentLine } from '../components/Frame.js';
+import { UnifiedScreen, ScreenDescription, MenuSection, FeatureHighlights, HintBox } from '../design-system/index.js';
+import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
+import { Section, Flex } from '../components/Layout.js';
+import { useTheme } from '../themes/theme.js';
+import { MenuItem } from '../components/Interactive.js';
+import packageJson from '../../../package.json';
 
 interface ConversionResult {
   success: boolean;
@@ -18,6 +22,8 @@ interface ConversionCompleteScreenProps {
   onMenu: () => void;
 }
 
+const packageVersion = packageJson.version ?? '0.0.0';
+
 export const ConversionCompleteScreen: React.FC<ConversionCompleteScreenProps> = ({ 
   result, 
   onAnother, 
@@ -25,8 +31,10 @@ export const ConversionCompleteScreen: React.FC<ConversionCompleteScreenProps> =
   onMenu 
 }) => {
   const { exit } = useApp();
+  const theme = useTheme();
+  const { contentWidth } = useScreenDimensions();
 
-  const choices = [
+  const choices: MenuItem[] = [
     { label: '🚀 変換されたエージェントでワークフロー作成', value: 'workflow' },
     { label: '🔄 新しい変換を実行する', value: 'another' },
     { label: '🏠 メインメニューに戻る', value: 'menu' },
@@ -44,7 +52,7 @@ export const ConversionCompleteScreen: React.FC<ConversionCompleteScreenProps> =
     }
   }, [exit, onWorkflow, onMenu]));
 
-  const handleSelect = (item: { value: string }) => {
+  const handleSelect = (item: MenuItem) => {
     if (item.value === 'another') {
       onAnother();
     } else if (item.value === 'workflow') {
@@ -56,173 +64,124 @@ export const ConversionCompleteScreen: React.FC<ConversionCompleteScreenProps> =
     }
   };
 
-  const frameWidth = 90;
+  // Screen configuration using design system patterns
+  const screenConfig = createScreenLayout(result.success ? 'complete' : 'preview', {
+    title: 'スラッシュコマンド変換完了',
+    subtitle: result.success ? '🎉 スラッシュコマンド変換が完了しました！' : '⚠️ 変換中に問題が発生しました',
+    icon: result.success ? '✅' : '⚠️'
+  });
+
+  const statusItems = [
+    { key: 'Converted', value: `${result.convertedCount}個` },
+    { key: 'Status', value: result.success ? 'Success' : 'Failed', color: result.success ? '#00ff00' : '#ff0000' }
+  ];
+
+  const nextStepFeatures = result.success ? [
+    '• ワークフロー作成でエージェントを組み合わせ',
+    '• 実行順序を設定して連携ワークフローを構築',
+    '• 新しいスラッシュコマンドとして利用可能'
+  ] : [];
+
+  const generatedFiles = result.success ? [
+    '• エージェント形式のMarkdownファイル',
+    '• メタデータと実行可能なBashコード',
+    '• Claude Code環境での実行に対応'
+  ] : [];
+
+  const troubleshootingHints = !result.success ? [
+    '• .claude/commands/ ディレクトリが存在するか確認',
+    '• スラッシュコマンドが正しい形式で記述されているか確認',
+    '• ファイルアクセス権限に問題がないか確認'
+  ] : [];
 
   return (
-    <Box flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%">
-      <Frame 
-        title="スラッシュコマンド変換完了" 
-        icon={result.success ? '✅' : '⚠️'} 
-        minWidth={85} 
-        maxWidth={110}
-      >
-        <ContentLine align="center">
-          <Text color={result.success ? 'green' : 'yellow'} bold>
-            {result.success ? '🎉 スラッシュコマンド変換が完了しました！' : '⚠️ 変換中に問題が発生しました'}
-          </Text>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine >
-          <Text bold color="white">📋 変換結果:</Text>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        {result.success ? (
-          <>
-            <ContentLine >
-              <Box>
-                <Text color="cyan">変換成功: </Text>
-                <Text color="green" bold>{result.convertedCount}個のコマンド</Text>
-              </Box>
-            </ContentLine>
-            
-            <ContentLine >
-              <Box>
-                <Text color="cyan">保存先: </Text>
-                <Text color="gray">{result.targetDirectory}</Text>
-              </Box>
-            </ContentLine>
-            
-            <ContentLine >
-              <Box>
-                <Text color="cyan">ステータス: </Text>
-                <Text color="green">正常完了</Text>
-              </Box>
-            </ContentLine>
-            
-            <ContentLine ><Text> </Text></ContentLine>
-            
-            <ContentLine >
-              <Text bold color="white">🤖 変換されたエージェント:</Text>
-            </ContentLine>
-            
-            <ContentLine ><Text> </Text></ContentLine>
-            
+    <UnifiedScreen
+      config={screenConfig}
+      version={packageVersion}
+      statusItems={statusItems}
+      customStatusMessage={result.success ? 
+        '✅ 変換完了！ワークフロー作成に進むことをお勧めします' : 
+        '⚠️ 問題を確認してから再度お試しください'}
+    >
+      {/* Conversion Results Summary */}
+      <Section title="📋 変換結果" spacing="sm">
+        <Box flexDirection="column" gap={1}>
+          {result.success ? (
+            <>
+              <Flex>
+                <Text color={theme.colors.hex.lightBlue}>変換成功: </Text>
+                <Text color={theme.colors.hex.green} bold>{result.convertedCount}個のコマンド</Text>
+              </Flex>
+              
+              <Flex>
+                <Text color={theme.colors.hex.lightBlue}>保存先: </Text>
+                <Text color={theme.colors.gray}>{result.targetDirectory}</Text>
+              </Flex>
+              
+              <Flex>
+                <Text color={theme.colors.hex.lightBlue}>ステータス: </Text>
+                <Text color={theme.colors.hex.green}>正常完了</Text>
+              </Flex>
+            </>
+          ) : (
+            <Flex>
+              <Text color={theme.colors.error}>エラー: </Text>
+              <Text color={theme.colors.gray}>{result.message}</Text>
+            </Flex>
+          )}
+        </Box>
+      </Section>
+
+      {/* Converted Agents List (Success only) */}
+      {result.success && (
+        <Section title="🤖 変換されたエージェント" spacing="sm">
+          <Box flexDirection="column" gap={1}>
             {result.convertedCommands?.map((command, index) => (
-              <ContentLine key={command} >
-                <Box>
-                  <Text color="green" bold>{(index + 1).toString().padStart(2, ' ')}. </Text>
-                  <Text color="white">{command}</Text>
-                  <Text color="gray"> - スラッシュコマンドから変換</Text>
-                </Box>
-              </ContentLine>
-            )) || (
-              <ContentLine >
-                <Text color="gray">変換されたコマンドの詳細情報なし</Text>
-              </ContentLine>
-            )}
-            
-            <ContentLine ><Text> </Text></ContentLine>
-            
-            <ContentLine >
-              <Text color="blue">📦 生成されたファイル:</Text>
-            </ContentLine>
-            <ContentLine >
-              <Text color="gray">• エージェント形式のMarkdownファイル</Text>
-            </ContentLine>
-            <ContentLine >
-              <Text color="gray">• メタデータと実行可能なBashコード</Text>
-            </ContentLine>
-            <ContentLine >
-              <Text color="gray">• Claude Code環境での実行に対応</Text>
-            </ContentLine>
-            
-            <ContentLine ><Text> </Text></ContentLine>
-            
-            <ContentLine >
-              <Text color="yellow">🚀 次のステップ:</Text>
-            </ContentLine>
-            <ContentLine >
-              <Text color="gray">• ワークフロー作成でエージェントを組み合わせ</Text>
-            </ContentLine>
-            <ContentLine >
-              <Text color="gray">• 実行順序を設定して連携ワークフローを構築</Text>
-            </ContentLine>
-            <ContentLine >
-              <Text color="gray">• 新しいスラッシュコマンドとして利用可能</Text>
-            </ContentLine>
-          </>
-        ) : (
-          <>
-            <ContentLine >
-              <Box>
-                <Text color="red">エラー: </Text>
-                <Text color="gray">{result.message}</Text>
+              <Box key={command}>
+                <Text color={theme.colors.hex.green} bold>{(index + 1).toString().padStart(2, ' ')}. </Text>
+                <Text color={theme.colors.white}>{command}</Text>
+                <Text color={theme.colors.gray}> - スラッシュコマンドから変換</Text>
               </Box>
-            </ContentLine>
-            
-            <ContentLine ><Text> </Text></ContentLine>
-            
-            <ContentLine >
-              <Text color="yellow">💡 対処方法:</Text>
-            </ContentLine>
-            <ContentLine >
-              <Text color="gray">• .claude/commands/ ディレクトリが存在するか確認</Text>
-            </ContentLine>
-            <ContentLine >
-              <Text color="gray">• スラッシュコマンドが正しい形式で記述されているか確認</Text>
-            </ContentLine>
-            <ContentLine >
-              <Text color="gray">• ファイルアクセス権限に問題がないか確認</Text>
-            </ContentLine>
-          </>
-        )}
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine >
-          <Box paddingLeft={2}>
-            <SelectInput
-              items={choices}
-              onSelect={handleSelect}
-              indicatorComponent={({ isSelected }) => (
-                <Box marginRight={1}>
-                  <Text color="cyan">{isSelected ? '▶' : ' '}</Text>
-                </Box>
-              )}
-              itemComponent={({ label, isSelected }) => (
-                <Text {...(isSelected ? { color: 'cyan' } : {})}>
-                  {label}
-                </Text>
-              )}
-            />
+            )) || (
+              <Text color={theme.colors.gray}>変換されたコマンドの詳細情報なし</Text>
+            )}
           </Box>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine align="center">
-          <Text color="blue">📝 操作方法:</Text>
-        </ContentLine>
-        <ContentLine align="center">
-          <Text color="gray">↑↓: 選択 | Enter: 実行 | W: ワークフロー | M: メニュー | Q: 終了</Text>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        {result.success ? (
-          <ContentLine align="center">
-            <Text color="green">✅ 変換完了！ワークフロー作成に進むことをお勧めします</Text>
-          </ContentLine>
-        ) : (
-          <ContentLine align="center">
-            <Text color="yellow">⚠️ 問題を確認してから再度お試しください</Text>
-          </ContentLine>
-        )}
-      </Frame>
-    </Box>
+        </Section>
+      )}
+
+      {/* Generated Files (Success only) */}
+      {result.success && (
+        <Section title="📦 生成されたファイル" spacing="sm">
+          <FeatureHighlights
+            features={generatedFiles}
+            contentWidth={contentWidth}
+          />
+        </Section>
+      )}
+
+      {/* Next Steps (Success only) */}
+      {result.success && (
+        <Section title="🚀 次のステップ" spacing="sm">
+          <FeatureHighlights
+            features={nextStepFeatures}
+            contentWidth={contentWidth}
+          />
+        </Section>
+      )}
+
+      {/* Troubleshooting (Failure only) */}
+      {!result.success && (
+        <HintBox
+          title="💡 対処方法"
+          hints={troubleshootingHints}
+        />
+      )}
+
+      {/* Action Menu */}
+      <MenuSection
+        items={choices}
+        onSelect={handleSelect}
+      />
+    </UnifiedScreen>
   );
 };

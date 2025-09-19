@@ -18,6 +18,26 @@ export interface Theme {
       muted: string;
       inverse: string;
     };
+    // Additional standard colors
+    white: string;
+    black: string;
+    red: string;
+    green: string;
+    yellow: string;
+    blue: string;
+    magenta: string;
+    cyan: string;
+    gray: string;
+    // Hex colors for advanced styling
+    hex: {
+      blue: string;
+      darkBlue: string;
+      lightBlue: string;
+      green: string;
+      orange: string;
+      purple: string;
+      pink: string;
+    };
   };
   spacing: {
     xs: number;
@@ -65,6 +85,26 @@ export const createTheme = (terminalInfo: { width: number; height: number }): Th
         secondary: 'cyan',
         muted: 'gray',
         inverse: 'black'
+      },
+      // Additional standard colors
+      white: 'white',
+      black: 'black',
+      red: 'red',
+      green: 'green',
+      yellow: 'yellow',
+      blue: 'blue',
+      magenta: 'magenta',
+      cyan: 'cyan',
+      gray: 'gray',
+      // Hex colors for advanced styling
+      hex: {
+        blue: '#3B82F6',
+        darkBlue: '#1E40AF',
+        lightBlue: '#60A5FA',
+        green: '#10B981',
+        orange: '#F97316',
+        purple: '#A855F7',
+        pink: '#EC4899'
       }
     },
     spacing: {

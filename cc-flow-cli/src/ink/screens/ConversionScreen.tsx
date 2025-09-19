@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
 import Spinner from 'ink-spinner';
-import { Frame, ContentLine } from '../components/Frame.js';
+import { UnifiedScreen, ScreenDescription, FeatureHighlights } from '../design-system/index.js';
+import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
+import { Section } from '../components/Layout.js';
+import { useTheme } from '../themes/theme.js';
 
 interface ConversionStep {
   name: string;
@@ -33,6 +36,8 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ onComplete, 
   const [currentStep, setCurrentStep] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const { exit } = useApp();
+  const theme = useTheme();
+  const { contentWidth } = useScreenDimensions();
 
   // Handle keyboard input
   useInput(useCallback((input: string, key: any) => {
@@ -101,119 +106,84 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ onComplete, 
 
   const getStatusColor = (status: ConversionStep['status']) => {
     switch (status) {
-      case 'processing': return 'cyan';
-      case 'success': return 'green';
-      case 'error': return 'red';
-      default: return 'gray';
+      case 'processing': return theme.colors.hex.lightBlue;
+      case 'success': return theme.colors.hex.green;
+      case 'error': return theme.colors.error;
+      default: return theme.colors.gray;
     }
   };
 
+  // Screen configuration using design system patterns
+  const screenConfig = createScreenLayout('processing', {
+    title: 'スラッシュコマンド変換',
+    subtitle: 'カスタムスラッシュコマンドをエージェント形式に変換しています',
+    icon: '🔄'
+  });
+
+  const statusItems = [
+    { key: 'Progress', value: `${currentStep + 1}/${steps.length}` },
+    { key: 'Status', value: isComplete ? 'Complete' : 'Processing', color: isComplete ? '#00ff00' : '#ffaa00' }
+  ];
+
+  const conversionResults = isComplete ? [
+    '• 3個のスラッシュコマンドを変換',
+    '• エージェント形式のMarkdownファイルを生成',
+    '• .claude/agents/converted/ に保存完了'
+  ] : [];
+
+  const convertedCommands = isComplete ? [
+    '• analyze-code - コード解析エージェント',
+    '• generate-docs - ドキュメント生成エージェント',
+    '• create-tests - テスト作成エージェント'
+  ] : [];
+
   return (
-    <Box flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%">
-      <Frame title="スラッシュコマンド変換" icon="🔄" minWidth={80} maxWidth={100}>
-        <ContentLine align="center">
-          <Text color="cyan">カスタムスラッシュコマンドをエージェント形式に変換しています</Text>
-        </ContentLine>
-        
-        <ContentLine>
-          <Text> </Text>
-        </ContentLine>
-        
-        <ContentLine>
-          <Text bold color="white">変換プロセス:</Text>
-        </ContentLine>
-        
-        <ContentLine>
-          <Text> </Text>
-        </ContentLine>
-        
-        {steps.map((step, index) => (
-          <ContentLine key={step.name}>
-            <Box>
+    <UnifiedScreen
+      config={screenConfig}
+      statusItems={statusItems}
+      customStatusMessage={!isComplete ? 
+        `変換中です... 進行状況: ${currentStep + 1}/${steps.length}` : 
+        '✅ まもなくワークフロー作成画面に移行します...'}
+    >
+      {/* Conversion Progress */}
+      <Section title="変換プロセス" spacing="sm">
+        <Box flexDirection="column" gap={1}>
+          {steps.map((step, index) => (
+            <Box key={step.name}>
               {getStatusIcon(step.status)}
-              <Text color="white"> {step.name}: </Text>
+              <Text color={theme.colors.white}> {step.name}: </Text>
               <Text color={getStatusColor(step.status)}>
                 {step.message}
               </Text>
             </Box>
-          </ContentLine>
-        ))}
-        
-        <ContentLine>
-          <Text> </Text>
-        </ContentLine>
-        
-        {!isComplete && (
-          <ContentLine align="center">
-            <Text color="yellow">
-              変換中です... 進行状況: {currentStep + 1}/{steps.length}
-            </Text>
-          </ContentLine>
-        )}
-        
-        {isComplete && (
-          <>
-            <ContentLine align="center">
-              <Text color="green" bold>🎉 変換完了!</Text>
-            </ContentLine>
-            
-            <ContentLine>
-              <Text> </Text>
-            </ContentLine>
-            
-            <ContentLine>
-              <Text color="cyan">✨ 変換結果:</Text>
-            </ContentLine>
-            <ContentLine>
-              <Text color="gray">• 3個のスラッシュコマンドを変換</Text>
-            </ContentLine>
-            <ContentLine>
-              <Text color="gray">• エージェント形式のMarkdownファイルを生成</Text>
-            </ContentLine>
-            <ContentLine>
-              <Text color="gray">• .claude/agents/converted/ に保存完了</Text>
-            </ContentLine>
-            
-            <ContentLine>
-              <Text> </Text>
-            </ContentLine>
-            
-            <ContentLine>
-              <Text color="blue">📝 変換されたコマンド:</Text>
-            </ContentLine>
-            <ContentLine>
-              <Text color="gray">• analyze-code - コード解析エージェント</Text>
-            </ContentLine>
-            <ContentLine>
-              <Text color="gray">• generate-docs - ドキュメント生成エージェント</Text>
-            </ContentLine>
-            <ContentLine>
-              <Text color="gray">• create-tests - テスト作成エージェント</Text>
-            </ContentLine>
-            
-            <ContentLine>
-              <Text> </Text>
-            </ContentLine>
-            
-            <ContentLine align="center">
-              <Text color="green">✅ まもなくワークフロー作成画面に移行します...</Text>
-            </ContentLine>
-          </>
-        )}
-        
-        <ContentLine>
-          <Text> </Text>
-        </ContentLine>
-        
-        <ContentLine align="center">
-          <Text color="blue">📝 操作方法:</Text>
-        </ContentLine>
-        <ContentLine align="center">
-          <Text color="gray">
-            {isComplete ? 'しばらくお待ちください...' : 'Esc: キャンセル | Q: 終了'}
-          </Text>
-        </ContentLine>
-      </Frame>
-    </Box>
+          ))}
+        </Box>
+      </Section>
+
+      {/* Completion Results */}
+      {isComplete && (
+        <>
+          <ScreenDescription
+            heading="🎉 変換完了!"
+            align="center"
+          />
+
+          <FeatureHighlights
+            features={conversionResults}
+            contentWidth={contentWidth}
+          />
+
+          <Section title="📝 変換されたコマンド" spacing="sm">
+            <Box flexDirection="column" gap={1}>
+              {convertedCommands.map((command, index) => (
+                <Text key={index} color={theme.colors.gray}>
+                  {command}
+                </Text>
+              ))}
+            </Box>
+          </Section>
+        </>
+      )}
+    </UnifiedScreen>
   );
 };

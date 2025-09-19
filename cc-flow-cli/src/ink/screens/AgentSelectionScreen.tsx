@@ -1,7 +1,9 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
-import { Container, Card, Section, Flex } from '../components/Layout.js';
+import { UnifiedScreen, ScreenDescription } from '../design-system/index.js';
+import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { CheckboxList, StatusBar } from '../components/Interactive.js';
+import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
 import { renderLines } from '../utils/text.js';
 
@@ -25,6 +27,7 @@ export const AgentSelectionScreen: React.FC<AgentSelectionScreenProps> = ({
 }) => {
   const theme = useTheme();
   const { exit } = useApp();
+  const { contentWidth } = useScreenDimensions();
 
   const availableAgents: Agent[] = useMemo(() => ([
     { id: 'spec-init', name: 'spec-init', description: 'プロジェクト仕様の初期化', path: './agents/spec/spec-init.md' },
@@ -35,9 +38,6 @@ export const AgentSelectionScreen: React.FC<AgentSelectionScreenProps> = ({
   ]), []);
 
   const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set());
-
-  const cardWidth = Math.min(theme.layout.maxWidth, Math.max(theme.layout.minWidth, 84));
-  const contentWidth = Math.max(24, cardWidth - theme.layout.paddingX * 2);
 
   const handleToggle = useCallback((agentId: string) => {
     setSelectedAgents(prev => {
@@ -74,86 +74,86 @@ export const AgentSelectionScreen: React.FC<AgentSelectionScreenProps> = ({
     ? renderLines('⚠️  少なくとも1つのエージェントを選択してください', contentWidth - 4, 'left')
     : selectedAgentsList.map((agent, index) => `${index + 1}. ${agent.name}`);
 
+  // Screen configuration using design system patterns
+  const screenConfig = createScreenLayout('selection', {
+    title: '🤖 エージェント選択',
+    subtitle: `対象: ${targetPath}`,
+    align: 'left'
+  });
+
+  const statusItems = [
+    { key: 'Selected', value: `${selectedAgents.size}/${availableAgents.length}` },
+    { key: 'Status', value: selectedAgents.size > 0 ? 'Ready' : 'Waiting', color: selectedAgents.size > 0 ? '#00ff00' : '#ffaa00' }
+  ];
+
   return (
-    <Container centered fullHeight>
-      <Card
-        width={cardWidth}
-        title="🤖 エージェント選択"
-        subtitle={`対象: ${targetPath}`}
+    <UnifiedScreen
+      config={screenConfig}
+      statusItems={statusItems}
+      customStatusMessage={selectedAgents.size === 0 ? '⚠️ 少なくとも1つ選択してください' : `✅ ${selectedAgents.size}個選択中 | Enter: 次へ進む`}
+    >
+      {/* Screen Description */}
+      <ScreenDescription
+        heading="ワークフローに含めるエージェントを選択してください（スペースキーで切替）"
+        subheading="選択順は後のステップで並べ替えできます。"
         align="left"
-      >
-        <Section spacing="sm">
-          <Flex direction="column" align="flex-start" gap={1}>
-            <Text color={theme.colors.info}>
-              ワークフローに含めるエージェントを選択してください（スペースキーで切替）
+      />
+
+      {/* Agent Selection List */}
+      <Section spacing="md">
+        <CheckboxList
+          items={availableAgents.map(agent => ({
+            id: agent.id,
+            label: agent.name,
+            description: agent.description,
+            icon: '🤖'
+          }))}
+          selectedIds={selectedAgents}
+          onToggle={handleToggle}
+          width={contentWidth}
+          maxHeight={12}
+        />
+      </Section>
+
+      {/* Selection Summary */}
+      <Section spacing="sm">
+        <Box
+          borderStyle={theme.layout.borderStyle}
+          borderColor={selectedAgents.size > 0 ? theme.colors.hex.green : theme.colors.hex.orange}
+          paddingX={1}
+          paddingY={0}
+          width={contentWidth}
+          flexDirection="column"
+        >
+          <Flex justify="space-between" align="center">
+            <Text color={theme.colors.white}>
+              選択済みエージェント数
             </Text>
-            <Text color={theme.colors.text.muted}>
-              選択順は後のステップで並べ替えできます。
+            <Text color={selectedAgents.size > 0 ? theme.colors.hex.green : theme.colors.hex.orange} bold>
+              {selectedAgents.size} / {availableAgents.length}
             </Text>
           </Flex>
-        </Section>
-
-        <Section spacing="md">
-          <CheckboxList
-            items={availableAgents.map(agent => ({
-              id: agent.id,
-              label: agent.name,
-              description: agent.description,
-              icon: '🤖'
-            }))}
-            selectedIds={selectedAgents}
-            onToggle={handleToggle}
-            width={contentWidth}
-            maxHeight={12}
-          />
-        </Section>
-
-        <Section spacing="sm">
-          <Box
-            borderStyle={theme.layout.borderStyle}
-            borderColor={selectedAgents.size > 0 ? theme.colors.success : theme.colors.warning}
-            paddingX={1}
-            paddingY={0}
-            width={contentWidth}
-            flexDirection="column"
-          >
-            <Flex justify="space-between" align="center">
-              <Text color={theme.colors.text.primary}>
-                選択済みエージェント数
+          <Box marginTop={1} flexDirection="column">
+            {summaryLines.map((line, index) => (
+              <Text
+                key={`summary-${index}`}
+                color={selectedAgents.size > 0 ? theme.colors.hex.green : theme.colors.hex.orange}
+              >
+                {line}
               </Text>
-              <Text color={selectedAgents.size > 0 ? theme.colors.success : theme.colors.warning} bold>
-                {selectedAgents.size} / {availableAgents.length}
-              </Text>
-            </Flex>
-            <Box marginTop={1} flexDirection="column">
-              {summaryLines.map((line, index) => (
-                <Text
-                  key={`summary-${index}`}
-                  color={selectedAgents.size > 0 ? theme.colors.success : theme.colors.warning}
-                >
-                  {line}
-                </Text>
-              ))}
-            </Box>
+            ))}
           </Box>
-        </Section>
+        </Box>
+      </Section>
 
-        <Section spacing="sm">
-          <StatusBar
-            center={selectedAgents.size === 0 ? '⚠️ 少なくとも1つ選択してください' : `✅ ${selectedAgents.size}個選択中 | Enter: 次へ進む`}
-            variant={selectedAgents.size === 0 ? 'warning' : 'success'}
-            width={contentWidth}
-          />
-        </Section>
-
-        <Section spacing="sm">
-          <StatusBar
-            center="↑↓: 移動 | Space: 選択切替 | Enter: 確定 | Esc: 戻る | Q: 終了"
-            variant="info"
-            width={contentWidth}
-          />
-        </Section>
-      </Card>
-    </Container>
+      {/* Additional Status Bar for Controls */}
+      <Section spacing="sm">
+        <StatusBar
+          center="↑↓: 移動 | Space: 選択切替 | Enter: 確定 | Esc: 戻る | Q: 終了"
+          variant="info"
+          width={contentWidth}
+        />
+      </Section>
+    </UnifiedScreen>
   );
 };

@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
 import Spinner from 'ink-spinner';
-import { Frame, ContentLine } from '../components/Frame.js';
+import { UnifiedScreen, ScreenDescription, FeatureHighlights } from '../design-system/index.js';
+import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
+import { Section } from '../components/Layout.js';
+import { useTheme } from '../themes/theme.js';
 
 interface EnvironmentCheck {
   name: string;
@@ -24,6 +27,8 @@ export const EnvironmentScreen: React.FC<EnvironmentScreenProps> = ({ onNext, on
   const [isComplete, setIsComplete] = useState(false);
   const [canProceed, setCanProceed] = useState(false);
   const { exit } = useApp();
+  const theme = useTheme();
+  const { contentWidth } = useScreenDimensions();
 
   // Handle keyboard input
   useInput(useCallback((input: string, key: any) => {
@@ -82,106 +87,71 @@ export const EnvironmentScreen: React.FC<EnvironmentScreenProps> = ({ onNext, on
 
   const getStatusColor = (status: EnvironmentCheck['status']) => {
     switch (status) {
-      case 'success': return 'green';
-      case 'warning': return 'yellow';
-      case 'error': return 'red';
-      default: return 'gray';
+      case 'success': return theme.colors.hex.green;
+      case 'warning': return theme.colors.warning;
+      case 'error': return theme.colors.error;
+      default: return theme.colors.gray;
     }
   };
 
+  // Screen configuration using design system patterns
+  const screenConfig = createScreenLayout('processing', {
+    title: '実行環境確認',
+    subtitle: 'ワークフロー作成に必要な環境を確認しています',
+    icon: '⚙️'
+  });
+
+  const statusItems = [
+    { key: 'Checks', value: `${checks.filter(c => c.status === 'success').length}/${checks.length}` },
+    { key: 'Status', value: isComplete ? 'Complete' : 'Checking', color: isComplete ? '#00ff00' : '#ffaa00' }
+  ];
+
+  const detectedFeatures = isComplete ? [
+    '• Claude Code統合環境での実行',
+    '• POML (Prompt Orchestration Markup Language) サポート',
+    '• ワークフロー自動生成とコマンド作成',
+    '• エージェント連携とスクリプト実行'
+  ] : [];
+
   return (
-    <Box flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%">
-      <Frame title="実行環境確認" icon="⚙️" minWidth={80} maxWidth={100}>
-        <ContentLine align="center">
-          <Text color="cyan">ワークフロー作成に必要な環境を確認しています</Text>
-        </ContentLine>
-        
-        <ContentLine>
-          <Text> </Text>
-        </ContentLine>
-        
-        <ContentLine>
-          <Text bold color="white">環境チェック結果:</Text>
-        </ContentLine>
-        
-        <ContentLine>
-          <Text> </Text>
-        </ContentLine>
-        
-        {checks.map((check, index) => (
-          <ContentLine key={check.name}>
-            <Box>
+    <UnifiedScreen
+      config={screenConfig}
+      statusItems={statusItems}
+      customStatusMessage={!isComplete ? 
+        '環境確認中です... しばらくお待ちください' : 
+        '✅ Enterキーでプレビュー画面に進みます'}
+    >
+      {/* Environment Check Results */}
+      <Section title="環境チェック結果" spacing="sm">
+        <Box flexDirection="column" gap={1}>
+          {checks.map((check, index) => (
+            <Box key={check.name}>
               {getStatusIcon(check.status)}
-              <Text color="white"> {check.name}: </Text>
+              <Text color={theme.colors.white}> {check.name}: </Text>
               <Text color={getStatusColor(check.status)}>
                 {check.message}
               </Text>
             </Box>
-          </ContentLine>
-        ))}
-        
-        <ContentLine>
-          <Text> </Text>
-        </ContentLine>
-        
-        {isComplete && (
-          <>
-            <ContentLine align="center">
-              <Text color="green" bold>🎉 環境チェック完了!</Text>
-            </ContentLine>
-            
-            <ContentLine>
-              <Text> </Text>
-            </ContentLine>
-            
-            <ContentLine>
-              <Text color="cyan">✨ 検出された機能:</Text>
-            </ContentLine>
-            <ContentLine>
-              <Text color="gray">• Claude Code統合環境での実行</Text>
-            </ContentLine>
-            <ContentLine>
-              <Text color="gray">• POML (Prompt Orchestration Markup Language) サポート</Text>
-            </ContentLine>
-            <ContentLine>
-              <Text color="gray">• ワークフロー自動生成とコマンド作成</Text>
-            </ContentLine>
-            <ContentLine>
-              <Text color="gray">• エージェント連携とスクリプト実行</Text>
-            </ContentLine>
-            
-            <ContentLine>
-              <Text> </Text>
-            </ContentLine>
-            
-            <ContentLine align="center">
-              <Text color="blue">📝 操作方法:</Text>
-            </ContentLine>
-            <ContentLine align="center">
-              <Text color="gray">Enter: 次に進む | Esc: 戻る | Q: 終了</Text>
-            </ContentLine>
-            
-            <ContentLine>
-              <Text> </Text>
-            </ContentLine>
-            
-            <ContentLine align="center">
-              <Text color="green">✅ Enterキーでプレビュー画面に進みます</Text>
-            </ContentLine>
-          </>
-        )}
-        
-        {!isComplete && (
-          <>
-            <ContentLine>
-              <Text> </Text>
-            </ContentLine>
-            <ContentLine align="center">
-              <Text color="yellow">環境確認中です... しばらくお待ちください</Text>
-            </ContentLine>
-          </>
-        )}
-      </Frame>
-    </Box>
+          ))}
+        </Box>
+      </Section>
+
+      {/* Completion Status */}
+      {isComplete && (
+        <>
+          <ScreenDescription
+            heading="🎉 環境チェック完了!"
+            align="center"
+          />
+
+          <Section title="✨ 検出された機能" spacing="sm">
+            <FeatureHighlights
+              features={detectedFeatures}
+              contentWidth={contentWidth}
+            />
+          </Section>
+        </>
+      )}
+    </UnifiedScreen>
   );
 };

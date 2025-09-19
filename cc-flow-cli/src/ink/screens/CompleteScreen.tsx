@@ -1,7 +1,11 @@
 import React, { useCallback } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
-import SelectInput from 'ink-select-input';
-import { Frame, ContentLine } from '../components/Frame.js';
+import { UnifiedScreen, ScreenDescription, MenuSection, FeatureHighlights, HintBox } from '../design-system/index.js';
+import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
+import { Section, Flex } from '../components/Layout.js';
+import { useTheme } from '../themes/theme.js';
+import { MenuItem } from '../components/Interactive.js';
+import packageJson from '../../../package.json';
 
 interface Agent {
   id: string;
@@ -23,10 +27,14 @@ interface CompleteScreenProps {
   onExit: () => void;
 }
 
+const packageVersion = packageJson.version ?? '0.0.0';
+
 export const CompleteScreen: React.FC<CompleteScreenProps> = ({ config, onAnother, onExit }) => {
   const { exit } = useApp();
+  const theme = useTheme();
+  const { contentWidth } = useScreenDimensions();
 
-  const choices = [
+  const choices: MenuItem[] = [
     { label: '🔄 新しいワークフローを作成する', value: 'another' },
     { label: '🔧 コマンド変換モードに切り替える', value: 'convert' },
     { label: '👋 アプリケーションを終了', value: 'exit' }
@@ -41,7 +49,7 @@ export const CompleteScreen: React.FC<CompleteScreenProps> = ({ config, onAnothe
     }
   }, [exit, onAnother]));
 
-  const handleSelect = (item: { value: string }) => {
+  const handleSelect = (item: MenuItem) => {
     if (item.value === 'another') {
       onAnother();
     } else if (item.value === 'convert') {
@@ -52,154 +60,99 @@ export const CompleteScreen: React.FC<CompleteScreenProps> = ({ config, onAnothe
     }
   };
 
-  const frameWidth = 85;
+  // Screen configuration using design system patterns
+  const screenConfig = createScreenLayout('complete', {
+    title: 'ワークフロー作成完了',
+    subtitle: '🎉 ワークフローの作成が完了しました！',
+    icon: '🎉'
+  });
+
+  const statusItems = [
+    { key: 'Command', value: `/${config.workflowName || 'my-workflow'}` },
+    { key: 'Agents', value: `${config.selectedAgents?.length || 0}個` },
+    { key: 'Status', value: 'Complete', color: '#00ff00' }
+  ];
+
+  const usageFeatures = [
+    `1. 基本実行: /${config.workflowName || 'my-workflow'} "あなたのタスク内容"`,
+    `2. 実行例: /${config.workflowName || 'my-workflow'} "Webアプリの仕様書を作成してください"`
+  ];
+
+  const usageHints = [
+    '• エージェントは上記の順序で自動実行されます',
+    '• 各エージェントの結果は次のエージェントに引き継がれます',
+    '• ワークフローはClaude Code環境で実行可能です'
+  ];
 
   return (
-    <Box flexDirection="column" alignItems="center" justifyContent="center" width="100%" height="100%">
-      <Frame title="ワークフロー作成完了" icon="🎉" minWidth={80} maxWidth={100}>
-        <ContentLine align="center">
-          <Text color="green" bold>🎉 ワークフローの作成が完了しました！</Text>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine >
-          <Text bold color="white">📋 作成されたワークフロー:</Text>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine >
-          <Box>
-            <Text color="cyan">コマンド名: </Text>
-            <Text color="green" bold>/{config.workflowName || 'my-workflow'}</Text>
-          </Box>
-        </ContentLine>
-        
-        <ContentLine >
-          <Box>
-            <Text color="cyan">エージェント数: </Text>
-            <Text color="yellow">{config.selectedAgents?.length || 0}個</Text>
-          </Box>
-        </ContentLine>
-        
-        <ContentLine >
-          <Box>
-            <Text color="cyan">ファイル保存先: </Text>
-            <Text color="gray">.claude/commands/{config.workflowName || 'my-workflow'}.md</Text>
-          </Box>
-        </ContentLine>
-        
-        {config.purpose && (
-          <ContentLine >
+    <UnifiedScreen
+      config={screenConfig}
+      version={packageVersion}
+      statusItems={statusItems}
+      customStatusMessage="✅ お疲れ様でした！ワークフローをお試しください"
+    >
+      {/* Workflow Summary */}
+      <Section title="📋 作成されたワークフロー" spacing="sm">
+        <Box flexDirection="column" gap={1}>
+          <Flex>
+            <Text color={theme.colors.hex.lightBlue}>コマンド名: </Text>
+            <Text color={theme.colors.hex.green} bold>/{config.workflowName || 'my-workflow'}</Text>
+          </Flex>
+          
+          <Flex>
+            <Text color={theme.colors.hex.lightBlue}>エージェント数: </Text>
+            <Text color={theme.colors.hex.green}>{config.selectedAgents?.length || 0}個</Text>
+          </Flex>
+          
+          <Flex>
+            <Text color={theme.colors.hex.lightBlue}>ファイル保存先: </Text>
+            <Text color={theme.colors.gray}>.claude/commands/{config.workflowName || 'my-workflow'}.md</Text>
+          </Flex>
+          
+          {config.purpose && (
+            <Flex>
+              <Text color={theme.colors.hex.lightBlue}>目的: </Text>
+              <Text color={theme.colors.hex.green}>{config.purpose}</Text>
+            </Flex>
+          )}
+        </Box>
+      </Section>
+
+      {/* Usage Instructions */}
+      <FeatureHighlights
+        features={usageFeatures}
+        contentWidth={contentWidth}
+      />
+
+      {/* Execution Order */}
+      <Section title="📝 実行順序" spacing="sm">
+        <Box flexDirection="column" gap={1}>
+          {config.selectedAgents?.slice(0, 3).map((agent, index) => (
+            <Box key={agent.id}>
+              <Text color={theme.colors.hex.green}>{index + 1}. </Text>
+              <Text color={theme.colors.white}>{agent.name}</Text>
+              <Text color={theme.colors.gray}> - {agent.description}</Text>
+            </Box>
+          ))}
+          {(config.selectedAgents?.length || 0) > 3 && (
             <Box>
-              <Text color="cyan">目的: </Text>
-              <Text color="yellow">{config.purpose}</Text>
+              <Text color={theme.colors.gray}>... 他 {(config.selectedAgents?.length || 0) - 3}個のエージェント</Text>
             </Box>
-          </ContentLine>
-        )}
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine >
-          <Text bold color="white">🚀 使用方法:</Text>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine >
-          <Text color="green">1. 基本実行:</Text>
-        </ContentLine>
-        <ContentLine >
-          <Box paddingLeft={2}>
-            <Text color="gray">/{config.workflowName || 'my-workflow'} "あなたのタスク内容"</Text>
-          </Box>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine >
-          <Text color="green">2. 実行例:</Text>
-        </ContentLine>
-        <ContentLine >
-          <Box paddingLeft={2}>
-            <Text color="gray">/{config.workflowName || 'my-workflow'} "Webアプリの仕様書を作成してください"</Text>
-          </Box>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine >
-          <Text color="blue">📝 実行順序:</Text>
-        </ContentLine>
-        {config.selectedAgents?.slice(0, 3).map((agent, index) => (
-          <ContentLine key={agent.id} >
-            <Box paddingLeft={2}>
-              <Text color="green">{index + 1}. </Text>
-              <Text color="white">{agent.name}</Text>
-              <Text color="gray"> - {agent.description}</Text>
-            </Box>
-          </ContentLine>
-        ))}
-        {(config.selectedAgents?.length || 0) > 3 && (
-          <ContentLine >
-            <Box paddingLeft={2}>
-              <Text color="gray">... 他 {(config.selectedAgents?.length || 0) - 3}個のエージェント</Text>
-            </Box>
-          </ContentLine>
-        )}
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine >
-          <Text color="yellow">💡 ヒント:</Text>
-        </ContentLine>
-        <ContentLine >
-          <Text color="gray">• エージェントは上記の順序で自動実行されます</Text>
-        </ContentLine>
-        <ContentLine >
-          <Text color="gray">• 各エージェントの結果は次のエージェントに引き継がれます</Text>
-        </ContentLine>
-        <ContentLine >
-          <Text color="gray">• ワークフローはClaude Code環境で実行可能です</Text>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine >
-          <Box paddingLeft={2}>
-            <SelectInput
-              items={choices}
-              onSelect={handleSelect}
-              indicatorComponent={({ isSelected }) => (
-                <Box marginRight={1}>
-                  <Text color="cyan">{isSelected ? '▶' : ' '}</Text>
-                </Box>
-              )}
-              itemComponent={({ label, isSelected }) => (
-                <Text {...(isSelected ? { color: 'cyan' } : {})}>
-                  {label}
-                </Text>
-              )}
-            />
-          </Box>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine align="center">
-          <Text color="blue">📝 操作方法:</Text>
-        </ContentLine>
-        <ContentLine align="center">
-          <Text color="gray">↑↓: 選択 | Enter: 実行 | N: 新規作成 | Q: 終了</Text>
-        </ContentLine>
-        
-        <ContentLine ><Text> </Text></ContentLine>
-        
-        <ContentLine align="center">
-          <Text color="green">✅ お疲れ様でした！ワークフローをお試しください</Text>
-        </ContentLine>
-      </Frame>
-    </Box>
+          )}
+        </Box>
+      </Section>
+
+      {/* Usage Hints */}
+      <HintBox
+        title="💡 ヒント"
+        hints={usageHints}
+      />
+
+      {/* Next Action Menu */}
+      <MenuSection
+        items={choices}
+        onSelect={handleSelect}
+      />
+    </UnifiedScreen>
   );
 };

@@ -1,14 +1,20 @@
-import React, { Fragment } from 'react';
-import { Box, Text, Spacer } from 'ink';
-import { useTheme } from '../themes/theme.js';
-import type { Theme } from '../themes/theme.js';
-import { renderLines } from '../utils/text.js';
+import React, { Fragment } from "react";
+import { Box, Text, Spacer } from "ink";
+import { useTheme } from "../themes/theme.js";
+import type { Theme } from "../themes/theme.js";
+import { renderLines } from "../utils/text.js";
 
-type Variant = 'default' | 'primary' | 'success' | 'warning' | 'info' | 'danger';
+type Variant =
+  | "default"
+  | "primary"
+  | "success"
+  | "warning"
+  | "info"
+  | "danger";
 
-type Align = 'left' | 'center' | 'right';
+type Align = "left" | "center" | "right";
 
-type Spacing = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+type Spacing = "xs" | "sm" | "md" | "lg" | "xl";
 
 const clampWidth = (value: number, min: number, max: number): number => {
   return Math.max(min, Math.min(max, value));
@@ -22,16 +28,24 @@ const resolveWidth = (
 ): number => {
   // Ensure terminal width is valid
   const safeTerminalWidth = Math.max(20, terminalWidth);
-  
-  if (typeof width === 'number') {
-    return clampWidth(width, minWidth, Math.min(maxWidth, safeTerminalWidth - 2));
+
+  if (typeof width === "number") {
+    return clampWidth(
+      width,
+      minWidth,
+      Math.min(maxWidth, safeTerminalWidth - 2)
+    );
   }
 
-  if (typeof width === 'string' && width.endsWith('%')) {
+  if (typeof width === "string" && width.endsWith("%")) {
     const percent = Number(width.slice(0, -1));
     if (!Number.isNaN(percent) && percent > 0 && percent <= 100) {
       const candidate = Math.round((safeTerminalWidth * percent) / 100);
-      return clampWidth(candidate, minWidth, Math.min(maxWidth, safeTerminalWidth - 2));
+      return clampWidth(
+        candidate,
+        minWidth,
+        Math.min(maxWidth, safeTerminalWidth - 2)
+      );
     }
   }
 
@@ -41,17 +55,17 @@ const resolveWidth = (
   return clampWidth(candidate, minWidth, candidate);
 };
 
-const variantColor = (variant: Variant, colors: Theme['colors']) => {
+const variantColor = (variant: Variant, colors: Theme["colors"]) => {
   switch (variant) {
-    case 'primary':
+    case "primary":
       return colors.primary;
-    case 'success':
+    case "success":
       return colors.success;
-    case 'warning':
+    case "warning":
       return colors.warning;
-    case 'info':
+    case "info":
       return colors.info;
-    case 'danger':
+    case "danger":
       return colors.error;
     default:
       return colors.border;
@@ -61,7 +75,7 @@ const variantColor = (variant: Variant, colors: Theme['colors']) => {
 const TextBlock = ({
   value,
   width,
-  align = 'left',
+  align = "left",
   color,
   bold,
   italic,
@@ -75,7 +89,8 @@ const TextBlock = ({
 }) => (
   <Box flexDirection="column" width="100%">
     {renderLines(value, width, align).map((line, index) => {
-      const textProps: { color?: string; bold?: boolean; italic?: boolean } = {};
+      const textProps: { color?: string; bold?: boolean; italic?: boolean } =
+        {};
       if (color) {
         textProps.color = color;
       }
@@ -94,7 +109,6 @@ const TextBlock = ({
   </Box>
 );
 
-
 interface ContainerProps {
   children: React.ReactNode;
   centered?: boolean;
@@ -106,13 +120,17 @@ export const Container: React.FC<ContainerProps> = ({
   children,
   centered = true,
   fullHeight = false,
-  padding = false
+  padding = false,
 }) => {
   const theme = useTheme();
-  
+
   // Calculate safe minimum height for full height mode
-  const safeMinHeight = fullHeight 
-    ? Math.max(10, theme.responsive.terminalHeight - (padding ? theme.layout.paddingY * 2 : 0))
+  const safeMinHeight = fullHeight
+    ? Math.max(
+        10,
+        theme.responsive.terminalHeight -
+          (padding ? theme.layout.paddingY * 2 : 0)
+      )
     : undefined;
 
   return (
@@ -120,7 +138,7 @@ export const Container: React.FC<ContainerProps> = ({
       width="100%"
       flexDirection="column"
       alignItems="center"
-      justifyContent={centered ? 'center' : 'flex-start'}
+      justifyContent={centered ? "center" : "flex-start"}
       minHeight={safeMinHeight}
       paddingY={padding ? theme.layout.paddingY : 0}
     >
@@ -154,17 +172,17 @@ export const Card: React.FC<CardProps> = ({
   width,
   minWidth,
   maxWidth,
-  variant = 'default',
-  align = 'center',
+  variant = "default",
+  align = "center",
   paddingX,
   paddingY,
-  fullHeight = false
+  fullHeight = false,
 }) => {
   const theme = useTheme();
 
   const resolvedPaddingX = paddingX ?? theme.layout.paddingX;
   const resolvedPaddingY = paddingY ?? theme.layout.paddingY;
-  
+
   const resolvedWidth = resolveWidth(
     width,
     theme.responsive.terminalWidth,
@@ -188,7 +206,11 @@ export const Card: React.FC<CardProps> = ({
       paddingX={resolvedPaddingX}
       paddingY={resolvedPaddingY}
       flexShrink={0}
-      minHeight={fullHeight ? Math.max(theme.responsive.terminalHeight - resolvedPaddingY * 2, 0) : undefined}
+      minHeight={
+        fullHeight
+          ? Math.max(theme.responsive.terminalHeight - resolvedPaddingY * 2, 0)
+          : undefined
+      }
     >
       {(title || subtitle) && (
         <Box flexDirection="column" width="100%" marginBottom={1}>
@@ -244,22 +266,28 @@ interface SectionProps {
 
 export const Section: React.FC<SectionProps> = ({
   children,
-  spacing = 'md',
+  spacing = "md",
   title,
   icon,
-  align = 'left',
-  width
+  align = "left",
+  width,
 }) => {
   const theme = useTheme();
   const margin = theme.spacing[spacing];
   const contentWidth = Math.max(
     1,
-    (width ?? resolveWidth(undefined, theme.responsive.terminalWidth, theme.layout.minWidth, theme.layout.maxWidth)) -
+    (width ??
+      resolveWidth(
+        undefined,
+        theme.responsive.terminalWidth,
+        theme.layout.minWidth,
+        theme.layout.maxWidth
+      )) -
       theme.layout.paddingX * 2
   );
 
   return (
-    <Box width="100%" flexDirection="column" marginBottom={margin}>
+    <Box width="100%" flexDirection="column" marginTop={margin}>
       {title && (
         <Box marginBottom={1}>
           <TextBlock
@@ -278,27 +306,27 @@ export const Section: React.FC<SectionProps> = ({
 
 interface FlexProps {
   children: React.ReactNode;
-  direction?: 'row' | 'column';
-  align?: 'flex-start' | 'center' | 'flex-end';
-  justify?: 'flex-start' | 'center' | 'flex-end' | 'space-between';
+  direction?: "row" | "column";
+  align?: "flex-start" | "center" | "flex-end";
+  justify?: "flex-start" | "center" | "flex-end" | "space-between";
   gap?: number;
   wrap?: boolean;
 }
 
 export const Flex: React.FC<FlexProps> = ({
   children,
-  direction = 'row',
-  align = 'flex-start',
-  justify = 'flex-start',
+  direction = "row",
+  align = "flex-start",
+  justify = "flex-start",
   gap = 0,
-  wrap = false
+  wrap = false,
 }) => (
   <Box
     flexDirection={direction}
     alignItems={align}
     justifyContent={justify}
     gap={gap}
-    flexWrap={wrap ? 'wrap' : 'nowrap'}
+    flexWrap={wrap ? "wrap" : "nowrap"}
   >
     {children}
   </Box>
@@ -314,7 +342,12 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle, icon }) => {
   const theme = useTheme();
   const width = Math.max(
     1,
-    resolveWidth(undefined, theme.responsive.terminalWidth, theme.layout.minWidth, theme.layout.maxWidth) -
+    resolveWidth(
+      undefined,
+      theme.responsive.terminalWidth,
+      theme.layout.minWidth,
+      theme.layout.maxWidth
+    ) -
       theme.layout.paddingX * 2
   );
 

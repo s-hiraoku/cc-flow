@@ -1,28 +1,30 @@
 import React from 'react';
-import { Text, useApp } from 'ink';
-import { Container, Card, Section, Flex } from '../components/Layout.js';
-import { FocusableMenu, StatusBar } from '../components/Interactive.js';
-import { useTheme } from '../themes/theme.js';
+import { useApp } from 'ink';
+import { UnifiedScreen, ScreenDescription, MenuSection } from '../design-system/index.js';
+import { createScreenLayout } from '../design-system/ScreenPatterns.js';
+import { MenuItem } from '../components/Interactive.js';
+import packageJson from '../../../package.json';
 
 interface MenuScreenProps {
   onSelect: (action: string) => void;
   onBack?: () => void;
 }
 
+const packageVersion = packageJson.version ?? '0.0.0';
+
 export const MenuScreen: React.FC<MenuScreenProps> = ({ onSelect, onBack }) => {
   const { exit } = useApp();
-  const theme = useTheme();
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     {
-      label: '📁 ディレクトリを選択してワークフロー作成',
+      label: '🤖 サブエージェントを連携してワークフロー作成',
       value: 'create-workflow',
-      description: 'エージェントディレクトリを選択して新しいワークフローを作成'
+      description: 'サブエージェントを選択・連携して新しいワークフローを作成'
     },
     {
-      label: '🔄 スラッシュコマンドをエージェントに変換',
+      label: '🔄 スラッシュコマンドをサブエージェントに変換してワークフローを作成',
       value: 'convert-commands',
-      description: '既存のスラッシュコマンドを新しいエージェント形式に変換'
+      description: '既存のスラッシュコマンドを新しいサブエージェント形式に変換してワークフローを作成'
     },
     {
       label: '⚙️ 設定',
@@ -41,7 +43,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({ onSelect, onBack }) => {
     }
   ];
 
-  const handleSelect = (item: { value: string }) => {
+  const handleSelect = (item: MenuItem) => {
     if (item.value === 'exit') {
       exit();
     } else {
@@ -49,50 +51,34 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({ onSelect, onBack }) => {
     }
   };
 
+  // Screen configuration using design system patterns
+  const screenConfig = createScreenLayout('menu');
+
   const statusItems = [
     { key: 'Mode', value: 'Main Menu' },
-    { key: 'Version', value: '0.0.10' },
-    { key: 'Status', value: 'Ready', color: theme.colors.success }
+    { key: 'Version', value: packageVersion },
+    { key: 'Status', value: 'Ready', color: '#00ff00' }
   ];
 
   return (
-    <Container>
-      <Card title="🌊 CC-Flow メインメニュー" width="85%">
-        {/* Description */}
-        <Section>
-          <Flex direction="column" align="center">
-            <Text color={theme.colors.info}>
-              エージェント連携ワークフロー作成ツール
-            </Text>
-            <Text color={theme.colors.muted} italic>
-              以下から実行したい操作を選択してください
-            </Text>
-          </Flex>
-        </Section>
+    <UnifiedScreen
+      config={screenConfig}
+      version={packageVersion}
+      statusItems={statusItems}
+    >
+      {/* Screen Description */}
+      <ScreenDescription
+        heading="エージェント連携ワークフロー作成ツール"
+        subheading="以下から実行したい操作を選択してください"
+        align="center"
+      />
 
-        {/* Main Menu */}
-        <Section spacing="lg">
-          <FocusableMenu
-            items={menuItems}
-            onSelect={handleSelect}
-          />
-        </Section>
-
-        {/* Help Text */}
-        <Section>
-          <Flex direction="column" align="center">
-            <Text color={theme.colors.info}>📝 操作方法:</Text>
-            <Text color={theme.colors.muted}>
-              ↑↓: 選択 | Enter: 実行 | Q: 終了
-            </Text>
-          </Flex>
-        </Section>
-
-        {/* Status Bar */}
-        <Section spacing="sm">
-          <StatusBar items={statusItems} />
-        </Section>
-      </Card>
-    </Container>
+      {/* Main Menu */}
+      <MenuSection
+        items={menuItems}
+        onSelect={handleSelect}
+        showDescription={true}
+      />
+    </UnifiedScreen>
   );
 };
