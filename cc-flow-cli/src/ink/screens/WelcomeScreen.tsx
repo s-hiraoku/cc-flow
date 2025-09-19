@@ -98,7 +98,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
             {heroLines.map((line, index) => (
               <Text
                 key={`hero-${index}`}
-                color={theme.colors.hex.lightBlue}
+                color={theme.colors.yellow}
                 bold
               >
                 {line}

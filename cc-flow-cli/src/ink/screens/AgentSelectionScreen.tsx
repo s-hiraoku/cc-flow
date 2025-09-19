@@ -94,9 +94,9 @@ export const AgentSelectionScreen: React.FC<AgentSelectionScreenProps> = ({
     >
       {/* Screen Description */}
       <ScreenDescription
-        heading="ワークフローに含めるエージェントを選択してください（スペースキーで切替）"
-        subheading="選択順は後のステップで並べ替えできます。"
-        align="left"
+        heading="ワークフローに含めるサブエージェントを選択"
+        subheading="スペースキーで選択/解除します。実行順序は次のステップで調整できます"
+        align="center"
       />
 
       {/* Agent Selection List */}

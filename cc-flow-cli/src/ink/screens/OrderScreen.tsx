@@ -103,8 +103,8 @@ export const OrderScreen: React.FC<OrderScreenProps> = ({
     >
       {/* Screen Description */}
       <ScreenDescription
-        heading="エージェントの実行順序を設定してください"
-        subheading="エージェントは上から順番に実行されます"
+        heading="サブエージェントの実行順序を調整"
+        subheading="Ctrl+↑↓キーで順序を変更します。上から順番に実行されます"
         align="center"
       />
 

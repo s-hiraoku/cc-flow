@@ -68,8 +68,8 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({ onSelect, onBack }) => {
     >
       {/* Screen Description */}
       <ScreenDescription
-        heading="エージェント連携ワークフロー作成ツール"
-        subheading="以下から実行したい操作を選択してください"
+        heading="Claude Code ワークフロー作成"
+        subheading="サブエージェントを組み合わせて自動化ワークフローを構築できます"
         align="center"
       />
 

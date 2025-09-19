@@ -4,6 +4,7 @@ import TextInput from 'ink-text-input';
 import Spinner from 'ink-spinner';
 import { useTheme } from '../themes/theme.js';
 import { alignWithinWidth, renderLines } from '../utils/text.js';
+import { Alignment, SpacingValue } from '../types/index.js';
 
 export interface MenuItem {
   id?: string;
@@ -51,7 +52,8 @@ interface FocusableMenuProps {
   width?: number;
   showDescription?: boolean;
   focusId?: string;
-  align?: 'left' | 'center' | 'right';
+  align?: Alignment;
+  spacing?: SpacingValue;
 }
 
 export const FocusableMenu: React.FC<FocusableMenuProps> = ({
@@ -59,7 +61,8 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
   onSelect,
   width,
   showDescription = false,
-  align = 'left'
+  align = 'left',
+  spacing = 1
 }) => {
   const theme = useTheme();
   const listWidth = width ?? resolveListWidth(theme.responsive.terminalWidth, theme.layout.minWidth, theme.layout.maxWidth);
@@ -99,28 +102,34 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
             : theme.colors.text.primary;
 
         return (
-          <Box key={item.id ?? item.value} flexDirection="column" marginBottom={1}>
+          <Box key={item.id ?? item.value} flexDirection="column" marginBottom={spacing} height={showDescription ? 3 : 1} minHeight={showDescription ? 3 : 1}>
             {labelLines.map((line, lineIndex) => {
               const indicator = lineIndex === 0 ? (isSelected ? '▶' : ' ') : ' ';
               const composedLine = alignWithinWidth(`${indicator} ${line}`, lineContainerWidth, align);
               return (
-                <Box key={`menu-${item.value}-${lineIndex}`} width={lineContainerWidth}>
+                <Box key={`menu-${item.value}-${lineIndex}`} width={lineContainerWidth} height={1}>
                   <Text color={textColor}>{composedLine}</Text>
                 </Box>
               );
             })}
-            {descriptionLines.length > 0 && (
-              <Box flexDirection="column" width={lineContainerWidth}>
-                {descriptionLines.map((line, lineIndex) => {
-                  const composedLine = alignWithinWidth(`  ${line}`, lineContainerWidth, align);
-                  return (
-                    <Box key={`menu-desc-${item.value}-${lineIndex}`} width={lineContainerWidth}>
-                      <Text color={theme.colors.text.muted} italic>
-                        {composedLine}
-                      </Text>
-                    </Box>
-                  );
-                })}
+            {showDescription && (
+              <Box flexDirection="column" width={lineContainerWidth} height={2}>
+                {descriptionLines.length > 0 ? (
+                  descriptionLines.map((line, lineIndex) => {
+                    const composedLine = alignWithinWidth(`  ${line}`, lineContainerWidth, align);
+                    return (
+                      <Box key={`menu-desc-${item.value}-${lineIndex}`} width={lineContainerWidth} height={1}>
+                        <Text color={theme.colors.text.muted} italic>
+                          {composedLine}
+                        </Text>
+                      </Box>
+                    );
+                  })
+                ) : (
+                  <Box height={2} width={lineContainerWidth}>
+                    <Text> </Text>
+                  </Box>
+                )}
               </Box>
             )}
           </Box>

@@ -1,5 +1,5 @@
-import { useStdout } from 'ink';
-import { useMemo } from 'react';
+import { useStdout } from "ink";
+import { useMemo } from "react";
 
 export interface Theme {
   colors: {
@@ -33,6 +33,7 @@ export interface Theme {
       blue: string;
       darkBlue: string;
       lightBlue: string;
+      tealBlue: string;
       green: string;
       orange: string;
       purple: string;
@@ -51,7 +52,7 @@ export interface Theme {
     maxWidth: number;
     paddingX: number;
     paddingY: number;
-    borderStyle: 'single' | 'double' | 'round' | 'bold';
+    borderStyle: "single" | "double" | "round" | "bold";
   };
   responsive: {
     isCompact: boolean;
@@ -60,52 +61,56 @@ export interface Theme {
   };
 }
 
-export const createTheme = (terminalInfo: { width: number; height: number }): Theme => {
+export const createTheme = (terminalInfo: {
+  width: number;
+  height: number;
+}): Theme => {
   // Ensure minimum viable terminal dimensions
   const safeWidth = Math.max(40, terminalInfo.width);
   const safeHeight = Math.max(10, terminalInfo.height);
-  
+
   const horizontalMargin = 6;
   const maxWidth = Math.max(40, Math.min(safeWidth - horizontalMargin, 120));
   const minWidth = Math.min(40, maxWidth);
 
   return {
     colors: {
-      primary: 'cyan',
-      secondary: 'blue',
-      success: 'green',
-      warning: 'yellow',
-      error: 'red',
-      info: 'blue',
-      muted: 'gray',
-      border: 'cyan',
-      background: 'black',
+      primary: "cyan",
+      secondary: "blue",
+      success: "green",
+      warning: "yellow",
+      error: "red",
+      info: "blue",
+      muted: "gray",
+      border: "cyan",
+      background: "black",
       text: {
-        primary: 'white',
-        secondary: 'cyan',
-        muted: 'gray',
-        inverse: 'black'
+        primary: "white",
+        secondary: "cyan",
+        muted: "gray",
+        inverse: "black",
       },
       // Additional standard colors
-      white: 'white',
-      black: 'black',
-      red: 'red',
-      green: 'green',
-      yellow: 'yellow',
-      blue: 'blue',
-      magenta: 'magenta',
-      cyan: 'cyan',
-      gray: 'gray',
+      white: "white",
+      black: "black",
+      red: "red",
+      green: "green",
+      yellow: "yellow",
+      blue: "blue",
+      magenta: "magenta",
+      cyan: "cyan",
+      gray: "gray",
       // Hex colors for advanced styling
       hex: {
-        blue: '#3B82F6',
-        darkBlue: '#1E40AF',
-        lightBlue: '#60A5FA',
-        green: '#10B981',
-        orange: '#F97316',
-        purple: '#A855F7',
-        pink: '#EC4899'
-      }
+        blue: "#3B82F6",
+        darkBlue: "#1E40AF",
+        lightBlue: "#60A5FA",
+        tealBlue: "#0891B2",
+        green: "#10B981",
+        orange: "#F97316",
+        purple: "#A855F7",
+        pink: "#EC4899",
+      },
     },
     spacing: {
       xs: 1,
@@ -119,7 +124,7 @@ export const createTheme = (terminalInfo: { width: number; height: number }): Th
       maxWidth,
       paddingX: 2,
       paddingY: 1,
-      borderStyle: 'round',
+      borderStyle: "round",
     },
     responsive: {
       isCompact: safeHeight < 20 || safeWidth < 70,
@@ -131,12 +136,12 @@ export const createTheme = (terminalInfo: { width: number; height: number }): Th
 
 export const useTheme = (): Theme => {
   const { stdout } = useStdout();
-  
+
   return useMemo(() => {
     // Get terminal dimensions with fallbacks
     const terminalWidth = stdout?.columns || process.stdout?.columns || 80;
     const terminalHeight = stdout?.rows || process.stdout?.rows || 24;
-    
+
     return createTheme({ width: terminalWidth, height: terminalHeight });
   }, [stdout?.columns, stdout?.rows]);
 };

@@ -1,23 +1,27 @@
 /**
  * CC-Flow TUI Design System - Reusable Screen Components
- * 
+ *
  * Pre-built components implementing the unified design patterns
  * for consistent screen layouts across the application.
  */
 
-import React from 'react';
-import { Box, Text } from 'ink';
-import { Container, Card, Section } from '../components/Layout.js';
-import { StatusBar, FocusableMenu, MenuItem } from '../components/Interactive.js';
-import { renderLines } from '../utils/text.js';
-import { 
-  DESIGN_TOKENS, 
-  SCREEN_PATTERNS, 
-  useScreenDimensions, 
-  getStatusBarConfig, 
+import React from "react";
+import { Box, Text } from "ink";
+import { Container, Card, Section } from "../components/Layout.js";
+import {
+  StatusBar,
+  FocusableMenu,
+  MenuItem,
+} from "../components/Interactive.js";
+import { renderLines } from "../utils/text.js";
+import {
+  DESIGN_TOKENS,
+  useScreenDimensions,
+  getStatusBarConfig,
   getScreenColors,
-  type ScreenLayoutConfig 
-} from './ScreenPatterns.js';
+  type ScreenLayoutConfig,
+} from "./ScreenPatterns.js";
+import { Spacing } from "../types/common.js";
 
 // Logo Component (from WelcomeScreen)
 interface LogoProps {
@@ -33,7 +37,7 @@ export const Logo: React.FC<LogoProps> = ({ lines, contentWidth }) => {
     <Section spacing={DESIGN_TOKENS.spacing.logo} align="center">
       <Box flexDirection="column" width="100%" alignItems="center">
         {lines.map((line, index) => {
-          const [centeredLine] = renderLines(line, contentWidth, 'center');
+          const [centeredLine] = renderLines(line, contentWidth, "center");
           const logoColor = logoColors[index] ?? theme.colors.hex.blue;
           return (
             <Text key={`logo-${index}`} color={logoColor}>
@@ -54,17 +58,16 @@ interface HeroTextProps {
 
 export const HeroText: React.FC<HeroTextProps> = ({ text, contentWidth }) => {
   const { theme } = useScreenDimensions();
-  const heroLines = typeof text === 'string' 
-    ? renderLines(text, contentWidth, 'center')
-    : text;
+  const heroLines =
+    typeof text === "string" ? renderLines(text, contentWidth, "center") : text;
 
   return (
     <Section spacing={DESIGN_TOKENS.spacing.hero} align="center">
       <Box flexDirection="column" width="100%" alignItems="center">
         {heroLines.map((line, index) => (
-          <Text 
-            key={`hero-${index}`} 
-            color={DESIGN_TOKENS.typography.hero.color(theme)} 
+          <Text
+            key={`hero-${index}`}
+            color={DESIGN_TOKENS.typography.hero.color(theme)}
             bold={DESIGN_TOKENS.typography.hero.bold}
           >
             {line}
@@ -81,17 +84,20 @@ interface FeatureHighlightsProps {
   contentWidth: number;
 }
 
-export const FeatureHighlights: React.FC<FeatureHighlightsProps> = ({ features, contentWidth }) => {
+export const FeatureHighlights: React.FC<FeatureHighlightsProps> = ({
+  features,
+  contentWidth,
+}) => {
   const { theme } = useScreenDimensions();
 
   return (
     <Section spacing={DESIGN_TOKENS.spacing.features} align="center">
       <Box flexDirection="column" width="100%" alignItems="center">
         {features.map((feature, index) => {
-          const [centeredLine] = renderLines(feature, contentWidth, 'center');
+          const [centeredLine] = renderLines(feature, contentWidth, "center");
           return (
-            <Text 
-              key={`feature-${index}`} 
+            <Text
+              key={`feature-${index}`}
               color={DESIGN_TOKENS.typography.feature.color(theme)}
             >
               {centeredLine}
@@ -108,41 +114,43 @@ interface ScreenDescriptionProps {
   heading?: string;
   subheading?: string;
   description?: string;
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
 }
 
-export const ScreenDescription: React.FC<ScreenDescriptionProps> = ({ 
-  heading, 
-  subheading, 
+export const ScreenDescription: React.FC<ScreenDescriptionProps> = ({
+  heading,
+  subheading,
   description,
-  align = 'center' 
+  align = "center",
 }) => {
   const { theme } = useScreenDimensions();
   const colors = getScreenColors(theme);
 
   return (
     <Section spacing={DESIGN_TOKENS.spacing.content} align={align}>
-      <Box flexDirection="column" width="100%" alignItems={align === 'center' ? 'center' : 'flex-start'}>
+      <Box
+        flexDirection="column"
+        width="100%"
+        alignItems={align === "center" ? "center" : "flex-start"}
+      >
         {heading && (
-          <Text 
-            color={colors.text.emphasis} 
+          <Text
+            color={colors.text.emphasis}
             bold={DESIGN_TOKENS.typography.heading.bold}
           >
             {heading}
           </Text>
         )}
         {subheading && (
-          <Text 
-            color={colors.text.muted} 
+          <Text
+            color={theme.colors.hex.tealBlue}
             italic={DESIGN_TOKENS.typography.subheading.italic}
           >
             {subheading}
           </Text>
         )}
         {description && (
-          <Text color={colors.text.secondary}>
-            {description}
-          </Text>
+          <Text color={colors.text.secondary}>{description}</Text>
         )}
       </Box>
     </Section>
@@ -155,34 +163,127 @@ interface MenuSectionProps {
   onSelect: (item: MenuItem) => void;
   showDescription?: boolean;
   contentWidth?: number;
+  descriptionPlaceholder?: string;
+  spacing?: Spacing;
+  bordered?: boolean;
 }
 
-export const MenuSection: React.FC<MenuSectionProps> = ({ 
-  items, 
-  onSelect, 
+export const MenuSection: React.FC<MenuSectionProps> = ({
+  items,
+  onSelect,
   showDescription = false,
-  contentWidth 
+  contentWidth,
+  descriptionPlaceholder,
+  spacing = "md",
+  bordered = true,
 }) => {
   const { contentWidth: defaultContentWidth, theme } = useScreenDimensions();
   const colors = getScreenColors(theme);
+  const [selectedItem, setSelectedItem] = React.useState<MenuItem | null>(
+    items[0] || null
+  );
+
+  const handleSelectionChange = (item: MenuItem) => {
+    setSelectedItem(item);
+  };
+
+  const menuContent = (
+    <>
+      <FocusableMenu
+        items={items}
+        onSelect={onSelect}
+        onSelectionChange={handleSelectionChange}
+        width={(contentWidth || defaultContentWidth) - (bordered ? 4 : 0)} // Account for border and padding only if bordered
+        align="left"
+      />
+
+      {showDescription && (
+        <Box
+          marginTop={1}
+          paddingTop={1}
+          borderTop
+          borderColor={colors.text.muted}
+          width="100%"
+          minHeight={3}
+          justifyContent="flex-start"
+          alignItems="flex-start"
+          paddingLeft={1}
+        >
+          <Text
+            color={
+              selectedItem?.description
+                ? theme.colors.hex.tealBlue
+                : colors.text.muted
+            }
+          >
+            {selectedItem?.description ||
+              descriptionPlaceholder ||
+              "項目を選択すると説明が表示されます"}
+          </Text>
+        </Box>
+      )}
+    </>
+  );
+
+  if (bordered) {
+    return (
+      <Section spacing={DESIGN_TOKENS.spacing.menu} align="center">
+        <Box
+          borderStyle="single"
+          borderColor={colors.text.emphasis}
+          padding={1}
+          width="100%"
+          alignItems="center"
+          flexDirection="column"
+        >
+          {menuContent}
+        </Box>
+      </Section>
+    );
+  }
 
   return (
     <Section spacing={DESIGN_TOKENS.spacing.menu} align="center">
-      <Box 
-        borderStyle="single"
-        borderColor={colors.text.emphasis}
-        padding={1}
+      <Box
         width="100%"
         alignItems="center"
         flexDirection="column"
       >
-        <FocusableMenu
-          items={items}
-          onSelect={onSelect}
-          width={(contentWidth || defaultContentWidth) - 4} // Account for border and padding
-          align="left"
-          showDescription={showDescription}
-        />
+        {menuContent}
+      </Box>
+    </Section>
+  );
+};
+
+// Selection Description Area Component
+interface SelectionDescriptionAreaProps {
+  selectedItem?: MenuItem | null;
+  placeholder?: string;
+}
+
+export const SelectionDescriptionArea: React.FC<
+  SelectionDescriptionAreaProps
+> = ({ selectedItem, placeholder = "項目を選択すると説明が表示されます" }) => {
+  const { theme } = useScreenDimensions();
+  const colors = getScreenColors(theme);
+
+  const displayText = selectedItem?.description || placeholder;
+  const textColor = selectedItem?.description
+    ? colors.text.secondary
+    : colors.text.muted;
+
+  return (
+    <Section spacing={DESIGN_TOKENS.spacing.hint}>
+      <Box
+        borderStyle="single"
+        borderColor={colors.text.muted}
+        padding={1}
+        width="100%"
+        minHeight={3}
+        flexDirection="column"
+        justifyContent="center"
+      >
+        <Text color={textColor}>{displayText}</Text>
       </Box>
     </Section>
   );
@@ -200,7 +301,7 @@ export const HintBox: React.FC<HintBoxProps> = ({ title, hints }) => {
 
   return (
     <Section spacing={DESIGN_TOKENS.spacing.hint}>
-      <Box 
+      <Box
         borderStyle="single"
         borderColor={colors.text.feature}
         padding={1}
@@ -211,7 +312,7 @@ export const HintBox: React.FC<HintBoxProps> = ({ title, hints }) => {
             {title}
           </Text>
           {hints.map((hint, index) => (
-            <Text key={`hint-${index}`} color={colors.text.secondary}>
+            <Text key={`hint-${index}`} color={theme.colors.hex.tealBlue}>
               {hint}
             </Text>
           ))}
@@ -223,17 +324,17 @@ export const HintBox: React.FC<HintBoxProps> = ({ title, hints }) => {
 
 // Screen Status Bar Component
 interface ScreenStatusBarProps {
-  navigationType: ScreenLayoutConfig['navigationType'];
+  navigationType: ScreenLayoutConfig["navigationType"];
   customMessage?: string;
   contentWidth?: number;
   items?: Array<{ key: string; value: string; color?: string }>;
 }
 
-export const ScreenStatusBar: React.FC<ScreenStatusBarProps> = ({ 
-  navigationType, 
+export const ScreenStatusBar: React.FC<ScreenStatusBarProps> = ({
+  navigationType,
   customMessage,
   contentWidth,
-  items 
+  items,
 }) => {
   const { contentWidth: defaultContentWidth } = useScreenDimensions();
   const statusConfig = getStatusBarConfig(navigationType, customMessage);
@@ -241,10 +342,10 @@ export const ScreenStatusBar: React.FC<ScreenStatusBarProps> = ({
   return (
     <Section spacing={DESIGN_TOKENS.spacing.statusBar} align="center">
       <StatusBar
-        center={items ? undefined : statusConfig.center}
+        {...(!items && statusConfig.center && { center: statusConfig.center })}
         variant={statusConfig.variant}
         width={contentWidth || defaultContentWidth}
-        items={items}
+        {...(items && { items })}
       />
     </Section>
   );
@@ -273,7 +374,7 @@ export const VersionDisplay: React.FC<VersionDisplayProps> = ({ version }) => {
 interface UnifiedScreenProps {
   config: ScreenLayoutConfig;
   children?: React.ReactNode;
-  
+
   // Optional components
   logoLines?: string[];
   heroText?: string | string[];
@@ -291,19 +392,19 @@ export const UnifiedScreen: React.FC<UnifiedScreenProps> = ({
   features,
   version,
   statusItems,
-  customStatusMessage
+  customStatusMessage,
 }) => {
   const { cardWidth, contentWidth } = useScreenDimensions();
 
   return (
     <Container centered={config.centered} fullHeight={config.fullHeight}>
       <Card
-        title={config.title}
-        subtitle={config.subtitle}
-        icon={config.icon}
+        {...(config.title && { title: config.title })}
+        {...(config.subtitle && { subtitle: config.subtitle })}
+        {...(config.icon && { icon: config.icon })}
         width={cardWidth}
-        variant={config.variant}
-        align={config.align}
+        {...(config.variant && { variant: config.variant })}
+        {...(config.align && { align: config.align })}
       >
         {/* Logo Section */}
         {config.hasLogo && logoLines && (
@@ -327,16 +428,16 @@ export const UnifiedScreen: React.FC<UnifiedScreenProps> = ({
         {config.hasStatusBar && (
           <ScreenStatusBar
             navigationType={config.navigationType}
-            customMessage={customStatusMessage || config.customStatusMessage}
+            {...((customStatusMessage || config.customStatusMessage) && {
+              customMessage: customStatusMessage || config.customStatusMessage,
+            })}
             contentWidth={contentWidth}
-            items={statusItems}
+            {...(statusItems && { items: statusItems })}
           />
         )}
 
         {/* Version Display */}
-        {config.hasVersion && version && (
-          <VersionDisplay version={version} />
-        )}
+        {config.hasVersion && version && <VersionDisplay version={version} />}
       </Card>
     </Container>
   );
