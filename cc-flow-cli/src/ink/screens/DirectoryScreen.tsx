@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Text, Spacer } from 'ink';
 import { Container, Card, Section, Flex } from '../components/Layout.js';
 import { FocusableMenu, StatusBar, MenuItem } from '../components/Interactive.js';
 import { useTheme } from '../themes/theme.js';
+import { getAgentDirectories } from '../utils/directoryUtils.js';
 
 interface DirectoryScreenProps {
   onNext: (targetPath: string) => void;
@@ -11,37 +12,38 @@ interface DirectoryScreenProps {
 
 const DirectoryScreenContent: React.FC<DirectoryScreenProps> = ({ onNext, onBack }) => {
   const theme = useTheme();
-  
-  const directories: MenuItem[] = [
-    {
-      id: 'all-agents',
-      label: 'すべてのエージェント',
-      value: './agents',
-      icon: '📂',
-      description: 'プロジェクト内のすべてのエージェントディレクトリを対象とします'
-    },
-    {
-      id: 'spec-agents',
-      label: 'spec/ - 仕様定義エージェント',
-      value: './agents/spec',
-      icon: '📋',
-      description: '仕様定義・要件分析・設計関連のエージェントが含まれます'
-    },
-    {
-      id: 'utility-agents',
-      label: 'utility/ - ユーティリティエージェント',
-      value: './agents/utility',
-      icon: '🔧',
-      description: '汎用的なヘルパーエージェントやツール系エージェントが含まれます'
-    },
-    {
-      id: 'back',
-      label: '戻る',
-      value: 'back',
-      icon: '↩️',
-      description: '前の画面に戻ります'
-    }
-  ];
+  const [directories, setDirectories] = useState<MenuItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadDirectories = async () => {
+      try {
+        setIsLoading(true);
+        const dirs = getAgentDirectories('.claude/agents').map<MenuItem>((dir) => ({
+          id: dir.id,
+          label: dir.label,
+          value: dir.value,
+          icon: dir.icon,
+          description: dir.description
+        }));
+        setDirectories(dirs);
+      } catch (error) {
+        console.error('Failed to load directories:', error);
+        // エラー時はデフォルトの戻るオプションのみ表示
+        setDirectories([{
+          id: 'back',
+          label: '戻る',
+          value: 'back',
+          icon: '↩️',
+          description: '前の画面に戻ります'
+        }]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDirectories();
+  }, []);
 
   const handleSelect = (item: MenuItem) => {
     if (item.value === 'back') {
@@ -76,12 +78,20 @@ const DirectoryScreenContent: React.FC<DirectoryScreenProps> = ({ onNext, onBack
 
         {/* ディレクトリ選択 */}
         <Section title="📁 利用可能なディレクトリ" spacing="sm">
-          <FocusableMenu
-            items={directories}
-            onSelect={handleSelect}
-            showDescription={true}
-            focusId="directory-menu"
-          />
+          {isLoading ? (
+            <Box padding={2}>
+              <Text color={theme.colors.info}>
+                🔍 ディレクトリを読み込み中...
+              </Text>
+            </Box>
+          ) : (
+            <FocusableMenu
+              items={directories}
+              onSelect={handleSelect}
+              showDescription={true}
+              focusId="directory-menu"
+            />
+          )}
         </Section>
 
         <Spacer />

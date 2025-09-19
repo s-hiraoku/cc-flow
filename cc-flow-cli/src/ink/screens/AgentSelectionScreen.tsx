@@ -1,8 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Box, Text, Spacer, useInput, useApp } from 'ink';
+import React, { useState, useCallback, useMemo } from 'react';
+import { Box, Text, useApp, useInput } from 'ink';
 import { Container, Card, Section, Flex } from '../components/Layout.js';
-import { CheckboxList, StatusBar, MenuItem } from '../components/Interactive.js';
+import { CheckboxList, StatusBar } from '../components/Interactive.js';
 import { useTheme } from '../themes/theme.js';
+import { renderLines } from '../utils/text.js';
 
 interface Agent {
   id: string;
@@ -17,43 +18,36 @@ interface AgentSelectionScreenProps {
   onBack: () => void;
 }
 
-const AgentSelectionScreenContent: React.FC<AgentSelectionScreenProps> = ({ 
-  targetPath, 
-  onNext, 
-  onBack 
+export const AgentSelectionScreen: React.FC<AgentSelectionScreenProps> = ({
+  targetPath,
+  onNext,
+  onBack
 }) => {
   const theme = useTheme();
   const { exit } = useApp();
-  
-  // Mock agents for now - in real implementation this would come from targetPath
-  const availableAgents: Agent[] = [
+
+  const availableAgents: Agent[] = useMemo(() => ([
     { id: 'spec-init', name: 'spec-init', description: 'プロジェクト仕様の初期化', path: './agents/spec/spec-init.md' },
     { id: 'spec-requirements', name: 'spec-requirements', description: '要件定義と分析', path: './agents/spec/spec-requirements.md' },
     { id: 'spec-design', name: 'spec-design', description: 'システム設計と架構', path: './agents/spec/spec-design.md' },
     { id: 'spec-tasks', name: 'spec-tasks', description: 'タスク分解と計画', path: './agents/spec/spec-tasks.md' },
-    { id: 'spec-impl', name: 'spec-impl', description: '実装仕様とガイド', path: './agents/spec/spec-impl.md' },
-  ];
+    { id: 'spec-impl', name: 'spec-impl', description: '実装仕様とガイド', path: './agents/spec/spec-impl.md' }
+  ]), []);
 
   const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set());
 
-  // エージェントをMenuItemに変換
-  const menuItems: MenuItem[] = availableAgents.map(agent => ({
-    id: agent.id,
-    label: agent.name,
-    value: agent.id,
-    icon: '🤖',
-    description: agent.description
-  }));
+  const cardWidth = Math.min(theme.layout.maxWidth, Math.max(theme.layout.minWidth, 84));
+  const contentWidth = Math.max(24, cardWidth - theme.layout.paddingX * 2);
 
   const handleToggle = useCallback((agentId: string) => {
     setSelectedAgents(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(agentId)) {
-        newSet.delete(agentId);
+      const next = new Set(prev);
+      if (next.has(agentId)) {
+        next.delete(agentId);
       } else {
-        newSet.add(agentId);
+        next.add(agentId);
       }
-      return newSet;
+      return next;
     });
   }, []);
 
@@ -62,9 +56,8 @@ const AgentSelectionScreenContent: React.FC<AgentSelectionScreenProps> = ({
       const selected = availableAgents.filter(agent => selectedAgents.has(agent.id));
       onNext(selected);
     }
-  }, [selectedAgents, availableAgents, onNext]);
+  }, [availableAgents, onNext, selectedAgents]);
 
-  // グローバルキーバインド
   useInput(useCallback((input: string, key: any) => {
     if (key.return && selectedAgents.size > 0) {
       handleNext();
@@ -73,111 +66,94 @@ const AgentSelectionScreenContent: React.FC<AgentSelectionScreenProps> = ({
     } else if (input === 'q' || input === 'Q') {
       exit();
     }
-  }, [selectedAgents.size, handleNext, onBack, exit]));
+  }, [exit, handleNext, onBack, selectedAgents.size]));
 
-  // 選択されたエージェントのリスト
   const selectedAgentsList = availableAgents.filter(agent => selectedAgents.has(agent.id));
 
+  const summaryLines = selectedAgentsList.length === 0
+    ? renderLines('⚠️  少なくとも1つのエージェントを選択してください', contentWidth - 4, 'left')
+    : selectedAgentsList.map((agent, index) => `${index + 1}. ${agent.name}`);
+
   return (
-    <Container centered>
+    <Container centered fullHeight>
       <Card
-        title="エージェント選択"
+        width={cardWidth}
+        title="🤖 エージェント選択"
         subtitle={`対象: ${targetPath}`}
-        icon="🤖"
-        variant="primary"
-        fullHeight
+        align="left"
       >
-        {/* 説明セクション */}
         <Section spacing="sm">
-          <Flex direction="column" align="center" gap={1}>
+          <Flex direction="column" align="flex-start" gap={1}>
             <Text color={theme.colors.info}>
-              ワークフローに含めるエージェントを選択してください
+              ワークフローに含めるエージェントを選択してください（スペースキーで切替）
             </Text>
-            <Text color={theme.colors.text.secondary}>
-              複数選択可能です（スペースキーで切替）
+            <Text color={theme.colors.text.muted}>
+              選択順は後のステップで並べ替えできます。
             </Text>
           </Flex>
         </Section>
 
-        <Spacer />
-
-        {/* エージェント選択リスト */}
-        <Section title="🤖 利用可能なエージェント" spacing="sm">
-          <Box height={Math.min(availableAgents.length + 2, 12)}>
-            <CheckboxList
-              items={menuItems}
-              selectedIds={selectedAgents}
-              onToggle={handleToggle}
-              focusId="agent-list"
-              multiSelect={true}
-            />
-          </Box>
+        <Section spacing="md">
+          <CheckboxList
+            items={availableAgents.map(agent => ({
+              id: agent.id,
+              label: agent.name,
+              description: agent.description,
+              icon: '🤖'
+            }))}
+            selectedIds={selectedAgents}
+            onToggle={handleToggle}
+            width={contentWidth}
+            maxHeight={12}
+          />
         </Section>
 
-        <Spacer />
-
-        {/* 選択状況表示 */}
-        <Section title="📋 選択状況" spacing="sm">
-          <Box 
-            borderStyle="single"
+        <Section spacing="sm">
+          <Box
+            borderStyle={theme.layout.borderStyle}
             borderColor={selectedAgents.size > 0 ? theme.colors.success : theme.colors.warning}
-            padding={1}
-            width="100%"
+            paddingX={1}
+            paddingY={0}
+            width={contentWidth}
+            flexDirection="column"
           >
-            <Flex direction="column" gap={1}>
-              <Flex justify="space-between" align="center">
-                <Text color={theme.colors.text.primary}>
-                  選択済みエージェント数:
-                </Text>
-                <Text 
-                  color={selectedAgents.size > 0 ? theme.colors.success : theme.colors.warning}
-                  bold
-                >
-                  {selectedAgents.size} / {availableAgents.length}
-                </Text>
-              </Flex>
-              
-              {selectedAgents.size > 0 && (
-                <Box flexDirection="column">
-                  <Text color={theme.colors.text.secondary} marginBottom={1}>
-                    選択されたエージェント:
-                  </Text>
-                  {selectedAgentsList.map((agent, index) => (
-                    <Text key={agent.id} color={theme.colors.success}>
-                      {index + 1}. {agent.name}
-                    </Text>
-                  ))}
-                </Box>
-              )}
+            <Flex justify="space-between" align="center">
+              <Text color={theme.colors.text.primary}>
+                選択済みエージェント数
+              </Text>
+              <Text color={selectedAgents.size > 0 ? theme.colors.success : theme.colors.warning} bold>
+                {selectedAgents.size} / {availableAgents.length}
+              </Text>
             </Flex>
+            <Box marginTop={1} flexDirection="column">
+              {summaryLines.map((line, index) => (
+                <Text
+                  key={`summary-${index}`}
+                  color={selectedAgents.size > 0 ? theme.colors.success : theme.colors.warning}
+                >
+                  {line}
+                </Text>
+              ))}
+            </Box>
           </Box>
         </Section>
 
-        {/* 次へボタン状態 */}
-        {selectedAgents.size === 0 ? (
+        <Section spacing="sm">
           <StatusBar
-            center="⚠️ 少なくとも1つのエージェントを選択してください"
-            variant="warning"
+            center={selectedAgents.size === 0 ? '⚠️ 少なくとも1つ選択してください' : `✅ ${selectedAgents.size}個選択中 | Enter: 次へ進む`}
+            variant={selectedAgents.size === 0 ? 'warning' : 'success'}
+            width={contentWidth}
           />
-        ) : (
-          <StatusBar
-            center={`✅ ${selectedAgents.size}個選択中 | Enter: 次へ進む`}
-            variant="success"
-          />
-        )}
+        </Section>
 
-        {/* 操作ガイド */}
-        <Box marginTop={1}>
+        <Section spacing="sm">
           <StatusBar
             center="↑↓: 移動 | Space: 選択切替 | Enter: 確定 | Esc: 戻る | Q: 終了"
-            variant="default"
+            variant="info"
+            width={contentWidth}
           />
-        </Box>
+        </Section>
       </Card>
     </Container>
   );
 };
-
-export const AgentSelectionScreen: React.FC<AgentSelectionScreenProps> = (props) => (
-  <AgentSelectionScreenContent {...props} />
-);

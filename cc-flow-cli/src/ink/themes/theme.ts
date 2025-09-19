@@ -10,8 +10,14 @@ export interface Theme {
     error: string;
     info: string;
     muted: string;
-    text: string;
     border: string;
+    background: string;
+    text: {
+      primary: string;
+      secondary: string;
+      muted: string;
+      inverse: string;
+    };
   };
   spacing: {
     xs: number;
@@ -21,8 +27,10 @@ export interface Theme {
     xl: number;
   };
   layout: {
+    minWidth: number;
     maxWidth: number;
-    padding: number;
+    paddingX: number;
+    paddingY: number;
     borderStyle: 'single' | 'double' | 'round' | 'bold';
   };
   responsive: {
@@ -32,43 +40,62 @@ export interface Theme {
   };
 }
 
-export const createTheme = (terminalInfo: { width: number; height: number }): Theme => ({
-  colors: {
-    primary: 'cyan',
-    secondary: 'blue',
-    success: 'green',
-    warning: 'yellow',
-    error: 'red',
-    info: 'blue',
-    muted: 'gray',
-    text: 'white',
-    border: 'cyan',
-  },
-  spacing: {
-    xs: 1,
-    sm: 2,
-    md: 3,
-    lg: 4,
-    xl: 5,
-  },
-  layout: {
-    maxWidth: Math.min(100, terminalInfo.width - 8),
-    padding: 1,
-    borderStyle: 'round',
-  },
-  responsive: {
-    isCompact: terminalInfo.height < 20 || terminalInfo.width < 70,
-    terminalWidth: terminalInfo.width,
-    terminalHeight: terminalInfo.height,
-  },
-});
+export const createTheme = (terminalInfo: { width: number; height: number }): Theme => {
+  // Ensure minimum viable terminal dimensions
+  const safeWidth = Math.max(40, terminalInfo.width);
+  const safeHeight = Math.max(10, terminalInfo.height);
+  
+  const horizontalMargin = 6;
+  const maxWidth = Math.max(40, Math.min(safeWidth - horizontalMargin, 120));
+  const minWidth = Math.min(40, maxWidth);
+
+  return {
+    colors: {
+      primary: 'cyan',
+      secondary: 'blue',
+      success: 'green',
+      warning: 'yellow',
+      error: 'red',
+      info: 'blue',
+      muted: 'gray',
+      border: 'cyan',
+      background: 'black',
+      text: {
+        primary: 'white',
+        secondary: 'cyan',
+        muted: 'gray',
+        inverse: 'black'
+      }
+    },
+    spacing: {
+      xs: 1,
+      sm: 2,
+      md: 3,
+      lg: 4,
+      xl: 5,
+    },
+    layout: {
+      minWidth,
+      maxWidth,
+      paddingX: 2,
+      paddingY: 1,
+      borderStyle: 'round',
+    },
+    responsive: {
+      isCompact: safeHeight < 20 || safeWidth < 70,
+      terminalWidth: safeWidth,
+      terminalHeight: safeHeight,
+    },
+  };
+};
 
 export const useTheme = (): Theme => {
   const { stdout } = useStdout();
   
   return useMemo(() => {
-    const terminalWidth = stdout?.columns || 80;
-    const terminalHeight = stdout?.rows || 24;
+    // Get terminal dimensions with fallbacks
+    const terminalWidth = stdout?.columns || process.stdout?.columns || 80;
+    const terminalHeight = stdout?.rows || process.stdout?.rows || 24;
     
     return createTheme({ width: terminalWidth, height: terminalHeight });
   }, [stdout?.columns, stdout?.rows]);
