@@ -145,8 +145,9 @@ convert_poml_to_markdown() {
 
     # マークダウンコマンドファイル形式にラップ
     local wf_name="$workflow_name"
+    local description="${WORKFLOW_PURPOSE:-${wf_name} workflow}"
     local markdown_content="---
-description: ${wf_name} workflow
+description: ${description}
 argument-hint: [context]
 allowed-tools: [Read, Bash]
 ---
@@ -167,7 +168,10 @@ ARGUMENTS=\"\$*\"
 USER_TASK=\"\${ARGUMENTS:-\\\"workflow execution\\\"}\"
 
 # Execute workflow orchestrator
-claude subagent general-purpose \"$markdown_text\"
+claude subagent general-purpose \"\$(cat <<EOF
+$markdown_text
+EOF
+)\"
 \`\`\`
 
 ## Workflow Details
