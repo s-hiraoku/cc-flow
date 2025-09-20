@@ -82,7 +82,7 @@ jobs:
         
       - name: Run security audit
         working-directory: ./cc-flow-cli
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=high
         
       - name: Run dependency check
         working-directory: ./cc-flow-cli
