@@ -36,7 +36,7 @@ export const CompleteScreen: React.FC<CompleteScreenProps> = ({ config, onAnothe
 
   const choices: MenuItem[] = [
     { label: '🔄 新しいワークフローを作成する', value: 'another' },
-    { label: '🔧 コマンド変換モードに切り替える', value: 'convert' },
+    { label: '🏠 メインメニューに戻る', value: 'convert' },
     { label: '👋 アプリケーションを終了', value: 'exit' }
   ];
 

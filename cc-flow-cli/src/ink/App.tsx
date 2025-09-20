@@ -26,6 +26,7 @@ export type ScreenType =
   | 'menu'
   | 'directory'
   | 'agent-selection'
+  | 'command-selection'
   | 'order'
   | 'workflow-name'
   | 'environment'
@@ -45,6 +46,7 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
   const [screenHistory, setScreenHistory] = useState<ScreenType[]>(['welcome']);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
+  const [workflowMode, setWorkflowMode] = useState<'create' | 'convert'>('create');
 
   const navigateTo = (screen: ScreenType) => {
     setScreenHistory(prev => [...prev, screen]);
@@ -115,9 +117,11 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
           <MenuScreen 
             onSelect={(action) => {
               if (action === 'create-workflow') {
+                setWorkflowMode('create');
                 navigateTo('directory');
               } else if (action === 'convert-commands') {
-                navigateTo('conversion');
+                setWorkflowMode('convert');
+                navigateTo('directory');
               } else if (action === 'exit') {
                 handleExit();
               }
@@ -129,9 +133,14 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
       case 'directory':
         return (
           <DirectoryScreen
+            workflowMode={workflowMode}
             onNext={(targetPath: string) => {
               setWorkflowConfig((prev: Partial<WorkflowConfig>) => ({ ...prev, targetPath }));
-              navigateTo('agent-selection');
+              if (workflowMode === 'convert') {
+                navigateTo('conversion');
+              } else {
+                navigateTo('agent-selection');
+              }
             }}
             onBack={goBack}
           />
@@ -210,6 +219,7 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
       case 'conversion':
         return (
           <ConversionScreen
+            targetPath={workflowConfig.targetPath}
             onComplete={(result: ConversionResult) => {
               setConversionResult(result);
               navigateTo('conversion-complete');

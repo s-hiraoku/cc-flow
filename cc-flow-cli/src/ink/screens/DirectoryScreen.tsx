@@ -10,14 +10,16 @@ import { createScreenLayout } from "../design-system/ScreenPatterns.js";
 import { MenuItem } from "../components/Interactive.js";
 import { Section } from "../components/Layout.js";
 import { useTheme } from "../themes/theme.js";
-import { getAgentDirectories } from "../utils/directoryUtils.js";
+import { getAgentDirectories, getCommandDirectories } from "../utils/directoryUtils.js";
 
 interface DirectoryScreenProps {
+  workflowMode?: 'create' | 'convert';
   onNext: (targetPath: string) => void;
   onBack: () => void;
 }
 
 const DirectoryScreenContent: React.FC<DirectoryScreenProps> = ({
+  workflowMode = 'create',
   onNext,
   onBack,
 }) => {
@@ -29,16 +31,20 @@ const DirectoryScreenContent: React.FC<DirectoryScreenProps> = ({
     const loadDirectories = async () => {
       try {
         setIsLoading(true);
-        const dirs = getAgentDirectories(".claude/agents").map<MenuItem>(
-          (dir) => ({
-            id: dir.id,
-            label: dir.label,
-            value: dir.value,
-            icon: dir.icon,
-            description: dir.description,
-          })
-        );
-        setDirectories(dirs);
+        
+        const dirs = workflowMode === 'convert' 
+          ? getCommandDirectories(".claude/commands")
+          : getAgentDirectories(".claude/agents");
+          
+        const mappedDirs = dirs.map<MenuItem>((dir) => ({
+          id: dir.id,
+          label: dir.label,
+          value: dir.value,
+          icon: dir.icon,
+          description: dir.description,
+        }));
+        
+        setDirectories(mappedDirs);
       } catch (error) {
         console.error("Failed to load directories:", error);
         // エラー時はデフォルトの戻るオプションのみ表示
@@ -57,7 +63,7 @@ const DirectoryScreenContent: React.FC<DirectoryScreenProps> = ({
     };
 
     loadDirectories();
-  }, []);
+  }, [workflowMode]);
 
   const handleSelect = (item: MenuItem) => {
     if (item.value === "back") {
@@ -69,12 +75,17 @@ const DirectoryScreenContent: React.FC<DirectoryScreenProps> = ({
 
   // Screen configuration using design system patterns
   const screenConfig = createScreenLayout("selection", {
-    title: "エージェントディレクトリ選択",
-    subtitle: "ワークフロー作成対象の選択",
-    icon: "📂",
+    title: workflowMode === 'convert' ? "スラッシュコマンドディレクトリ選択" : "エージェントディレクトリ選択",
+    subtitle: workflowMode === 'convert' ? "変換対象のコマンドディレクトリを選択" : "ワークフロー作成対象の選択",
+    icon: workflowMode === 'convert' ? "📋" : "📂",
   });
 
-  const hintBoxContent = [
+  const hintBoxContent = workflowMode === 'convert' ? [
+    "• ./.claude/commands/ 内のスラッシュコマンドを変換対象とします",
+    "• ディレクトリを選択すると、その中のコマンドファイル (.md) を変換します",
+    "• 変換されたコマンドは新しいサブエージェント形式になります",
+    "• 通常は「メインコマンド」を選択してください",
+  ] : [
     "• ./claude/agents/ 内の各ディレクトリでサブエージェントをカテゴリ分け",
     "• ディレクトリを選択すると、その中のサブエージェントのみが表示されます",
     "• 目的に応じてディレクトリを選ぶことで、適切なサブエージェントを見つけやすくなります",
@@ -91,7 +102,7 @@ const DirectoryScreenContent: React.FC<DirectoryScreenProps> = ({
       />
 
       {/* Directory Selection */}
-      <Section title="📁 利用可能なディレクトリ" spacing="sm">
+      <Section title={workflowMode === 'convert' ? "📋 利用可能なコマンドディレクトリ" : "📁 利用可能なディレクトリ"} spacing="sm">
         {isLoading ? (
           <Text color={theme.colors.hex.blue}>
             🔍 ディレクトリを読み込み中...

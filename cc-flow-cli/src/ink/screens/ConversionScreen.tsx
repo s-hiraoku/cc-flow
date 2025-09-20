@@ -21,11 +21,12 @@ interface ConversionResult {
 }
 
 interface ConversionScreenProps {
+  targetPath?: string | undefined;
   onComplete: (result: ConversionResult) => void;
   onBack: () => void;
 }
 
-export const ConversionScreen: React.FC<ConversionScreenProps> = ({ onComplete, onBack }) => {
+export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, onComplete, onBack }) => {
   const [steps, setSteps] = useState<ConversionStep[]>([
     { name: 'スラッシュコマンド検索', status: 'pending', message: '開始待ち...' },
     { name: 'コマンド解析', status: 'pending', message: '開始待ち...' },

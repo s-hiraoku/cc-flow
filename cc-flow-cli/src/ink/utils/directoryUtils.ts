@@ -14,6 +14,19 @@ export interface DirectoryStats {
   description: string;
 }
 
+export interface CommandStats {
+  commandCount: number;
+  description: string;
+}
+
+export interface Command {
+  id: string;
+  name: string;
+  description: string;
+  path: string;
+  category?: string;
+}
+
 /**
  * 指定されたパスのサブディレクトリを取得し、エージェント数を計算する
  */
@@ -304,4 +317,258 @@ function getDefaultDirectories(): DirectoryInfo[] {
       description: '前の画面に戻ります'
     }
   ];
+}
+
+/**
+ * スラッシュコマンドディレクトリを取得し、コマンド数を計算する
+ */
+export function getCommandDirectories(basePath: string): DirectoryInfo[] {
+  try {
+    const directories: DirectoryInfo[] = [];
+    
+    // .claude/commands ディレクトリが存在するかチェック
+    const commandsPath = join(process.cwd(), '.claude', 'commands');
+    
+    try {
+      const items = readdirSync(commandsPath);
+      
+      for (const item of items) {
+        const itemPath = join(commandsPath, item);
+        
+        try {
+          const stats = statSync(itemPath);
+          
+          if (stats.isDirectory()) {
+            const commandStats = getCommandDirectoryStats(itemPath);
+            const directoryInfo = createCommandDirectoryInfo(item, commandStats);
+            directories.push(directoryInfo);
+          }
+        } catch (error) {
+          // 個別のディレクトリでエラーが発生しても続行
+          console.warn(`Warning: Could not read directory ${item}:`, error);
+        }
+      }
+    } catch (error) {
+      console.warn('Warning: Could not read commands directory:', error);
+    }
+    
+    // メインのcommandsディレクトリも追加
+    try {
+      const mainCommandStats = getCommandDirectoryStats(commandsPath);
+      directories.unshift({
+        id: 'main-commands',
+        label: 'メインコマンド',
+        value: './.claude/commands',
+        icon: '📋',
+        description: `メインのスラッシュコマンドディレクトリ（${mainCommandStats.commandCount}個のコマンド）`
+      });
+    } catch (error) {
+      // メインディレクトリが存在しない場合はデフォルトを追加
+      directories.unshift({
+        id: 'main-commands',
+        label: 'メインコマンド',
+        value: './.claude/commands',
+        icon: '📋',
+        description: 'メインのスラッシュコマンドディレクトリ'
+      });
+    }
+    
+    return directories;
+  } catch (error) {
+    console.warn('Error loading command directories:', error);
+    return getDefaultCommandDirectories();
+  }
+}
+
+/**
+ * ディレクトリ内のコマンド統計を取得
+ */
+function getCommandDirectoryStats(dirPath: string): CommandStats {
+  try {
+    const files = readdirSync(dirPath);
+    const commandFiles = files.filter(file => file.endsWith('.md'));
+    
+    return {
+      commandCount: commandFiles.length,
+      description: `${commandFiles.length}個のスラッシュコマンド`
+    };
+  } catch (error) {
+    return {
+      commandCount: 0,
+      description: 'アクセスできません'
+    };
+  }
+}
+
+/**
+ * コマンドディレクトリ情報を作成
+ */
+function createCommandDirectoryInfo(dirName: string, stats: CommandStats): DirectoryInfo {
+  const icon = getCommandDirectoryIcon(dirName);
+  const label = getCommandDirectoryLabel(dirName, stats.commandCount);
+  
+  return {
+    id: `${dirName}-commands`,
+    label,
+    value: `./.claude/commands/${dirName}`,
+    icon,
+    description: `${stats.description}（${stats.commandCount}個のコマンド）`
+  };
+}
+
+/**
+ * コマンドディレクトリのアイコンを取得
+ */
+function getCommandDirectoryIcon(dirName: string): string {
+  if (dirName.includes('demo')) return '🧪';
+  if (dirName.includes('workflow')) return '🔄';
+  if (dirName.includes('util')) return '🛠️';
+  if (dirName.includes('spec')) return '📋';
+  return '📄';
+}
+
+/**
+ * コマンドディレクトリのラベルを取得
+ */
+function getCommandDirectoryLabel(dirName: string, commandCount: number): string {
+  const baseLabel = dirName.charAt(0).toUpperCase() + dirName.slice(1);
+  return `${baseLabel} (${commandCount}個)`;
+}
+
+/**
+ * デフォルトのコマンドディレクトリ一覧
+ */
+function getDefaultCommandDirectories(): DirectoryInfo[] {
+  return [
+    {
+      id: 'main-commands',
+      label: 'メインコマンド',
+      value: './.claude/commands',
+      icon: '📋',
+      description: 'メインのスラッシュコマンドディレクトリ'
+    },
+    {
+      id: 'back',
+      label: '戻る',
+      value: 'back',
+      icon: '↩️',
+      description: '前の画面に戻ります'
+    }
+  ];
+}
+
+/**
+ * 指定されたパスからスラッシュコマンドを取得する
+ */
+export function getCommandsFromPath(targetPath: string): Command[] {
+  try {
+    const commands: Command[] = [];
+    const fullPath = join(process.cwd(), targetPath);
+    
+    try {
+      const files = readdirSync(fullPath);
+      const commandFiles = files.filter(file => file.endsWith('.md'));
+      
+      for (const file of commandFiles) {
+        const filePath = join(fullPath, file);
+        const commandName = file.replace('.md', '');
+        
+        try {
+          const description = extractCommandDescription(filePath);
+          commands.push({
+            id: commandName,
+            name: commandName,
+            description,
+            path: filePath,
+            category: extractCategoryFromPath(targetPath)
+          });
+        } catch (error) {
+          console.warn(`Warning: Could not read command file ${file}:`, error);
+          // エラーでも基本情報は追加
+          commands.push({
+            id: commandName,
+            name: commandName,
+            description: 'スラッシュコマンド',
+            path: filePath,
+            category: extractCategoryFromPath(targetPath)
+          });
+        }
+      }
+    } catch (error) {
+      console.warn('Warning: Could not read commands directory:', error);
+    }
+    
+    return commands.sort((a, b) => a.name.localeCompare(b.name));
+  } catch (error) {
+    console.warn('Error loading commands from path:', error);
+    return [];
+  }
+}
+
+/**
+ * コマンドファイルから説明を抽出
+ */
+function extractCommandDescription(filePath: string): string {
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    
+    // YAML frontmatterから説明を抽出を試行
+    const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
+    if (frontmatterMatch && frontmatterMatch[1]) {
+      const yaml = frontmatterMatch[1];
+      const descMatch = yaml.match(/description:\s*(.+)/);
+      if (descMatch && descMatch[1]) {
+        return descMatch[1].replace(/["']/g, '').trim();
+      }
+    }
+    
+    // H1タイトルから抽出を試行
+    const h1Match = content.match(/^# (.+)$/m);
+    if (h1Match && h1Match[1]) {
+      return h1Match[1].trim();
+    }
+    
+    // 最初の非空行から抽出を試行
+    const lines = content.split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('---')) {
+        return trimmed.length > 100 ? trimmed.substring(0, 100) + '...' : trimmed;
+      }
+    }
+    
+    // フォールバック：コマンド名に基づく説明
+    return getCommandDescriptionByName(extractNameFromPath(filePath));
+  } catch (error) {
+    return getCommandDescriptionByName(extractNameFromPath(filePath));
+  }
+}
+
+/**
+ * ファイルパスからコマンド名を抽出
+ */
+function extractNameFromPath(filePath: string): string {
+  return filePath.split('/').pop()?.replace('.md', '') || 'command';
+}
+
+/**
+ * パスからカテゴリを抽出
+ */
+function extractCategoryFromPath(targetPath: string): string {
+  const pathParts = targetPath.split('/');
+  return pathParts[pathParts.length - 1] || 'commands';
+}
+
+/**
+ * コマンド名に基づく説明を生成
+ */
+function getCommandDescriptionByName(commandName: string): string {
+  if (commandName.includes('create')) return '🏗️ 作成・生成コマンド';
+  if (commandName.includes('workflow')) return '🔄 ワークフロー管理';
+  if (commandName.includes('spec')) return '📋 仕様書関連コマンド';
+  if (commandName.includes('test')) return '🧪 テスト・検証コマンド';
+  if (commandName.includes('deploy')) return '🚀 デプロイメントコマンド';
+  if (commandName.includes('build')) return '🔧 ビルド・コンパイルコマンド';
+  if (commandName.includes('convert')) return '🔄 変換・移行コマンド';
+  return '📄 スラッシュコマンド';
 }
