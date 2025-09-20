@@ -101,6 +101,7 @@ const DirectoryScreenContent: React.FC<DirectoryScreenProps> = ({
             items={directories}
             onSelect={handleSelect}
             showDescription={true}
+            spacing="xs"
           />
         )}
       </Section>

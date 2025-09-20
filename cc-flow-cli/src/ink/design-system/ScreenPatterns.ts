@@ -1,21 +1,24 @@
 /**
  * CC-Flow TUI Design System - Screen Patterns
- * 
+ *
  * Unified design patterns based on WelcomeScreen layout for consistent
  * visual hierarchy and user experience across all screens.
  */
 
-import { useTheme } from '../themes/theme.js';
-import type { Theme } from '../themes/theme.js';
+import { useTheme } from "../themes/theme.js";
+import type { Theme } from "../themes/theme.js";
 
 // Design System Constants
 export const DESIGN_TOKENS = {
   // Layout consistency from WelcomeScreen
   cardWidthCalculation: (theme: Theme) => {
-    const maxCardWidth = Math.min(theme.layout.maxWidth, Math.floor(theme.responsive.terminalWidth * 0.9));
+    const maxCardWidth = Math.min(
+      theme.layout.maxWidth,
+      Math.floor(theme.responsive.terminalWidth * 0.9)
+    );
     return Math.max(theme.layout.minWidth, maxCardWidth);
   },
-  
+
   contentWidthCalculation: (cardWidth: number, theme: Theme) => {
     return Math.max(20, cardWidth - theme.layout.paddingX * 2 - 2); // borders
   },
@@ -29,66 +32,66 @@ export const DESIGN_TOKENS = {
         theme.colors.hex.blue,
         theme.colors.hex.blue,
         theme.colors.hex.lightBlue,
-        theme.colors.hex.lightBlue
-      ]
+        theme.colors.hex.lightBlue,
+      ],
     },
     hero: {
       color: (theme: Theme) => theme.colors.hex.lightBlue,
-      bold: true
+      bold: true,
     },
     feature: {
-      color: (theme: Theme) => theme.colors.hex.green
+      color: (theme: Theme) => theme.colors.hex.green,
     },
     heading: {
       color: (theme: Theme) => theme.colors.hex.lightBlue,
-      bold: true
+      bold: true,
     },
     subheading: {
       color: (theme: Theme) => theme.colors.gray,
-      italic: true
+      italic: true,
     },
     description: {
-      color: (theme: Theme) => theme.colors.cyan
+      color: (theme: Theme) => theme.colors.cyan,
     },
     version: {
-      color: (theme: Theme) => theme.colors.gray
+      color: (theme: Theme) => theme.colors.gray,
     },
     statusText: {
-      color: (theme: Theme) => theme.colors.hex.blue
-    }
+      color: (theme: Theme) => theme.colors.hex.blue,
+    },
   },
 
   // Section spacing patterns from WelcomeScreen
   spacing: {
-    logo: 'sm' as const,
-    hero: 'sm' as const,
-    features: 'sm' as const,
-    menu: 'lg' as const,
-    statusBar: 'sm' as const,
-    version: 'xs' as const,
-    content: 'sm' as const,
-    hint: 'xs' as const
+    logo: "sm" as const,
+    hero: "sm" as const,
+    features: "sm" as const,
+    menu: "sm" as const,
+    statusBar: "sm" as const,
+    version: "xs" as const,
+    content: "sm" as const,
+    hint: "xs" as const,
   },
 
   // Status bar variants
   statusBar: {
     navigation: {
       center: "↑↓: 選択 | Enter: 実行 | Q: 終了",
-      variant: "info" as const
+      variant: "info" as const,
     },
     backNavigation: {
       center: "↑↓: ナビゲート | Enter: 選択 | Esc: 戻る",
-      variant: "default" as const
+      variant: "default" as const,
     },
     confirmation: {
       center: "Enter: 確認 | Esc: キャンセル",
-      variant: "info" as const
+      variant: "info" as const,
     },
     processing: {
       center: "処理中...",
-      variant: "warning" as const
-    }
-  }
+      variant: "warning" as const,
+    },
+  },
 } as const;
 
 // Screen Layout Patterns
@@ -96,14 +99,14 @@ export interface ScreenLayoutConfig {
   // Container settings
   centered: boolean;
   fullHeight: boolean;
-  
+
   // Card settings
   title?: string;
   subtitle?: string;
   icon?: string;
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'info' | 'danger';
-  align?: 'left' | 'center' | 'right';
-  
+  variant?: "default" | "primary" | "success" | "warning" | "info" | "danger";
+  align?: "left" | "center" | "right";
+
   // Content structure
   hasLogo?: boolean;
   hasHero?: boolean;
@@ -111,9 +114,9 @@ export interface ScreenLayoutConfig {
   hasDescription?: boolean;
   hasStatusBar?: boolean;
   hasVersion?: boolean;
-  
+
   // Navigation type
-  navigationType: 'menu' | 'back' | 'confirmation' | 'processing' | 'custom';
+  navigationType: "menu" | "back" | "confirmation" | "processing" | "custom";
   customStatusMessage?: string;
 }
 
@@ -123,86 +126,89 @@ export const SCREEN_PATTERNS = {
   welcome: {
     centered: true,
     fullHeight: true,
-    variant: 'default',
-    align: 'center',
+    variant: "default",
+    align: "center",
     hasLogo: true,
     hasHero: true,
     hasFeatures: true,
     hasStatusBar: true,
     hasVersion: true,
-    navigationType: 'menu'
+    navigationType: "menu",
   } as ScreenLayoutConfig,
 
   // Main menu pattern
   menu: {
     centered: true,
     fullHeight: true,
-    variant: 'default',
-    align: 'center',
-    title: '🌊 CC-Flow メインメニュー',
-    subtitle: 'エージェント連携ワークフロー作成ツール',
+    variant: "default",
+    align: "center",
+    title: "🌊 CC-Flow メインメニュー",
+    subtitle: "エージェント連携ワークフロー作成ツール",
     hasDescription: true,
     hasStatusBar: true,
-    navigationType: 'menu'
+    navigationType: "menu",
   } as ScreenLayoutConfig,
 
   // Selection pattern (directory, agent selection)
   selection: {
     centered: true,
     fullHeight: true,
-    variant: 'primary',
-    align: 'center',
+    variant: "primary",
+    align: "center",
     hasDescription: true,
     hasStatusBar: true,
-    navigationType: 'back'
+    navigationType: "back",
   } as ScreenLayoutConfig,
 
   // Configuration pattern (order, workflow name)
   configuration: {
     centered: true,
     fullHeight: true,
-    variant: 'info',
-    align: 'center',
+    variant: "info",
+    align: "center",
     hasDescription: true,
     hasStatusBar: true,
-    navigationType: 'confirmation'
+    navigationType: "confirmation",
   } as ScreenLayoutConfig,
 
   // Preview/review pattern
   preview: {
     centered: true,
     fullHeight: true,
-    variant: 'warning',
-    align: 'left',
+    variant: "warning",
+    align: "left",
     hasStatusBar: true,
-    navigationType: 'confirmation'
+    navigationType: "confirmation",
   } as ScreenLayoutConfig,
 
   // Completion pattern
   complete: {
     centered: true,
     fullHeight: true,
-    variant: 'success',
-    align: 'center',
+    variant: "success",
+    align: "center",
     hasFeatures: true,
     hasStatusBar: true,
     hasVersion: true,
-    navigationType: 'menu'
+    navigationType: "menu",
   } as ScreenLayoutConfig,
 
   // Processing pattern
   processing: {
     centered: true,
     fullHeight: true,
-    variant: 'info',
-    align: 'center',
+    variant: "info",
+    align: "center",
     hasStatusBar: true,
-    navigationType: 'processing'
-  } as ScreenLayoutConfig
+    navigationType: "processing",
+  } as ScreenLayoutConfig,
 } as const;
 
 // Utility functions for consistent styling
-export const createScreenLayout = (pattern: keyof typeof SCREEN_PATTERNS, overrides?: Partial<ScreenLayoutConfig>) => {
+export const createScreenLayout = (
+  pattern: keyof typeof SCREEN_PATTERNS,
+  overrides?: Partial<ScreenLayoutConfig>
+) => {
   return { ...SCREEN_PATTERNS[pattern], ...overrides };
 };
 
@@ -210,29 +216,32 @@ export const useScreenDimensions = () => {
   const theme = useTheme();
   const cardWidth = DESIGN_TOKENS.cardWidthCalculation(theme);
   const contentWidth = DESIGN_TOKENS.contentWidthCalculation(cardWidth, theme);
-  
+
   return {
     theme,
     cardWidth,
-    contentWidth
+    contentWidth,
   };
 };
 
 // Status bar message generator
-export const getStatusBarConfig = (navigationType: ScreenLayoutConfig['navigationType'], customMessage?: string) => {
+export const getStatusBarConfig = (
+  navigationType: ScreenLayoutConfig["navigationType"],
+  customMessage?: string
+) => {
   switch (navigationType) {
-    case 'menu':
+    case "menu":
       return DESIGN_TOKENS.statusBar.navigation;
-    case 'back':
+    case "back":
       return DESIGN_TOKENS.statusBar.backNavigation;
-    case 'confirmation':
+    case "confirmation":
       return DESIGN_TOKENS.statusBar.confirmation;
-    case 'processing':
+    case "processing":
       return DESIGN_TOKENS.statusBar.processing;
-    case 'custom':
+    case "custom":
       return {
         center: customMessage || "カスタムメッセージ",
-        variant: "default" as const
+        variant: "default" as const,
       };
     default:
       return DESIGN_TOKENS.statusBar.navigation;
@@ -245,9 +254,9 @@ export const getScreenColors = (theme: Theme) => ({
   brand: {
     primary: theme.colors.hex.blue,
     secondary: theme.colors.hex.lightBlue,
-    accent: theme.colors.hex.darkBlue
+    accent: theme.colors.hex.darkBlue,
   },
-  
+
   // Text hierarchy
   text: {
     primary: theme.colors.text.primary,
@@ -255,21 +264,21 @@ export const getScreenColors = (theme: Theme) => ({
     muted: theme.colors.gray,
     emphasis: theme.colors.hex.lightBlue,
     feature: theme.colors.hex.green,
-    status: theme.colors.hex.blue
+    status: theme.colors.hex.blue,
   },
-  
+
   // Interactive elements
   interactive: {
     selected: theme.colors.primary,
     hover: theme.colors.hex.lightBlue,
-    disabled: theme.colors.text.muted
+    disabled: theme.colors.text.muted,
   },
-  
+
   // Status indicators
   status: {
     success: theme.colors.success,
     warning: theme.colors.warning,
     error: theme.colors.error,
-    info: theme.colors.info
-  }
+    info: theme.colors.info,
+  },
 });
