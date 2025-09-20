@@ -3,14 +3,14 @@ import { useApp } from 'ink';
 import { UnifiedScreen, ScreenDescription, MenuSection } from '../design-system/index.js';
 import { createScreenLayout } from '../design-system/ScreenPatterns.js';
 import { MenuItem } from '../components/Interactive.js';
-import packageJson from '../../../package.json' with { type: 'json' };
+import { getVersion } from '../../utils/package.js';
 
 interface MenuScreenProps {
   onSelect: (action: string) => void;
   onBack?: () => void;
 }
 
-const packageVersion = packageJson.version ?? '0.0.0';
+const packageVersion = getVersion();
 
 export const MenuScreen: React.FC<MenuScreenProps> = ({ onSelect, onBack }) => {
   const { exit } = useApp();

@@ -8,7 +8,7 @@ import {
 } from "../components/Interactive.js";
 import { useTheme } from "../themes/theme.js";
 import { renderLines } from "../utils/text.js";
-import packageJson from "../../../package.json" with { type: 'json' };
+import { getVersion } from "../../utils/package.js";
 
 interface WelcomeScreenProps {
   onNext: () => void;
@@ -25,7 +25,7 @@ const LOGO_LINES = [
 
 // Logo colors will be taken from theme.colors.hex
 
-const packageVersion = packageJson.version ?? "0.0.0";
+const packageVersion = getVersion();
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
   const { exit } = useApp();

@@ -87,8 +87,10 @@
     "wrap-ansi": "^9.0.2"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "^2.0.5",
+    "ink-testing-library": "^4.0.0",
     "tsx": "^4.19.0",
     "typescript": "~5.6.0",
     "vitest": "^2.0.5"

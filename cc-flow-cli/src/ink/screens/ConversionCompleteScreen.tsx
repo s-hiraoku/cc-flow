@@ -5,7 +5,7 @@ import { createScreenLayout, useScreenDimensions } from '../design-system/Screen
 import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
 import { MenuItem } from '../components/Interactive.js';
-import packageJson from '../../../package.json' with { type: 'json' };
+import { getVersion } from '../../utils/package.js';
 
 interface ConversionResult {
   success: boolean;
@@ -22,7 +22,7 @@ interface ConversionCompleteScreenProps {
   onMenu: () => void;
 }
 
-const packageVersion = packageJson.version ?? '0.0.0';
+const packageVersion = getVersion();
 
 export const ConversionCompleteScreen: React.FC<ConversionCompleteScreenProps> = ({ 
   result, 

@@ -17,7 +17,7 @@ import {
 } from '../ScreenComponents.js';
 import { createScreenLayout } from '../ScreenPatterns.js';
 import type { MenuItem } from '../../components/Interactive.js';
-import packageJson from '../../../../package.json' with { type: 'json' };
+import { getVersion } from '../../../utils/package.js';
 
 interface WelcomeScreenProps {
   onNext: () => void;
@@ -72,7 +72,7 @@ export const WelcomeScreenRefactored: React.FC<WelcomeScreenProps> = ({ onNext }
       logoLines={LOGO_LINES}
       heroText={heroText}
       features={features}
-      version={packageJson.version}
+      version={getVersion()}
     >
       {/* Menu section with unified styling */}
       <MenuSection 
@@ -124,7 +124,7 @@ export const WelcomeScreenManualExample: React.FC<WelcomeScreenProps> = ({ onNex
         onSelect={handleSelect}
       />
       
-      <VersionDisplay version={packageJson.version} />
+      <VersionDisplay version={getVersion()} />
     </UnifiedScreen>
   );
 };

@@ -5,7 +5,7 @@ import { createScreenLayout, useScreenDimensions } from '../design-system/Screen
 import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
 import { MenuItem } from '../components/Interactive.js';
-import packageJson from '../../../package.json' with { type: 'json' };
+import { getVersion } from '../../utils/package.js';
 
 interface Agent {
   id: string;
@@ -27,7 +27,7 @@ interface CompleteScreenProps {
   onExit: () => void;
 }
 
-const packageVersion = packageJson.version ?? '0.0.0';
+const packageVersion = getVersion();
 
 export const CompleteScreen: React.FC<CompleteScreenProps> = ({ config, onAnother, onExit }) => {
   const { exit } = useApp();

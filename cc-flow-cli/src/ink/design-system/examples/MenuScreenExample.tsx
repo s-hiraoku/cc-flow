@@ -11,7 +11,7 @@ import { UnifiedScreen, ScreenDescription, MenuSection } from '../ScreenComponen
 import { createScreenLayout } from '../ScreenPatterns.js';
 import { useTheme } from '../../themes/theme.js';
 import type { MenuItem } from '../../components/Interactive.js';
-import packageJson from '../../../../package.json' with { type: 'json' };
+import { getVersion } from '../../../utils/package.js';
 
 interface MenuScreenProps {
   onSelect: (action: string) => void;
@@ -69,7 +69,7 @@ export const MenuScreenExample: React.FC<MenuScreenProps> = ({ onSelect, onBack 
   // Status bar items
   const statusItems = [
     { key: 'Mode', value: 'Main Menu' },
-    { key: 'Version', value: packageJson.version },
+    { key: 'Version', value: getVersion() },
     { key: 'Status', value: 'Ready', color: theme.colors.success }
   ];
 
