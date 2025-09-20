@@ -124,7 +124,7 @@ export interface ScreenLayoutConfig {
 export const SCREEN_PATTERNS = {
   // Welcome/Landing pattern
   welcome: {
-    centered: true,
+    centered: false,
     fullHeight: true,
     variant: "default",
     align: "center",
@@ -138,7 +138,7 @@ export const SCREEN_PATTERNS = {
 
   // Main menu pattern
   menu: {
-    centered: true,
+    centered: false,
     fullHeight: true,
     variant: "default",
     align: "center",
@@ -151,7 +151,7 @@ export const SCREEN_PATTERNS = {
 
   // Selection pattern (directory, agent selection)
   selection: {
-    centered: true,
+    centered: false,
     fullHeight: true,
     variant: "primary",
     align: "center",
@@ -162,7 +162,7 @@ export const SCREEN_PATTERNS = {
 
   // Configuration pattern (order, workflow name)
   configuration: {
-    centered: true,
+    centered: false,
     fullHeight: true,
     variant: "info",
     align: "center",
@@ -173,7 +173,7 @@ export const SCREEN_PATTERNS = {
 
   // Preview/review pattern
   preview: {
-    centered: true,
+    centered: false,
     fullHeight: true,
     variant: "warning",
     align: "left",
@@ -183,7 +183,7 @@ export const SCREEN_PATTERNS = {
 
   // Completion pattern
   complete: {
-    centered: true,
+    centered: false,
     fullHeight: true,
     variant: "success",
     align: "center",
@@ -195,7 +195,7 @@ export const SCREEN_PATTERNS = {
 
   // Processing pattern
   processing: {
-    centered: true,
+    centered: false,
     fullHeight: true,
     variant: "info",
     align: "center",

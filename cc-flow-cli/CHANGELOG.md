@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.12] - 2025-09-20
+
+### Fixed
+- **UI Layout**: Fixed vertical centering issue - all screens now align to top for better content visibility
+- **Welcome Screen**: Removed vertical centering from welcome screen for consistent layout
+
 ## [0.0.11] - 2025-09-20
 
 ### Major Changes

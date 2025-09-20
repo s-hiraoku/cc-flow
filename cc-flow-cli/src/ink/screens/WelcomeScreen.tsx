@@ -69,7 +69,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
   ];
 
   return (
-    <Container centered fullHeight>
+    <Container centered={false} fullHeight>
       <Card width={cardWidth} align="center">
         <Section spacing="sm" align="center">
           <Box flexDirection="column" width="100%" alignItems="center">
