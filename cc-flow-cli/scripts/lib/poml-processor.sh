@@ -78,6 +78,53 @@ process_poml_to_markdown() {
     success "マークダウンファイルを生成しました: $output_file"
 }
 
+# POMLファイルをMarkdownに変換（pomljsを使用）
+convert_poml_to_markdown() {
+    local poml_content="$1"
+    local agent_list_json="$2"
+    local workflow_name="$3"
+
+    # info "POMLファイルをpomljsで変換しています..."
+
+    # Node.js環境をチェック（サイレント）
+    check_nodejs_dependencies >/dev/null 2>&1
+
+    # 一時POMLファイルを作成
+    local temp_poml="/tmp/workflow_${workflow_name}_$$.poml"
+
+    # POMLテンプレートからエージェントリストを置換した内容を作成
+    echo "$poml_content" | sed "s/{WORKFLOW_AGENT_LIST}/$agent_list_json/g" | sed "s/{WORKFLOW_NAME}/$workflow_name/g" > "$temp_poml"
+
+    # pomljsでPOMLを実行してMarkdownを生成（必要な変数を渡す）
+    local poml_output
+    if ! poml_output=$(npx pomljs --file "$temp_poml" --context 'user_input=workflow execution' --context 'context=sequential agent execution' 2>&1); then
+        rm -f "$temp_poml"
+        error_exit "pomljsの実行に失敗しました: $poml_output"
+    fi
+
+    # 一時ファイルをクリーンアップ
+    rm -f "$temp_poml"
+
+    # JSON出力からメッセージ内容を抽出
+    local markdown_content
+    if command -v jq >/dev/null 2>&1; then
+        # jqが利用可能な場合
+        markdown_content=$(echo "$poml_output" | jq -r '.messages[0].content' 2>/dev/null)
+        if [[ -z "$markdown_content" || "$markdown_content" == "null" ]]; then
+            markdown_content="$poml_output"
+        fi
+    else
+        # jqが利用できない場合はシンプルな抽出
+        markdown_content=$(echo "$poml_output" | sed -n 's/.*"content":"\([^"]*\)".*/\1/p' | head -1)
+        if [[ -z "$markdown_content" ]]; then
+            markdown_content="$poml_output"
+        fi
+    fi
+
+    # Markdownを出力
+    echo "$markdown_content"
+}
+
 # ワークフロー用のコンテキスト変数を生成
 create_workflow_context() {
     local workflow_name="$1"
