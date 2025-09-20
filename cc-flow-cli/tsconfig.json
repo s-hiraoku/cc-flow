@@ -31,7 +31,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "isolatedModules": true,
-    "verbatimModuleSyntax": false,
+    "verbatimModuleSyntax": true,
     
     // Resolution - Optimized for ESM
     "resolveJsonModule": true,

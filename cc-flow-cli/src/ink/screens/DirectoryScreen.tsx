@@ -7,7 +7,7 @@ import {
   HintBox,
 } from "../design-system/index.js";
 import { createScreenLayout } from "../design-system/ScreenPatterns.js";
-import { MenuItem } from "../components/Interactive.js";
+import type { MenuItem } from "../components/Interactive.js";
 import { Section } from "../components/Layout.js";
 import { useTheme } from "../themes/theme.js";
 import { getAgentDirectories, getCommandDirectories } from "../utils/directoryUtils.js";

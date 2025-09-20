@@ -2,7 +2,7 @@ import React from 'react';
 import { useApp } from 'ink';
 import { UnifiedScreen, ScreenDescription, MenuSection } from '../design-system/index.js';
 import { createScreenLayout } from '../design-system/ScreenPatterns.js';
-import { MenuItem } from '../components/Interactive.js';
+import type { MenuItem } from '../components/Interactive.js';
 import { getVersion } from '../../utils/package.js';
 
 interface MenuScreenProps {

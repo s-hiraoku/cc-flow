@@ -4,7 +4,7 @@ import TextInput from "ink-text-input";
 import Spinner from "ink-spinner";
 import { useTheme } from "../themes/theme.js";
 import { alignWithinWidth, renderLines } from "../utils/text.js";
-import { Alignment, SpacingValue } from "../types/index.js";
+import type { Alignment, SpacingValue } from "../types/index.js";
 
 export interface MenuItem {
   id?: string;

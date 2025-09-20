@@ -4,7 +4,7 @@ import { Container, Card, Section } from "../components/Layout.js";
 import {
   FocusableMenu,
   StatusBar,
-  MenuItem,
+  type MenuItem,
 } from "../components/Interactive.js";
 import { useTheme } from "../themes/theme.js";
 import { renderLines } from "../utils/text.js";

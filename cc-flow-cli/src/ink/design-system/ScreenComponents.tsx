@@ -11,7 +11,7 @@ import { Container, Card, Section } from "../components/Layout.js";
 import {
   StatusBar,
   FocusableMenu,
-  MenuItem,
+  type MenuItem,
 } from "../components/Interactive.js";
 import { renderLines } from "../utils/text.js";
 import {
@@ -21,7 +21,7 @@ import {
   getScreenColors,
   type ScreenLayoutConfig,
 } from "./ScreenPatterns.js";
-import { Spacing } from "../types/common.js";
+import type { Spacing } from "../types/common.js";
 
 // Logo Component (from WelcomeScreen)
 interface LogoProps {

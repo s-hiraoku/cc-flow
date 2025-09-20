@@ -5,7 +5,7 @@ import { UnifiedScreen, ScreenDescription, MenuSection } from '../design-system/
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
-import { MenuItem } from '../components/Interactive.js';
+import type { MenuItem } from '../components/Interactive.js';
 
 interface Agent {
   id: string;

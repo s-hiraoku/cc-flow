@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, renameSync } from 'fs';
 import { dirname, join } from 'path';
+import { tmpdir } from 'os';
 import { fileURLToPath, pathToFileURL } from 'url';
 import chalk from 'chalk';
 
@@ -21,23 +22,33 @@ function log(message, formatter, silent) {
 export function updateProjectOverviewMemory(options = {}) {
   const { silent = false } = options;
 
-  if (!existsSync(packageJsonPath)) {
-    throw new Error(`package.json not found at ${packageJsonPath}`);
+  // Read package.json with proper error handling instead of existsSync check
+  let packageJson, version;
+  try {
+    packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+    version = packageJson.version;
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      throw new Error(`package.json not found at ${packageJsonPath}`);
+    }
+    throw error;
   }
-
-  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-  const { version } = packageJson;
 
   if (!version) {
     throw new Error('package.json does not contain a version field.');
   }
 
-  if (!existsSync(projectOverviewPath)) {
-    log(`Skipping project overview sync; missing ${projectOverviewPath}`, chalk.dim, silent);
-    return { changed: false, skipped: true, version };
+  // Read project overview with proper error handling instead of existsSync check
+  let currentContent;
+  try {
+    currentContent = readFileSync(projectOverviewPath, 'utf8');
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      log(`Skipping project overview sync; missing ${projectOverviewPath}`, chalk.dim, silent);
+      return { changed: false, skipped: true, version };
+    }
+    throw error;
   }
-
-  const currentContent = readFileSync(projectOverviewPath, 'utf8');
   const versionLineRegex = /(Version\s+)([0-9A-Za-z.-]+)(\s+-\s+.+)/;
 
   let updatedContent = currentContent.replace(versionLineRegex, (_, prefix, _existing, suffix) => `${prefix}${version}${suffix}`);
