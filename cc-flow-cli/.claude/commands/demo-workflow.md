@@ -6,7 +6,7 @@ allowed-tools: [Read, Bash]
 
 # demo-workflow
 
-Execute multiple sub-agents sequentially based on workflow type.
+Execute sub-agents in sequence: **architecture-designer code-generator**
 
 ## Usage
 
@@ -16,61 +16,66 @@ Execute multiple sub-agents sequentially based on workflow type.
 
 ## Execution Instructions
 
-You are asked to execute a sequential workflow with the following agents:
-`requirements-analyzer architecture-designer code-generator quality-checker deployment-manager progress-reporter`
+This workflow executes each sub-agent in the specified sequence, passing accumulated context between agents.
 
-Please perform these steps:
+### Workflow Process
 
-1. **Parse Input**: Receive the user's context from the command arguments provided as "$*"
+1. **Initialize Context**
+   - Start with user-provided context: `$*`
 
-2. **Sequential Agent Execution**: For each agent in the list above, execute in order:
-   
-   a. Display progress indicator: "→ [agent-name]"
-   
-   b. Invoke the sub-agent with the current accumulated context:
-      - Pass the task description and current context to the agent
-      - Use the pattern: "Task: [agent-name]. Context: [accumulated-context]"
-   
-   c. Capture and display the agent's response
-   
-   d. Update the accumulated context by appending:
-      "[agent-name]: [response]" to the existing context
-   
-   e. Continue to the next agent with the updated context
+2. **Execute Each Sub-Agent**
 
-3. **Completion**: After all agents have been executed successfully, display:
-   "✅ Workflow completed"
+   For each agent in the sequence **architecture-designer code-generator**:
 
-## Context Management
+   - **Display Progress**
+     ```
+     → [agent-name]
+     ```
 
-- Initial context: User-provided command arguments
-- Context accumulation: Each agent's output enriches the context for subsequent agents
-- Final output: Complete trace of all agent executions and their responses
+   - **Invoke Sub-Agent**
+     ```
+     claude subagent "[agent-name]" "[accumulated-context]"
+     ```
 
-## Error Handling
+   - **Accumulate Context**
 
-If any agent fails to execute:
-- Display "Failed" for that agent
-- Continue with remaining agents using the available context
-- Include failure notation in the accumulated context
+     Add the agent's response to the context for the next agent
 
-## Template Variables Reference
+3. **Complete Workflow**
+   ```
+   ✅ Workflow completed
+   ```
 
-- `Execute demo workflow`: Brief workflow description
-- `[context]`: Expected arguments format  
-- `demo-workflow`: Command name (matches filename)
-- `requirements-analyzer architecture-designer code-generator quality-checker deployment-manager progress-reporter`: Space-separated list of agent names
+### Context Management
+
+- **Initial Context**: User input from command arguments
+- **Progressive Context**: Each agent's output enriches the context
+- **Final Output**: Complete trace of all agent executions
+
+### Expected Execution Pattern
+
+```
+Initialize: "your task description"
+
+→ architecture-designer
+[Sub-agent executes with initial context]
+Context: "your task description\narchitecture-designer: [design output]"
+
+→ code-generator
+[Sub-agent executes with enriched context]
+Context: "your task description\narchitecture-designer: [design output]\ncode-generator: [implementation output]"
+
+✅ Workflow completed
+```
 
 ## Example
 
-For a workflow named `example-workflow` with agents `agent1 agent2`:
-
 ```
-/example-workflow "implement user authentication with JWT tokens"
+/demo-workflow "implement user authentication with JWT tokens"
 
-→ agent1
-[agent1 analyzes requirements and creates design]
-→ agent2  
-[agent2 implements the authentication logic]
+→ architecture-designer
+[architecture-designer analyzes requirements and creates design]
+→ code-generator
+[code-generator implements the authentication logic]
 ✅ Workflow completed
 ```

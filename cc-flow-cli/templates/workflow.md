@@ -19,7 +19,7 @@ Execute multiple sub-agents sequentially based on workflow type.
 ## Template Variables Reference
 
 - `{DESCRIPTION}`: Brief workflow description
-- `{ARGUMENT_HINT}`: Expected arguments format  
+- `{ARGUMENT_HINT}`: Expected arguments format
 - `{WORKFLOW_NAME}`: Command name (matches filename)
 - `{WORKFLOW_AGENT_LIST}`: Space-separated list of agent names
 
@@ -28,11 +28,11 @@ Execute multiple sub-agents sequentially based on workflow type.
 For a workflow named `example-workflow` with agents `agent1 agent2`:
 
 ```
-/example-workflow "implement user authentication with JWT tokens"
+/{WORKFLOW_NAME} "implement user authentication with JWT tokens"
 
 → agent1
 [agent1 analyzes requirements and creates design]
-→ agent2  
+→ agent2
 [agent2 implements the authentication logic]
 ✅ Workflow completed
 ```

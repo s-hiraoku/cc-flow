@@ -84,8 +84,6 @@ convert_poml_to_markdown() {
     local agent_list_json="$2"
     local workflow_name="$3"
 
-    # info "POMLファイルをpomljsで変換しています..."
-
     # Node.js環境をチェック（サイレント）
     check_nodejs_dependencies >/dev/null 2>&1
 
@@ -97,7 +95,7 @@ convert_poml_to_markdown() {
 
     # pomljsでPOMLを実行してMarkdownを生成（必要な変数を渡す）
     local poml_output
-    if ! poml_output=$(npx pomljs --file "$temp_poml" --context 'user_input=workflow execution' --context 'context=sequential agent execution' 2>&1); then
+    if ! poml_output=$(npx pomljs --file "$temp_poml" --context 'user_input=workflow execution' --context 'context=sequential agent execution' 2>/dev/null); then
         rm -f "$temp_poml"
         error_exit "pomljsの実行に失敗しました: $poml_output"
     fi
