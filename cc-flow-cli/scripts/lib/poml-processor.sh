@@ -93,7 +93,7 @@ convert_poml_to_markdown() {
     # POMLテンプレートをそのまま保存
     echo "$poml_content" > "$temp_poml"
 
-    # エージェントリストを配列形式に変換
+    # エージェントリストを正式なPOML配列形式に変換
     local agent_array="["
     local first=true
     for agent in $agent_list_space; do
@@ -102,18 +102,32 @@ convert_poml_to_markdown() {
         else
             agent_array+=", "
         fi
-        agent_array+="\"$agent\""
+        # POMLでは文字列はシングルクォートを推奨
+        agent_array+="'$agent'"
     done
     agent_array+="]"
 
-    # pomljsでPOMLを実行してMarkdownを生成（コンテキスト変数を渡す）
+    # pomljsでPOMLを実行してMarkdownを生成（正式なPOML変数を渡す）
     local poml_output
     local poml_error
+    # デバッグ出力
+    echo "Debug: temp_poml=$temp_poml"
+    echo "Debug: agent_array=$agent_array"
+    echo "Debug: workflow_name=$workflow_name"
+
     if ! { poml_output=$(npx pomljs --file "$temp_poml" \
         --context "user_input=workflow execution" \
         --context "context=sequential agent execution" \
-        --context "workflow_name=$workflow_name" \
-        --context "agent_list=$agent_array" 2>/tmp/poml_error_$$) && poml_error=$(cat /tmp/poml_error_$$ 2>/dev/null || echo ""); }; then
+        --context "workflow_name='$workflow_name'" \
+        --context "workflow_subagents=$agent_array" \
+        --context "workflow_agents=$agent_array" 2>/tmp/poml_error_$$) && poml_error=$(cat /tmp/poml_error_$$ 2>/dev/null || echo ""); }; then
+        echo "Debug: POML execution failed"
+        echo "Debug: poml_output=$poml_output"
+        echo "Debug: poml_error=$poml_error"
+        if [[ -f /tmp/poml_error_$$ ]]; then
+            echo "Debug: Error file contents:"
+            cat /tmp/poml_error_$$
+        fi
         rm -f "$temp_poml" /tmp/poml_error_$$
         error_exit "pomljsの実行に失敗しました: $poml_output $poml_error"
     fi

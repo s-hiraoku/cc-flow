@@ -6,33 +6,58 @@ allowed-tools: [Read, Bash]
 
 # {WORKFLOW_NAME}
 
-Execute multiple sub-agents sequentially based on workflow type.
+Execute multiple sub-agents sequentially using POML workflow orchestration.
 
 ## Usage
 
-```
+```bash
 /{WORKFLOW_NAME} "your task or requirement"
 ```
 
+This command processes the task through the following agents in sequence:
+{WORKFLOW_AGENT_LIST}
+
+Each agent receives the user task and builds upon previous agent results.
+
 {POML_GENERATED_INSTRUCTIONS}
 
-## Template Variables Reference
+## Workflow Execution
 
-- `{DESCRIPTION}`: Brief workflow description
-- `{ARGUMENT_HINT}`: Expected arguments format
-- `{WORKFLOW_NAME}`: Command name (matches filename)
-- `{WORKFLOW_AGENT_LIST}`: Space-separated list of agent names
+The workflow is powered by POML (Prompt Orchestration Markup Language) which:
+
+1. **Defines sequential execution**: Agents execute in the specified order
+2. **Passes context**: Each agent receives the user input and accumulated context
+3. **Tracks progress**: Shows step-by-step execution with loop indexes
+4. **Standardizes output**: Consistent response format across all agents
+
+## Sub-agent Execution Format
+
+For each agent in the workflow:
+```bash
+claude subagent "{agent-name}" "{user-task}"
+```
+
+Output format:
+```
+Step {N} of {total}: Execute {agent-name}
+→ {agent-name}: [response]
+```
 
 ## Example
 
-For a workflow named `example-workflow` with agents `agent1 agent2`:
+For a workflow with agents `spec-requirements spec-design spec-implementation`:
 
-```
-/{WORKFLOW_NAME} "implement user authentication with JWT tokens"
+```bash
+/{WORKFLOW_NAME} "create a user authentication system"
 
-→ agent1
-[agent1 analyzes requirements and creates design]
-→ agent2
-[agent2 implements the authentication logic]
+Step 1 of 3: Execute spec-requirements
+→ spec-requirements: [requirements analysis response]
+
+Step 2 of 3: Execute spec-design
+→ spec-design: [design specification response]
+
+Step 3 of 3: Execute spec-implementation
+→ spec-implementation: [implementation details response]
+
 ✅ Workflow completed
 ```
