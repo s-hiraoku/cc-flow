@@ -1,0 +1,135 @@
+# Repository settings for cc-flow
+repository:
+  name: cc-flow
+  description: "Claude Code workflow platform with interactive TUI for creating and managing sub-agent workflows using POML"
+  homepage: https://github.com/s-hiraoku/cc-flow
+  topics:
+    - claude-code
+    - cli
+    - tui
+    - react-ink
+    - workflow
+    - automation
+    - poml
+    - terminal
+    - typescript
+    - nodejs
+  
+  private: false
+  has_issues: true
+  has_projects: true
+  has_wiki: false
+  has_downloads: true
+  
+  default_branch: main
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: true
+  allow_auto_merge: true
+  delete_branch_on_merge: true
+  
+  enable_automated_security_fixes: true
+  enable_vulnerability_alerts: true
+
+# Branch protection rules
+branches:
+  - name: main
+    protection:
+      required_status_checks:
+        strict: true
+        contexts:
+          - "Test and Build (18)"
+          - "Test and Build (20)"
+          - "Test and Build (22)"
+          - "Security Audit"
+      enforce_admins: false
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: false
+        require_last_push_approval: false
+      restrictions: null
+      allow_force_pushes: false
+      allow_deletions: false
+
+  - name: develop
+    protection:
+      required_status_checks:
+        strict: false
+        contexts:
+          - "Test and Build (20)"
+      enforce_admins: false
+      required_pull_request_reviews:
+        required_approving_review_count: 0
+        dismiss_stale_reviews: false
+      restrictions: null
+      allow_force_pushes: true
+      allow_deletions: false
+
+# Labels for issue and PR management
+labels:
+  # Type labels
+  - name: "type: bug"
+    color: "d73a4a"
+    description: "Something isn't working"
+  - name: "type: feature"
+    color: "0075ca"
+    description: "New feature or request"
+  - name: "type: enhancement"
+    color: "a2eeef"
+    description: "Enhancement to existing feature"
+  - name: "type: documentation"
+    color: "0052cc"
+    description: "Documentation only changes"
+  - name: "type: refactor"
+    color: "fef2c0"
+    description: "Code refactoring"
+
+  # Priority labels
+  - name: "priority: high"
+    color: "d93f0b"
+    description: "High priority"
+  - name: "priority: medium"
+    color: "fbca04"
+    description: "Medium priority"
+  - name: "priority: low"
+    color: "c2e0c6"
+    description: "Low priority"
+
+  # Component labels
+  - name: "component: tui"
+    color: "1d76db"
+    description: "Related to Terminal UI components"
+  - name: "component: cli"
+    color: "1d76db"
+    description: "Related to CLI functionality"
+  - name: "component: workflow"
+    color: "5319e7"
+    description: "Related to workflow management"
+  - name: "component: testing"
+    color: "0e8a16"
+    description: "Related to testing infrastructure"
+
+  # Special labels
+  - name: "auto-merge"
+    color: "ededed"
+    description: "Enable automatic merging"
+  - name: "dependencies"
+    color: "0366d6"
+    description: "Pull requests that update a dependency file"
+  - name: "good first issue"
+    color: "7057ff"
+    description: "Good for newcomers"
+  - name: "help wanted"
+    color: "008672"
+    description: "Extra attention is needed"
+  - name: "wontfix"
+    color: "ffffff"
+    description: "This will not be worked on"
+
+# Environment settings
+environments:
+  - name: production
+    deployment_branch_policy:
+      protected_branches: true
+      custom_branch_policies: false

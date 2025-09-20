@@ -1,0 +1,45 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "automerge": true,
+      "automergeType": "pr",
+      "major": {
+        "automerge": false
+      }
+    },
+    {
+      "matchPackageNames": [
+        "react",
+        "ink",
+        "@types/react",
+        "typescript",
+        "vitest"
+      ],
+      "groupName": "core dependencies",
+      "automerge": false
+    },
+    {
+      "matchPackagePatterns": ["^@types/"],
+      "groupName": "type definitions",
+      "automerge": true
+    }
+  ],
+  "schedule": ["before 6am on monday"],
+  "timezone": "Asia/Tokyo",
+  "commitMessagePrefix": "chore:",
+  "commitMessageAction": "update",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{newVersion}}",
+  "prTitle": "{{commitMessagePrefix}} {{commitMessageAction}} {{commitMessageTopic}} {{commitMessageExtra}}",
+  "prBodyTemplate": "This PR updates {{depName}} from {{currentVersion}} to {{newVersion}}.\n\n### Changes\n{{{changelog}}}\n\n---\n🤖 This PR was automatically created by Renovate",
+  "assignees": ["s-hiraoku"],
+  "reviewers": ["s-hiraoku"],
+  "labels": ["dependencies"],
+  "rangeStrategy": "bump",
+  "stabilityDays": 3,
+  "prConcurrentLimit": 5,
+  "branchConcurrentLimit": 10
+}

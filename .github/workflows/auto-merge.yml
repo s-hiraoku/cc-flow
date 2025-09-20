@@ -1,0 +1,124 @@
+name: Auto-merge PRs
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  check_suite:
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  auto-merge:
+    name: Auto-merge approved PRs
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' && (
+        github.event.pull_request.user.login == 'renovate[bot]' ||
+        github.event.pull_request.user.login == 'dependabot[bot]' ||
+        contains(github.event.pull_request.labels.*.name, 'auto-merge')
+      )
+    
+    steps:
+      - name: Check PR status
+        id: pr-status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            });
+            
+            console.log('PR status:', pr.mergeable_state);
+            console.log('PR draft:', pr.draft);
+            console.log('PR mergeable:', pr.mergeable);
+            
+            return {
+              mergeable: pr.mergeable === true,
+              draft: pr.draft,
+              state: pr.mergeable_state,
+              canMerge: pr.mergeable === true && !pr.draft && pr.mergeable_state === 'clean'
+            };
+            
+      - name: Check if all checks passed
+        id: check-status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: checks } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.payload.pull_request.head.sha,
+            });
+            
+            const checkRuns = checks.check_runs;
+            const failedChecks = checkRuns.filter(check => 
+              check.status === 'completed' && check.conclusion !== 'success' && check.conclusion !== 'neutral'
+            );
+            
+            console.log('Total checks:', checkRuns.length);
+            console.log('Failed checks:', failedChecks.length);
+            
+            return {
+              allPassed: failedChecks.length === 0 && checkRuns.length > 0,
+              failedChecks: failedChecks.map(check => check.name)
+            };
+            
+      - name: Auto-merge if conditions met
+        if: |
+          fromJSON(steps.pr-status.outputs.result).canMerge &&
+          fromJSON(steps.check-status.outputs.result).allPassed
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            
+            // Enable auto-merge
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              commit_title: context.payload.pull_request.title,
+              commit_message: 'Auto-merged by GitHub Actions',
+              merge_method: 'squash'
+            });
+            
+            console.log(`Auto-merged PR #${prNumber}`);
+            
+      - name: Comment on failed auto-merge
+        if: |
+          !fromJSON(steps.pr-status.outputs.result).canMerge ||
+          !fromJSON(steps.check-status.outputs.result).allPassed
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prStatus = ${{ steps.pr-status.outputs.result }};
+            const checkStatus = ${{ steps.check-status.outputs.result }};
+            
+            let reasons = [];
+            if (!prStatus.canMerge) reasons.push('PR is not mergeable');
+            if (!checkStatus.allPassed) reasons.push('Some checks are failing');
+            
+            const comment = `## 🤖 Auto-merge Status
+            
+            This PR cannot be auto-merged due to:
+            ${reasons.map(r => `- ${r}`).join('\n')}
+            
+            ${checkStatus.failedChecks.length > 0 ? 
+              `### Failed Checks:\n${checkStatus.failedChecks.map(c => `- ${c}`).join('\n')}` : 
+              ''
+            }
+            
+            Please resolve these issues for auto-merge to proceed.`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: comment
+            });

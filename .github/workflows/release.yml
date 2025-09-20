@@ -1,0 +1,104 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+jobs:
+  release:
+    name: Release Package
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'cc-flow-cli/package-lock.json'
+          registry-url: 'https://registry.npmjs.org'
+          
+      - name: Install dependencies
+        working-directory: ./cc-flow-cli
+        run: npm ci
+        
+      - name: Run full validation
+        working-directory: ./cc-flow-cli
+        run: npm run validate
+        
+      - name: Build for production
+        working-directory: ./cc-flow-cli
+        run: npm run build
+        
+      - name: Update version (if manual)
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: ./cc-flow-cli
+        run: npm version ${{ github.event.inputs.version }} --no-git-tag-version
+        
+      - name: Get package version
+        id: package-version
+        working-directory: ./cc-flow-cli
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        
+      - name: Create release tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add cc-flow-cli/package.json
+          git commit -m "chore: release v${{ steps.package-version.outputs.version }}"
+          git tag "v${{ steps.package-version.outputs.version }}"
+          git push origin main --tags
+          
+      - name: Publish to npm
+        working-directory: ./cc-flow-cli
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
+      - name: Generate changelog
+        id: changelog
+        run: |
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "## Changes in v${{ steps.package-version.outputs.version }}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD~1)..HEAD >> $GITHUB_OUTPUT 2>/dev/null || echo "- Initial release" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "### Installation" >> $GITHUB_OUTPUT
+          echo "\`\`\`bash" >> $GITHUB_OUTPUT
+          echo "npm install -g @hiraoku/cc-flow-cli@${{ steps.package-version.outputs.version }}" >> $GITHUB_OUTPUT
+          echo "\`\`\`" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.package-version.outputs.version }}
+          release_name: Release v${{ steps.package-version.outputs.version }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
+          
+      - name: Notify success
+        if: success()
+        run: |
+          echo "✅ Successfully released v${{ steps.package-version.outputs.version }}"
+          echo "📦 Package: https://www.npmjs.com/package/@hiraoku/cc-flow-cli"
+          echo "🏷️ Release: https://github.com/${{ github.repository }}/releases/tag/v${{ steps.package-version.outputs.version }}"
