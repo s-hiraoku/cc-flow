@@ -7,6 +7,7 @@ import { Section } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
 import { execSync } from 'child_process';
 import { join } from 'path';
+import type { ConversionResult } from '../../types/conversion.js';
 
 interface ConversionStep {
   name: string;
@@ -14,13 +15,6 @@ interface ConversionStep {
   message: string;
 }
 
-interface ConversionResult {
-  success: boolean;
-  message: string;
-  convertedCount: number;
-  targetDirectory: string;
-  convertedCommands?: string[];
-}
 
 interface ConversionScreenProps {
   targetPath?: string | undefined;

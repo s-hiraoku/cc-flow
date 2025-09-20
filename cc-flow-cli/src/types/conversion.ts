@@ -3,4 +3,5 @@ export interface ConversionResult {
   message: string;
   convertedCount: number;
   targetDirectory: string;
+  convertedCommands?: string[];
 }

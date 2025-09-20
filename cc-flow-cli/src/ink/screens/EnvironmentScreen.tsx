@@ -140,7 +140,7 @@ export const EnvironmentScreen: React.FC<EnvironmentScreenProps> = ({ onNext, on
       {isComplete && (
         <>
           <ScreenDescription
-            heading="🎉 環境確認完了 - 次のステップへ"
+            heading="➡️ 環境確認完了 - 次のステップへ"
             description="ワークフロー作成の準備が整いました。最終確認画面に進んでワークフローを生成してください。"
             align="center"
           />

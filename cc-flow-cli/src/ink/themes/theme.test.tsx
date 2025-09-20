@@ -31,7 +31,7 @@ const TestComponent: React.FC = () => {
 describe('Theme System', () => {
   describe('createTheme', () => {
     it('creates a valid theme with default dimensions', () => {
-      const theme = createTheme({ columns: 80, rows: 24 });
+      const theme = createTheme({ width: 80, height: 24 });
       
       expect(theme.colors).toBeDefined();
       expect(theme.colors.primary).toBeDefined();
@@ -42,7 +42,7 @@ describe('Theme System', () => {
     });
 
     it('accepts custom terminal dimensions', () => {
-      const theme = createTheme({ columns: 100, rows: 30 });
+      const theme = createTheme({ width: 100, height: 30 });
       
       // Check that responsive properties exist and are defined
       expect(theme.responsive).toBeDefined();
@@ -52,7 +52,7 @@ describe('Theme System', () => {
     });
 
     it('has valid color values', () => {
-      const theme = createTheme({ columns: 80, rows: 24 });
+      const theme = createTheme({ width: 80, height: 24 });
       
       // Check that colors are valid hex strings or named colors
       expect(theme.colors.primary).toMatch(/^#[0-9a-fA-F]{6}$|^[a-zA-Z]+$/);
@@ -61,7 +61,7 @@ describe('Theme System', () => {
     });
 
     it('has valid spacing values', () => {
-      const theme = createTheme({ columns: 80, rows: 24 });
+      const theme = createTheme({ width: 80, height: 24 });
       
       expect(typeof theme.spacing.xs).toBe('number');
       expect(typeof theme.spacing.sm).toBe('number');
@@ -77,7 +77,7 @@ describe('Theme System', () => {
     });
 
     it('has valid layout properties', () => {
-      const theme = createTheme({ columns: 80, rows: 24 });
+      const theme = createTheme({ width: 80, height: 24 });
       
       expect(typeof theme.layout.paddingX).toBe('number');
       expect(typeof theme.layout.paddingY).toBe('number');
@@ -91,7 +91,7 @@ describe('Theme System', () => {
     });
 
     it('handles small terminal dimensions', () => {
-      const theme = createTheme({ columns: 40, rows: 10 });
+      const theme = createTheme({ width: 40, height: 10 });
       
       expect(theme.responsive).toBeDefined();
       expect(typeof theme.responsive.terminalWidth).toBe('number');
@@ -139,7 +139,7 @@ describe('Theme System', () => {
 
   describe('Theme Structure', () => {
     it('contains all required color properties', () => {
-      const theme = createTheme({ columns: 80, rows: 24 });
+      const theme = createTheme({ width: 80, height: 24 });
       
       const requiredColors = [
         'primary', 'secondary', 'success', 'warning', 'error', 'info', 'border'
@@ -151,7 +151,7 @@ describe('Theme System', () => {
     });
 
     it('contains text color variants', () => {
-      const theme = createTheme({ columns: 80, rows: 24 });
+      const theme = createTheme({ width: 80, height: 24 });
       
       expect(theme.colors.text).toBeDefined();
       expect(theme.colors.text.primary).toBeDefined();
@@ -160,7 +160,7 @@ describe('Theme System', () => {
     });
 
     it('contains hex color variants', () => {
-      const theme = createTheme({ columns: 80, rows: 24 });
+      const theme = createTheme({ width: 80, height: 24 });
       
       if (theme.colors.hex) {
         expect(theme.colors.hex.blue).toBeDefined();
@@ -169,7 +169,7 @@ describe('Theme System', () => {
     });
 
     it('has responsive properties', () => {
-      const theme = createTheme({ columns: 80, rows: 24 });
+      const theme = createTheme({ width: 80, height: 24 });
       
       expect(theme.responsive).toBeDefined();
       expect(typeof theme.responsive.terminalWidth).toBe('number');
@@ -177,7 +177,7 @@ describe('Theme System', () => {
     });
 
     it('contains standard color names', () => {
-      const theme = createTheme({ columns: 80, rows: 24 });
+      const theme = createTheme({ width: 80, height: 24 });
       
       const standardColors = ['white', 'black', 'red', 'green', 'blue', 'yellow'];
       standardColors.forEach(color => {
@@ -195,7 +195,7 @@ describe('Theme System', () => {
     });
 
     it('provides colors that can be used in Text components', () => {
-      const theme = createTheme({ columns: 80, rows: 24 });
+      const theme = createTheme({ width: 80, height: 24 });
       
       const { lastFrame } = render(
         <Text color={theme.colors.success}>Success message</Text>
@@ -206,8 +206,8 @@ describe('Theme System', () => {
     });
 
     it('handles different terminal sizes gracefully', () => {
-      const smallTheme = createTheme({ columns: 40, rows: 10 });
-      const largeTheme = createTheme({ columns: 120, rows: 40 });
+      const smallTheme = createTheme({ width: 40, height: 10 });
+      const largeTheme = createTheme({ width: 120, height: 40 });
       
       expect(typeof smallTheme.responsive.terminalWidth).toBe('number');
       expect(typeof largeTheme.responsive.terminalWidth).toBe('number');

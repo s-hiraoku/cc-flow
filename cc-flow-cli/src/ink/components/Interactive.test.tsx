@@ -120,13 +120,13 @@ describe('Interactive Components', () => {
   describe('StatusBar', () => {
     it('renders basic status message', () => {
       const { lastFrame } = render(
-        <StatusBar message="Test status message" width={50} />
+        <StatusBar center="Test status message" width={50} />
       );
       
       const output = lastFrame();
       // StatusBar may render as a bordered container
       expect(output).toBeDefined();
-      expect(output.length).toBeGreaterThan(0);
+      expect(output).toContain('Test status message');
     });
 
     it('renders with left, center, and right content', () => {
@@ -151,7 +151,7 @@ describe('Interactive Components', () => {
       variants.forEach(variant => {
         const { lastFrame } = render(
           <StatusBar 
-            message="Test message"
+            center="Test message"
             variant={variant}
             width={50}
           />
@@ -161,29 +161,35 @@ describe('Interactive Components', () => {
       });
     });
 
-    it('handles compact mode', () => {
+    it('renders provided items', () => {
+      const items = [
+        { key: 'State', value: 'Ready' },
+        { key: 'Mode', value: 'Interactive' }
+      ];
       const { lastFrame } = render(
         <StatusBar 
-          message="Compact message"
+          items={items}
           width={50}
-          compact={true}
         />
       );
       
-      expect(lastFrame()).toBeDefined();
+      const output = lastFrame();
+      items.forEach(item => {
+        expect(output).toContain(`${item.key}`);
+        expect(output).toContain(`${item.value}`);
+      });
     });
 
-    it('renders with custom colors', () => {
+    it('renders left-aligned content', () => {
       const { lastFrame } = render(
         <StatusBar 
-          message="Colored message"
+          left="Colored message"
           width={50}
-          textColor="#ff0000"
-          backgroundColor="#00ff00"
         />
       );
       
-      expect(lastFrame()).toBeDefined();
+      const output = lastFrame();
+      expect(output).toContain('Colored message');
     });
   });
 

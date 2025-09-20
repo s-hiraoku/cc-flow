@@ -62,6 +62,7 @@ interface FocusableMenuProps {
   focusId?: string;
   align?: Alignment;
   spacing?: SpacingValue;
+  variant?: 'default' | 'primary' | 'secondary';
 }
 
 export const FocusableMenu: React.FC<FocusableMenuProps> = ({
@@ -72,6 +73,7 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
   showDescription = false,
   align = "left",
   spacing = 1,
+  variant = 'default',
 }) => {
   const theme = useTheme();
   const listWidth =
@@ -123,11 +125,22 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
             ? renderLines(item.description, contentWidth, "left")
             : [];
 
-        const textColor = isDisabled
-          ? theme.colors.text.muted
-          : isSelected
-          ? theme.colors.primary
-          : theme.colors.text.primary;
+        const getVariantColor = () => {
+          if (isDisabled) return theme.colors.text.muted;
+          if (!isSelected) return theme.colors.text.primary;
+          
+          switch (variant) {
+            case 'primary':
+              return theme.colors.primary;
+            case 'secondary':
+              return theme.colors.text.secondary || theme.colors.text.muted;
+            case 'default':
+            default:
+              return theme.colors.primary;
+          }
+        };
+        
+        const textColor = getVariantColor();
 
         return (
           <Box

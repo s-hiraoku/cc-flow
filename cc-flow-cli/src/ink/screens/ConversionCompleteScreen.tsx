@@ -6,14 +6,8 @@ import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
 import { MenuItem } from '../components/Interactive.js';
 import { getVersion } from '../../utils/package.js';
+import type { ConversionResult } from '../../types/conversion.js';
 
-interface ConversionResult {
-  success: boolean;
-  message: string;
-  convertedCount: number;
-  targetDirectory: string;
-  convertedCommands?: string[];
-}
 
 interface ConversionCompleteScreenProps {
   result: ConversionResult;

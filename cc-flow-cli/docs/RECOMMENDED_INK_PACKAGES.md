@@ -17,7 +17,6 @@ React Ink 6.3.0 用の推奨パッケージリストです。これらのパッ�
 ```bash
 npm install --save \
   ink-table@^3.0.0 \
-  ink-box@^1.0.0 \
   ink-divider@^3.0.0 \
   ink-link@^3.0.0 \
   ink-progress-bar@^3.0.0

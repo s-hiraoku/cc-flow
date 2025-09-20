@@ -69,8 +69,8 @@ export const Frame: React.FC<FrameProps> = ({
     const terminalWidth = stdout?.columns || 80;
     
     // Ensure minimum margins and responsive behavior
-    const availableWidth = Math.max(minWidth, terminalWidth - 8); // 4 chars margin on each side
-    const calculatedWidth = Math.min(maxWidth, availableWidth);
+    const safeAvailable = Math.max(minWidth, Math.min(terminalWidth - 8, maxWidth));
+    const calculatedWidth = safeAvailable;
     
     return calculatedWidth;
   }, [width, stdout?.columns, minWidth, maxWidth]);

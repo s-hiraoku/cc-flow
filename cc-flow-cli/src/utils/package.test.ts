@@ -1,10 +1,15 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { getPackageJson, getVersion } from './package.js';
+import * as fs from 'fs';
 
-// Mock fs module
-vi.mock('fs', () => ({
-  readFileSync: vi.fn()
-}));
+// Use partial mock to preserve real fs behavior while allowing specific overrides
+vi.mock('fs', async () => {
+  const actual = await vi.importActual<typeof import('fs')>('fs');
+  return {
+    ...actual,
+    readFileSync: vi.fn()
+  };
+});
 
 // Mock path module for consistent testing
 vi.mock('path', () => ({

@@ -16,4 +16,4 @@ CC-Flow is a Claude Code workflow platform that enables sequential execution of 
 - Teams wanting to standardize and reuse workflow patterns
 
 ## Current Status
-Version 0.0.9 - Feature-complete CLI with active development and npm package distribution
+Version 0.0.10 - Feature-complete CLI with active development and npm package distribution
