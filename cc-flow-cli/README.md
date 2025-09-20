@@ -41,8 +41,9 @@ Run your command in Claude Code:
 The TUI delegates actual file generation to a shell script:
 
 - Script: `scripts/create-workflow.sh`
-- Arguments passed: `"<targetPath>" "<agentName,agentName,...>"`
+- Arguments passed: `"<targetPath>" "<agentName,agentName,...>" "[purpose]"`
 - Workflow name: set via env var `WORKFLOW_NAME` (falls back to `<dir>-workflow`)
+- Purpose: set via env var `WORKFLOW_PURPOSE` or third argument (optional)
 
 Script lookup order
 1. Your project’s `scripts/create-workflow.sh` (preferred)
@@ -67,8 +68,14 @@ scripts/create-workflow.sh ./agents/spec "1 3 4"
 # Name-based order (comma-separated agent IDs)
 scripts/create-workflow.sh ./agents/spec "spec-init,spec-requirements,spec-design"
 
+# With custom purpose
+scripts/create-workflow.sh ./agents/spec "1 3 4" "API仕様書作成ワークフロー"
+
 # Cross-category selection
 scripts/create-workflow.sh ./agents "spec-init,utility-date"
+
+# Interactive mode with purpose
+scripts/create-workflow.sh ./agents/spec "" "カスタム目的"
 ```
 
 This generates `.claude/commands/<dir>-workflow.md`. Run it in Claude Code as `/spec-workflow "..."`.

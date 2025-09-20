@@ -43,6 +43,9 @@ cc-flow
 # Non-interactive script mode (for automation)
 scripts/create-workflow.sh ./agents/spec "3 4 1 6 2"
 
+# With custom purpose
+scripts/create-workflow.sh ./agents/spec "3 4 1 6 2" "API仕様書作成"
+
 # Execute generated workflow
 /spec-workflow "Your task context"
 ```
@@ -150,6 +153,12 @@ For automation or CI/CD:
 ```bash
 # Create workflow with agent order
 scripts/create-workflow.sh ./agents/spec "3 4 1 6 2"
+
+# Create workflow with agent order and custom purpose
+scripts/create-workflow.sh ./agents/spec "3 4 1 6 2" "API仕様書作成ワークフロー"
+
+# Interactive mode with custom purpose
+scripts/create-workflow.sh ./agents/spec "" "テスト作成ワークフロー"
 
 # Convert slash commands
 scripts/convert-slash-commands.sh demo --dry-run

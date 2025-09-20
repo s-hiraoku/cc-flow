@@ -243,8 +243,14 @@ scripts/create-workflow.sh ./agents/spec "1 3 4"
 # Or specify agent names (comma-separated)
 scripts/create-workflow.sh ./agents/spec "spec-init,spec-requirements,spec-design"
 
+# With custom purpose description
+scripts/create-workflow.sh ./agents/spec "1 3 4" "API仕様書作成ワークフロー"
+
 # Cross-category selection (when using ./agents)
 scripts/create-workflow.sh ./agents "spec-init,utility-date"
+
+# Interactive mode with custom purpose
+scripts/create-workflow.sh ./agents/spec "" "カスタムワークフロー目的"
 
 # Back-compat short form (deprecated; emits a warning)
 scripts/create-workflow.sh spec "1 3 4"
