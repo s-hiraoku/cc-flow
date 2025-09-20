@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
 import { UnifiedScreen, ScreenDescription } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
@@ -6,17 +6,13 @@ import { CheckboxList, StatusBar } from '../components/Interactive.js';
 import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
 import { renderLines } from '../utils/text.js';
+import { getAgentsFromPath, type Agent as AgentType } from '../utils/directoryUtils.js';
 
-interface Agent {
-  id: string;
-  name: string;
-  description: string;
-  path: string;
-}
+
 
 interface AgentSelectionScreenProps {
   targetPath: string;
-  onNext: (selectedAgents: Agent[]) => void;
+  onNext: (selectedAgents: AgentType[]) => void;
   onBack: () => void;
 }
 
@@ -29,13 +25,25 @@ export const AgentSelectionScreen: React.FC<AgentSelectionScreenProps> = ({
   const { exit } = useApp();
   const { contentWidth } = useScreenDimensions();
 
-  const availableAgents: Agent[] = useMemo(() => ([
-    { id: 'spec-init', name: 'spec-init', description: 'プロジェクト仕様の初期化', path: './agents/spec/spec-init.md' },
-    { id: 'spec-requirements', name: 'spec-requirements', description: '要件定義と分析', path: './agents/spec/spec-requirements.md' },
-    { id: 'spec-design', name: 'spec-design', description: 'システム設計と架構', path: './agents/spec/spec-design.md' },
-    { id: 'spec-tasks', name: 'spec-tasks', description: 'タスク分解と計画', path: './agents/spec/spec-tasks.md' },
-    { id: 'spec-impl', name: 'spec-impl', description: '実装仕様とガイド', path: './agents/spec/spec-impl.md' }
-  ]), []);
+  const [availableAgents, setAvailableAgents] = useState<AgentType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadAgents = async () => {
+      try {
+        setIsLoading(true);
+        const agents = getAgentsFromPath(targetPath);
+        setAvailableAgents(agents);
+      } catch (error) {
+        console.error('Failed to load agents:', error);
+        setAvailableAgents([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAgents();
+  }, [targetPath]);
 
   const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set());
 
@@ -106,7 +114,7 @@ export const AgentSelectionScreen: React.FC<AgentSelectionScreenProps> = ({
             id: agent.id,
             label: agent.name,
             description: agent.description,
-            icon: '🤖'
+            icon: agent.icon || '🤖'
           }))}
           selectedIds={selectedAgents}
           onToggle={handleToggle}

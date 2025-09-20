@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from 'fs';
+import { readdirSync, statSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 export interface DirectoryInfo {
@@ -165,6 +165,128 @@ function getDirectoryLabel(dirName: string, agentCount: number): string {
 /**
  * エラー時のデフォルトディレクトリ一覧
  */
+/**
+ * 指定されたパスからエージェントファイルを読み込む
+ */
+export interface Agent {
+  id: string;
+  name: string;
+  description: string;
+  path: string;
+  icon?: string;
+}
+
+export function getAgentsFromPath(targetPath: string): Agent[] {
+  try {
+    const agents: Agent[] = [];
+    
+    // パスの正規化（./agents形式から絶対パスに変換）
+    const normalizedPath = targetPath.startsWith('./') 
+      ? join(process.cwd(), '.claude', targetPath.slice(2))
+      : targetPath;
+    
+    try {
+      const files = readdirSync(normalizedPath);
+      
+      for (const file of files) {
+        if (file.endsWith('.md')) {
+          const filePath = join(normalizedPath, file);
+          const stats = statSync(filePath);
+          
+          if (stats.isFile()) {
+            const agentName = file.replace('.md', '');
+            const description = extractAgentDescription(filePath, agentName);
+            const icon = getAgentIcon(agentName);
+            
+            agents.push({
+              id: agentName,
+              name: agentName,
+              description,
+              path: filePath,
+              icon
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.warn(`Warning: Could not read directory ${normalizedPath}:`, error);
+    }
+    
+    // 名前でソート
+    agents.sort((a, b) => a.name.localeCompare(b.name));
+    
+    return agents;
+  } catch (error) {
+    console.error('Error getting agents from path:', error);
+    return [];
+  }
+}
+
+/**
+ * エージェントファイルから説明を抽出
+ */
+function extractAgentDescription(filePath: string, agentName: string): string {
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    
+    // YAML frontmatterから説明を抽出を試行
+    const frontmatterMatch = content.match(/^---\s*\n(.*?)\n---/s);
+    if (frontmatterMatch) {
+      const yaml = frontmatterMatch[1];
+      const descMatch = yaml.match(/description:\s*(.+)/);
+      if (descMatch) {
+        return descMatch[1].replace(/["']/g, '').trim();
+      }
+    }
+    
+    // 最初の段落から説明を抽出
+    const lines = content.split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('---')) {
+        return trimmed.length > 100 ? trimmed.substring(0, 100) + '...' : trimmed;
+      }
+    }
+    
+    // フォールバック：エージェント名に基づく説明
+    return getAgentDescriptionByName(agentName);
+  } catch (error) {
+    return getAgentDescriptionByName(agentName);
+  }
+}
+
+/**
+ * エージェント名に基づく説明を生成
+ */
+function getAgentDescriptionByName(agentName: string): string {
+  if (agentName.includes('init')) return '🏗️ 初期化・セットアップ';
+  if (agentName.includes('requirements')) return '📋 要件定義・分析';
+  if (agentName.includes('design')) return '🎨 設計・アーキテクチャ';
+  if (agentName.includes('tasks')) return '📝 タスク分解・計画';
+  if (agentName.includes('impl')) return '⚡ 実装・開発';
+  if (agentName.includes('status')) return '📊 進捗・ステータス確認';
+  if (agentName.includes('test')) return '🧪 テスト・検証';
+  if (agentName.includes('deploy')) return '🚀 デプロイメント';
+  if (agentName.includes('steering')) return '🎯 方向性・ガイダンス';
+  return '⚙️ 処理・実行';
+}
+
+/**
+ * エージェント名に基づくアイコンを取得
+ */
+function getAgentIcon(agentName: string): string {
+  if (agentName.includes('init')) return '🏗️';
+  if (agentName.includes('requirements')) return '📋';
+  if (agentName.includes('design')) return '🎨';
+  if (agentName.includes('tasks')) return '📝';
+  if (agentName.includes('impl')) return '⚡';
+  if (agentName.includes('status')) return '📊';
+  if (agentName.includes('test')) return '🧪';
+  if (agentName.includes('deploy')) return '🚀';
+  if (agentName.includes('steering')) return '🎯';
+  return '🤖';
+}
+
 function getDefaultDirectories(): DirectoryInfo[] {
   return [
     {
