@@ -165,7 +165,6 @@ interface MenuSectionProps {
   contentWidth?: number;
   descriptionPlaceholder?: string;
   spacing?: Spacing;
-  bordered?: boolean;
 }
 
 export const MenuSection: React.FC<MenuSectionProps> = ({
@@ -174,8 +173,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
   showDescription = false,
   contentWidth,
   descriptionPlaceholder,
-  spacing = "md",
-  bordered = true,
+  spacing = DESIGN_TOKENS.spacing.menu,
 }) => {
   const { contentWidth: defaultContentWidth, theme } = useScreenDimensions();
   const colors = getScreenColors(theme);
@@ -193,7 +191,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
         items={items}
         onSelect={onSelect}
         onSelectionChange={handleSelectionChange}
-        width={(contentWidth || defaultContentWidth) - (bordered ? 4 : 0)} // Account for border and padding only if bordered
+        width={Math.max(40, (contentWidth || defaultContentWidth) - 4)} // Account for border and padding
         align="left"
       />
 
@@ -225,28 +223,14 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
     </>
   );
 
-  if (bordered) {
-    return (
-      <Section spacing={DESIGN_TOKENS.spacing.menu} align="center">
-        <Box
-          borderStyle="single"
-          borderColor={colors.text.emphasis}
-          padding={1}
-          width="100%"
-          alignItems="center"
-          flexDirection="column"
-        >
-          {menuContent}
-        </Box>
-      </Section>
-    );
-  }
-
   return (
-    <Section spacing={DESIGN_TOKENS.spacing.menu} align="center">
+    <Section spacing={spacing} align="left">
       <Box
+        borderStyle="single"
+        borderColor={colors.text.emphasis}
+        padding={1}
         width="100%"
-        alignItems="center"
+        alignItems="flex-start"
         flexDirection="column"
       >
         {menuContent}
