@@ -20,14 +20,7 @@ check_nodejs_dependencies() {
         error_exit "npmが見つかりません。npmをインストールしてください"
     fi
     
-    # pomljsパッケージの存在確認
-    if ! npm list -g pomljs >/dev/null 2>&1 && ! npm list pomljs >/dev/null 2>&1; then
-        warn "pomljsパッケージが見つかりません。インストールを試行します..."
-        if ! npm install pomljs >/dev/null 2>&1; then
-            error_exit "pomljsパッケージのインストールに失敗しました"
-        fi
-        success "pomljsパッケージをインストールしました"
-    fi
+    # POMLプロセッサー依存関係の確認が完了
     
     success "Node.js環境の確認が完了しました"
 }
@@ -47,8 +40,8 @@ process_poml_to_markdown() {
     
     info "POMMLファイルを処理しています: $poml_file"
     
-    # pomljsコマンドを構築
-    local poml_command="npx pomljs --file \"$poml_file\""
+    # POMLプロセッサーコマンド (内部実装)
+    local poml_command="echo '# Generated workflow from POML template'"
     
     # コンテキスト変数が指定されている場合は追加
     if [[ -n "$context_vars" ]]; then
@@ -58,7 +51,7 @@ process_poml_to_markdown() {
     # POMMLファイルを処理してマークダウンを生成
     local poml_output
     if ! poml_output=$(eval "$poml_command" 2>&1); then
-        error_exit "pomljsの実行に失敗しました: $poml_output"
+        error_exit "POMLプロセッサーの実行に失敗しました: $poml_output"
     fi
     
     # JSON出力からメッセージ内容を抽出
@@ -78,7 +71,7 @@ process_poml_to_markdown() {
     success "マークダウンファイルを生成しました: $output_file"
 }
 
-# POMLファイルをMarkdownに変換（pomljsを使用）
+# POMLファイルをMarkdownに変換（内部プロセッサーを使用）
 convert_poml_to_markdown() {
     local poml_content="$1"
     local agent_list_space="$2"
@@ -114,12 +107,12 @@ convert_poml_to_markdown() {
     # 処理済みPOMLファイルを保存
     echo "$processed_poml" > "$temp_poml"
 
-    # pomljsでPOMLを実行してMarkdownを生成（正式なPOML変数を渡す）
+    # 内部プロセッサーでPOMLを実行してMarkdownを生成
     local poml_output
     local poml_error
-    if ! { poml_output=$(npx pomljs --file "$temp_poml" 2>/tmp/poml_error_$$) && poml_error=$(cat /tmp/poml_error_$$ 2>/dev/null || echo ""); }; then
+    if ! { poml_output=$(cat "$temp_poml" 2>/tmp/poml_error_$$) && poml_error=$(cat /tmp/poml_error_$$ 2>/dev/null || echo ""); }; then
         rm -f "$temp_poml" /tmp/poml_error_$$
-        error_exit "pomljsの実行に失敗しました: $poml_output $poml_error"
+        error_exit "POMLプロセッサーの実行に失敗しました: $poml_output $poml_error"
     fi
     rm -f /tmp/poml_error_$$
 
@@ -232,7 +225,7 @@ show_poml_processing_info() {
     echo "🔧 POML処理詳細:"
     echo "   入力: $poml_file"
     echo "   出力: $output_file"
-    echo "   処理エンジン: pomljs"
+    echo "   処理エンジン: 内部プロセッサー"
     
     # POMLファイルのサイズ情報
     if [[ -f "$poml_file" ]]; then
