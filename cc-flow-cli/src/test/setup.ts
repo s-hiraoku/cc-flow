@@ -33,11 +33,5 @@ vi.mock('node:process', () => ({
   env: {}
 }));
 
-// Mock fs operations for safety
-vi.mock('node:fs', () => ({
-  existsSync: vi.fn(() => true),
-  readFileSync: vi.fn(() => '{}'),
-  writeFileSync: vi.fn(),
-  mkdirSync: vi.fn(),
-  readdirSync: vi.fn(() => [])
-}));
+// Note: fs operations are now mocked per-test using vi.spyOn() for better control
+// This allows tests to specify exact behavior without global interference

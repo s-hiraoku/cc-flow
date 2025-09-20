@@ -2,8 +2,8 @@
   "compilerOptions": {
     // Target ES2022 for Node.js 18+ compatibility (import.meta support)
     "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
     "lib": ["ES2022"],
     "jsx": "react-jsx",
     

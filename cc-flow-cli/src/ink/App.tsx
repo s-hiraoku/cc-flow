@@ -14,13 +14,7 @@ import { WorkflowNameScreen } from './screens/WorkflowNameScreen.js';
 import { EnvironmentScreen } from './screens/EnvironmentScreen.js';
 import { ScriptExecutor } from '../services/ScriptExecutor.js';
 import type { WorkflowConfig } from '../models/Agent.js';
-
-interface ConversionResult {
-  success: boolean;
-  message: string;
-  convertedCount: number;
-  targetDirectory: string;
-}
+import type { ConversionResult } from '../types/conversion.js';
 
 export type ScreenType = 
   | 'welcome'
