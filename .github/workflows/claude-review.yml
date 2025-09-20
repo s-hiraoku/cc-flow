@@ -33,7 +33,7 @@ jobs:
           
       - name: Install dependencies
         working-directory: ./cc-flow-cli
-        run: npm ci
+        run: npm install
         
       - name: Get changed files
         id: changed-files

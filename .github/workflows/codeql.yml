@@ -41,7 +41,7 @@ jobs:
 
     - name: Install dependencies
       working-directory: ./cc-flow-cli
-      run: npm ci
+      run: npm install
 
     - name: Build project
       working-directory: ./cc-flow-cli
