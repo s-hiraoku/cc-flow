@@ -4,26 +4,44 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-CC-Flow is a Claude Code workflow platform that enables sequential execution of sub-agents through custom slash commands. It uses POML (Prompt Orchestration Markup Language) for workflow orchestration and follows a modular script architecture inspired by GitHub spec-kit patterns.
+CC-Flow is a Claude Code workflow platform that enables sequential execution of sub-agents through custom slash commands. It features a beautiful interactive Terminal User Interface (TUI) built with React Ink for creating workflows visually, and uses POML (Prompt Orchestration Markup Language) for workflow orchestration.
 
 ## Key Commands
 
+### Development Commands
+
 ```bash
-# Install dependencies
-npm install
+# Install dependencies for CLI package
+cd cc-flow-cli && npm install
 
-# Inside Claude Code (slash command)
-# Non-interactive mode is required in Claude Code (no stdin support)
-/create-workflow spec "3 4 1 6 2"  # index-based order
+# Run CLI in development mode
+cd cc-flow-cli && npm run dev
 
-# Example with the same order:
-# 3=spec-init, 4=spec-requirements, 1=spec-design, 6=spec-tasks, 2=spec-impl
-/create-workflow spec "3 4 1 6 2"
+# Build CLI package
+cd cc-flow-cli && npm run build
 
-Note:
-- "/create-workflow" is a slash command executed inside Claude Code. It is distinct from the shell script `scripts/create-workflow.sh` that you run in a terminal.
-- Slash command uses a category name like `spec`; the script uses a path like `./agents/spec`.
-- This repository does not ship `/create-workflow` by default. If it isn’t present in your project, use the terminal script examples below or add a corresponding `.claude/commands/create-workflow.md` in your project.
+# Run tests
+cd cc-flow-cli && npm test
+
+# Type checking
+cd cc-flow-cli && npm run type-check
+
+# Validate build (type-check + build)
+cd cc-flow-cli && npm run validate
+```
+
+### Using the CLI
+
+```bash
+# Run interactive TUI (recommended)
+npx @hiraoku/cc-flow-cli
+
+# Or after global install
+npm install -g @hiraoku/cc-flow-cli
+cc-flow
+
+# Non-interactive script mode (for automation)
+scripts/create-workflow.sh ./agents/spec "3 4 1 6 2"
 
 # Execute generated workflow
 /spec-workflow "Your task context"
@@ -31,98 +49,51 @@ Note:
 
 ## Architecture
 
+### Project Structure
+
+The codebase is organized as a monorepo with two main parts:
+
+```
+cc-flow/
+├── cc-flow-cli/                    # React Ink TUI application (TypeScript)
+│   ├── src/
+│   │   ├── ink/                    # TUI components and screens
+│   │   │   ├── screens/            # Screen components (Welcome, Menu, etc.)
+│   │   │   ├── components/         # Reusable UI components
+│   │   │   ├── design-system/      # Design system and layout patterns
+│   │   │   └── themes/             # Color themes and responsive design
+│   │   ├── services/               # Business logic services
+│   │   ├── models/                 # Data models and types
+│   │   └── utils/                  # Utility functions
+│   ├── scripts/                    # Build and deployment scripts
+│   ├── templates/                  # POML workflow templates
+│   └── bin/                        # Executable entry point
+├── scripts/                        # Workflow creation shell scripts
+├── .claude/                        # Claude Code configuration
+│   ├── commands/                   # Slash command definitions
+│   └── agents/                     # Sub-agent definitions
+└── templates/                      # POML workflow templates
+```
+
+### TUI Architecture (React Ink)
+
+The interactive CLI is built with React Ink and follows a screen-based architecture:
+
+- **App.tsx**: Main application component with state management
+- **Screens**: Self-contained UI screens for different workflow steps
+- **Design System**: Reusable components with consistent styling
+- **Interactive Components**: Focus-aware menu and input components
+- **Theme System**: Responsive design with color themes
+
+Key TUI features:
+- Bilingual UI (English/Japanese)
+- Keyboard navigation and accessibility
+- Responsive terminal layouts
+- Beautiful ASCII art and visual feedback
+
 ### Command System
 
-- **Location**: `.claude/commands/`
-- **Format**: Markdown files with YAML frontmatter and bash code blocks
-- **Key insight**: Each `.md` file becomes a slash command. The bash code block is executed when the command runs.
-- **Argument handling**: Commands receive arguments via `$*` or `$1`, `$2`, etc.
-
-### POML Integration
-
-- **Templates**: `templates/workflow.poml` uses `{WORKFLOW_AGENT_LIST}` placeholder for agent arrays
-- **Syntax**: Arrays must use single quotes: `['agent1', 'agent2']`
-- **Variables**: Use `{{variable}}` for POML context variables
-- **Loops**: `<item for="item in ['a', 'b']">{{item}}</item>`
-
-### Script Architecture
-
-```
-scripts/
-├── create-workflow.sh      # Main entry, supports both interactive and non-interactive modes
-├── lib/
-│   ├── agent-discovery.sh  # Finds agents in directories
-│   ├── template-processor.sh # Processes templates with variable substitution
-│   └── user-interaction.sh # Interactive prompts and confirmations
-└── utils/
-    └── common.sh           # Error handling and utilities
-```
-
-**Non-interactive usage** (required for Claude Code):
-
-```bash
-# Recommended new path format
-./scripts/create-workflow.sh ./agents/<dir> "<order>"
-
-# Examples
-./scripts/create-workflow.sh ./agents/spec "3 4 1 6 2"        # index-based
-./scripts/create-workflow.sh ./agents/spec "spec-init,spec-impl" # name-based
-
-# Back-compat short form (deprecated; emits a warning)
-./scripts/create-workflow.sh spec "3 4 1 6 2"
-```
-
-### Agent Structure
-
-- **Location**: `.claude/agents/<category>/<agent-name>.md`
-- **Categories**: `spec/` (specification workflow), `utility/` (helper agents)
-- **Workflow creation**: Interactive selection during `/create-workflow` execution
-
-## Working with Workflows
-
-### Creating New Workflows
-
-1. Create agent directory: `.claude/agents/<category>/`
-2. Add agent files: `<agent-name>.md`
-3. Run `/create-workflow <category>`
-4. Select agents and order interactively
-5. Confirm to generate command files
-
-### Generated Files
-
-By default, the script generates a single final command file and cleans up intermediates:
-
-- `.claude/commands/<workflow-name>.md` - The slash command (final)
-- POML is created only as a temporary intermediate and removed in the default flow
-
-### Template Variables
-
-The template system (`template-processor.sh`) replaces these placeholders:
-
-- `{WORKFLOW_NAME}` - Name of the workflow (e.g., "spec-workflow")
-- `{WORKFLOW_AGENT_LIST}` - Array of agents (POML: `['agent1', 'agent2']`, Bash: `agent1 agent2`)
-- `{DESCRIPTION}` - Command description
-- `{ARGUMENT_HINT}` - Argument hint for command usage
-
-## Important Implementation Details
-
-### Bash Execution Context
-
-- Each Bash tool call is a separate process - variables don't persist
-- Use single command with `&&` or `;` to maintain context
-- Scripts should handle all error checking internally
-
-### POML Array Syntax
-
-```poml
-<!-- Correct -->
-<item for="agent in ['spec-init', 'spec-requirements']">
-
-<!-- Incorrect (will cause parse error) -->
-<item for="agent in ["spec-init", "spec-requirements"]">
-```
-
-### Command File Structure
+Commands are defined as markdown files with YAML frontmatter:
 
 ```markdown
 ---
@@ -133,25 +104,306 @@ allowed-tools: [Bash]
 
 # command-name
 
-Description
-
-## Execution
-
 \`\`\`bash
-
-# Get arguments
-
-ARGUMENTS="$\*"
-
-# Execute script
-
+ARGUMENTS="$*"
 ./scripts/script.sh "$ARGUMENTS"
 \`\`\`
 ```
 
+### POML Integration
+
+- **Templates**: Use `{WORKFLOW_AGENT_LIST}` placeholder for agent arrays
+- **Syntax**: Arrays must use single quotes: `['agent1', 'agent2']`
+- **Variables**: Use `{{variable}}` for POML context variables
+- **Loops**: `<item for="item in ['a', 'b']">{{item}}</item>`
+
+### Agent Structure
+
+Agents are markdown files with specific metadata:
+
+- **Location**: `.claude/agents/<category>/<agent-name>.md`
+- **Categories**: `spec/` (specification workflow), `utility/` (helper agents)
+- **Workflow Integration**: Agents can be chained together in custom workflows
+
+## Working with the TUI
+
+### Creating Workflows
+
+1. Run `npx @hiraoku/cc-flow-cli` to launch the TUI
+2. Select "Create workflow from existing agents"
+3. Choose agent directory (e.g., "spec")
+4. Select agents using checkbox interface
+5. Set execution order interactively
+6. Preview and confirm workflow creation
+
+### Converting Slash Commands
+
+1. Run the CLI and select "Convert slash commands to agents"
+2. Choose source directory containing commands
+3. Select commands to convert
+4. Generated agents can be used in workflows
+
+### Script Mode (Non-Interactive)
+
+For automation or CI/CD:
+
+```bash
+# Create workflow with agent order
+scripts/create-workflow.sh ./agents/spec "3 4 1 6 2"
+
+# Convert slash commands
+scripts/convert-slash-commands.sh demo --dry-run
+```
+
+## Important Implementation Details
+
+### TypeScript Configuration
+
+- **Target**: ES2022 with ESNext modules
+- **Module System**: ESModules with .js imports
+- **Build Output**: Compiled to `dist/` directory
+- **Node.js**: Minimum version 18.0.0
+
+### React Ink Specifics
+
+- **Components**: Functional components with hooks
+- **Layout**: Box model with flexbox
+- **Input Handling**: `useInput` hook for keyboard events
+- **State Management**: React state with custom hooks
+- **Testing**: Vitest with coverage reporting
+
+### Development Workflow
+
+1. **Local Development**: Use `npm run dev` for hot reloading
+2. **Type Checking**: Run `npm run type-check` before commits
+3. **Testing**: Use `npm test` for unit tests
+4. **Building**: `npm run build` compiles TypeScript to JavaScript
+5. **Publishing**: `npm run prepublishOnly` runs full validation
+
+### Error Handling
+
+- **Shell Execution**: Scripts handle all error checking internally
+- **TUI Errors**: Graceful error display with recovery options
+- **Validation**: Input validation at multiple levels
+- **Debugging**: Console output for development debugging
+
 ## Development Notes
 
-- POML version: 0.0.8 (see package.json)
-- Script permissions: Ensure `.sh` files are executable (`chmod +x`)
-- Error messages: Use Japanese emoji patterns (❌, ✅, 🔍, 📂) for consistency
-- **Claude Code limitation**: No interactive input support - always use non-interactive mode with order specification
+- **Dependencies**: Uses modern React Ink v6+ with TypeScript 5.6
+- **Package Management**: npm with package-lock.json
+- **Accessibility**: Terminal UI follows accessibility best practices
+- **Responsive Design**: Adapts to different terminal sizes
+- **Internationalization**: Bilingual UI with Japanese/English support
+- **Claude Code Integration**: Generated commands call `claude subagent`
+
+### Common Patterns
+
+- **Screen Components**: Follow `UnifiedScreen` pattern for consistency
+- **Menu Systems**: Use `FocusableMenu` for interactive selections
+- **Layout**: Use design system components for consistent spacing
+- **Colors**: Use theme system for consistent color schemes
+- **Error Messages**: Japanese emoji patterns (❌, ✅, 🔍, 📂)# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+CC-Flow is a Claude Code workflow platform that enables sequential execution of sub-agents through custom slash commands. It features a beautiful interactive Terminal User Interface (TUI) built with React Ink for creating workflows visually, and uses POML (Prompt Orchestration Markup Language) for workflow orchestration.
+
+## Key Commands
+
+### Development Commands
+
+```bash
+# Install dependencies for CLI package
+cd cc-flow-cli && npm install
+
+# Run CLI in development mode
+cd cc-flow-cli && npm run dev
+
+# Build CLI package
+cd cc-flow-cli && npm run build
+
+# Run tests
+cd cc-flow-cli && npm test
+
+# Type checking
+cd cc-flow-cli && npm run type-check
+
+# Validate build (type-check + build)
+cd cc-flow-cli && npm run validate
+```
+
+### Using the CLI
+
+```bash
+# Run interactive TUI (recommended)
+npx @hiraoku/cc-flow-cli
+
+# Or after global install
+npm install -g @hiraoku/cc-flow-cli
+cc-flow
+
+# Non-interactive script mode (for automation)
+scripts/create-workflow.sh ./agents/spec "3 4 1 6 2"
+
+# Execute generated workflow
+/spec-workflow "Your task context"
+```
+
+## Architecture
+
+### Project Structure
+
+The codebase is organized as a monorepo with two main parts:
+
+```
+cc-flow/
+├── cc-flow-cli/                    # React Ink TUI application (TypeScript)
+│   ├── src/
+│   │   ├── ink/                    # TUI components and screens
+│   │   │   ├── screens/            # Screen components (Welcome, Menu, etc.)
+│   │   │   ├── components/         # Reusable UI components
+│   │   │   ├── design-system/      # Design system and layout patterns
+│   │   │   └── themes/             # Color themes and responsive design
+│   │   ├── services/               # Business logic services
+│   │   ├── models/                 # Data models and types
+│   │   └── utils/                  # Utility functions
+│   ├── scripts/                    # Build and deployment scripts
+│   ├── templates/                  # POML workflow templates
+│   └── bin/                        # Executable entry point
+├── scripts/                        # Workflow creation shell scripts
+├── .claude/                        # Claude Code configuration
+│   ├── commands/                   # Slash command definitions
+│   └── agents/                     # Sub-agent definitions
+└── templates/                      # POML workflow templates
+```
+
+### TUI Architecture (React Ink)
+
+The interactive CLI is built with React Ink and follows a screen-based architecture:
+
+- **App.tsx**: Main application component with state management
+- **Screens**: Self-contained UI screens for different workflow steps
+- **Design System**: Reusable components with consistent styling
+- **Interactive Components**: Focus-aware menu and input components
+- **Theme System**: Responsive design with color themes
+
+Key TUI features:
+- Bilingual UI (English/Japanese)
+- Keyboard navigation and accessibility
+- Responsive terminal layouts
+- Beautiful ASCII art and visual feedback
+
+### Command System
+
+Commands are defined as markdown files with YAML frontmatter:
+
+```markdown
+---
+description: Command description
+argument-hint: <args>
+allowed-tools: [Bash]
+---
+
+# command-name
+
+\`\`\`bash
+ARGUMENTS="$*"
+./scripts/script.sh "$ARGUMENTS"
+\`\`\`
+```
+
+### POML Integration
+
+- **Templates**: Use `{WORKFLOW_AGENT_LIST}` placeholder for agent arrays
+- **Syntax**: Arrays must use single quotes: `['agent1', 'agent2']`
+- **Variables**: Use `{{variable}}` for POML context variables
+- **Loops**: `<item for="item in ['a', 'b']">{{item}}</item>`
+
+### Agent Structure
+
+Agents are markdown files with specific metadata:
+
+- **Location**: `.claude/agents/<category>/<agent-name>.md`
+- **Categories**: `spec/` (specification workflow), `utility/` (helper agents)
+- **Workflow Integration**: Agents can be chained together in custom workflows
+
+## Working with the TUI
+
+### Creating Workflows
+
+1. Run `npx @hiraoku/cc-flow-cli` to launch the TUI
+2. Select "Create workflow from existing agents"
+3. Choose agent directory (e.g., "spec")
+4. Select agents using checkbox interface
+5. Set execution order interactively
+6. Preview and confirm workflow creation
+
+### Converting Slash Commands
+
+1. Run the CLI and select "Convert slash commands to agents"
+2. Choose source directory containing commands
+3. Select commands to convert
+4. Generated agents can be used in workflows
+
+### Script Mode (Non-Interactive)
+
+For automation or CI/CD:
+
+```bash
+# Create workflow with agent order
+scripts/create-workflow.sh ./agents/spec "3 4 1 6 2"
+
+# Convert slash commands
+scripts/convert-slash-commands.sh demo --dry-run
+```
+
+## Important Implementation Details
+
+### TypeScript Configuration
+
+- **Target**: ES2022 with ESNext modules
+- **Module System**: ESModules with .js imports
+- **Build Output**: Compiled to `dist/` directory
+- **Node.js**: Minimum version 18.0.0
+
+### React Ink Specifics
+
+- **Components**: Functional components with hooks
+- **Layout**: Box model with flexbox
+- **Input Handling**: `useInput` hook for keyboard events
+- **State Management**: React state with custom hooks
+- **Testing**: Vitest with coverage reporting
+
+### Development Workflow
+
+1. **Local Development**: Use `npm run dev` for hot reloading
+2. **Type Checking**: Run `npm run type-check` before commits
+3. **Testing**: Use `npm test` for unit tests
+4. **Building**: `npm run build` compiles TypeScript to JavaScript
+5. **Publishing**: `npm run prepublishOnly` runs full validation
+
+### Error Handling
+
+- **Shell Execution**: Scripts handle all error checking internally
+- **TUI Errors**: Graceful error display with recovery options
+- **Validation**: Input validation at multiple levels
+- **Debugging**: Console output for development debugging
+
+## Development Notes
+
+- **Dependencies**: Uses modern React Ink v6+ with TypeScript 5.6
+- **Package Management**: npm with package-lock.json
+- **Accessibility**: Terminal UI follows accessibility best practices
+- **Responsive Design**: Adapts to different terminal sizes
+- **Internationalization**: Bilingual UI with Japanese/English support
+- **Claude Code Integration**: Generated commands call `claude subagent`
+
+### Common Patterns
+
+- **Screen Components**: Follow `UnifiedScreen` pattern for consistency
+- **Menu Systems**: Use `FocusableMenu` for interactive selections
+- **Layout**: Use design system components for consistent spacing
+- **Colors**: Use theme system for consistent color schemes
+- **Error Messages**: Japanese emoji patterns (❌, ✅, 🔍, 📂)
