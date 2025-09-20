@@ -110,13 +110,7 @@ export const CommandSelectionScreen: React.FC<CommandSelectionScreenProps> = ({
     { key: 'Status', value: hasValidSelection ? 'Ready' : 'Select Items', color: hasValidSelection ? '#00ff00' : '#ffaa00' }
   ];
 
-  const shortcuts = [
-    '↑↓: 移動',
-    'Space: 選択/解除',
-    'A: 全選択/全解除',
-    'Enter: 次へ',
-    'Esc: 戻る'
-  ];
+
 
   return (
     <UnifiedScreen
@@ -151,8 +145,9 @@ export const CommandSelectionScreen: React.FC<CommandSelectionScreenProps> = ({
         ) : (
           <CheckboxList
             items={checkboxItems}
+            selectedIds={selectedCommands}
             onToggle={handleToggle}
-            contentWidth={contentWidth}
+            width={contentWidth}
           />
         )}
       </Section>
@@ -173,8 +168,8 @@ export const CommandSelectionScreen: React.FC<CommandSelectionScreenProps> = ({
 
       {/* Keyboard Shortcuts */}
       <StatusBar 
-        shortcuts={shortcuts}
-        contentWidth={contentWidth}
+        center="↑↓: 移動 | Space: 選択/解除 | A: 全選択/全解除 | Enter: 次へ | Esc: 戻る"
+        width={contentWidth}
       />
     </UnifiedScreen>
   );

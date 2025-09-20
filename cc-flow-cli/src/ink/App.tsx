@@ -4,6 +4,7 @@ import { WelcomeScreen } from './screens/WelcomeScreen.js';
 import { MenuScreen } from './screens/MenuScreen.js';
 import { DirectoryScreen } from './screens/DirectoryScreen.js';
 import { AgentSelectionScreen } from './screens/AgentSelectionScreen.js';
+import { CommandSelectionScreen } from './screens/CommandSelectionScreen.js';
 import { OrderScreen } from './screens/OrderScreen.js';
 import { PreviewScreen } from './screens/PreviewScreen.js';
 import { CompleteScreen } from './screens/CompleteScreen.js';
@@ -137,7 +138,7 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
             onNext={(targetPath: string) => {
               setWorkflowConfig((prev: Partial<WorkflowConfig>) => ({ ...prev, targetPath }));
               if (workflowMode === 'convert') {
-                navigateTo('conversion');
+                navigateTo('command-selection');
               } else {
                 navigateTo('agent-selection');
               }
@@ -146,6 +147,18 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
           />
         );
       
+      case 'command-selection':
+        return (
+          <CommandSelectionScreen
+            targetPath={workflowConfig.targetPath || '.claude/commands'}
+            onNext={(selectedCommands: any[]) => {
+              setWorkflowConfig((prev: Partial<WorkflowConfig>) => ({ ...prev, selectedCommands }));
+              navigateTo('conversion');
+            }}
+            onBack={goBack}
+          />
+        );
+
       case 'agent-selection':
         return (
           <AgentSelectionScreen
@@ -220,6 +233,7 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
         return (
           <ConversionScreen
             targetPath={workflowConfig.targetPath}
+            selectedCommands={workflowConfig.selectedCommands as any[] || []}
             onComplete={(result: ConversionResult) => {
               setConversionResult(result);
               navigateTo('conversion-complete');

@@ -357,7 +357,7 @@ export function getCommandDirectories(basePath: string): DirectoryInfo[] {
       const mainCommandStats = getCommandDirectoryStats(commandsPath);
       directories.unshift({
         id: 'main-commands',
-        label: 'メインコマンド',
+        label: 'すべてのスラッシュコマンド',
         value: './.claude/commands',
         icon: '📋',
         description: `メインのスラッシュコマンドディレクトリ（${mainCommandStats.commandCount}個のコマンド）`
@@ -366,7 +366,7 @@ export function getCommandDirectories(basePath: string): DirectoryInfo[] {
       // メインディレクトリが存在しない場合はデフォルトを追加
       directories.unshift({
         id: 'main-commands',
-        label: 'メインコマンド',
+        label: 'すべてのスラッシュコマンド',
         value: './.claude/commands',
         icon: '📋',
         description: 'メインのスラッシュコマンドディレクトリ'
