@@ -26,16 +26,16 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({ onSelect, onBack }) => {
       value: 'convert-commands',
       description: '既存のスラッシュコマンドを新しいサブエージェント形式に変換してワークフローを作成'
     },
-    {
-      label: '⚙️ 設定',
-      value: 'settings',
-      description: 'アプリケーション設定を変更'
-    },
-    {
-      label: '❓ ヘルプ',
-      value: 'help',
-      description: 'CC-Flowの使用方法とドキュメント'
-    },
+    // {
+    //   label: '⚙️ 設定',
+    //   value: 'settings',
+    //   description: 'アプリケーション設定を変更'
+    // },
+    // {
+    //   label: '❓ ヘルプ',
+    //   value: 'help',
+    //   description: 'CC-Flowの使用方法とドキュメント'
+    // },
     {
       label: '👋 終了',
       value: 'exit',
