@@ -100,38 +100,81 @@ convert_poml_to_markdown() {
     # POMLテンプレートの変数置換を行う
     local processed_poml="$poml_content"
     processed_poml="${processed_poml//\{WORKFLOW_AGENT_ARRAY\}/$agent_array}"
-    processed_poml="${processed_poml//\{WORKFLOW_CONTEXT\}/sequential agent execution}"
-    processed_poml="${processed_poml//\{USER_INPUT\}/workflow execution}"
-    processed_poml="${processed_poml//\{WORKFLOW_NAME\}/$workflow_name}"
+    processed_poml="${processed_poml//\{WORKFLOW_CONTEXT\}/'sequential agent execution'}"
+    processed_poml="${processed_poml//\{WORKFLOW_NAME\}/'$workflow_name'}"
+    processed_poml="${processed_poml//\{USER_TASK_VAR\}/'\$USER_TASK'}"
 
     # 処理済みPOMLファイルを保存
     echo "$processed_poml" > "$temp_poml"
 
-    # 内部プロセッサーでPOMLを実行してMarkdownを生成
+    # pomljsを使ってPOMLをマークダウンに変換
     local poml_output
     local poml_error
-    if ! { poml_output=$(cat "$temp_poml" 2>/tmp/poml_error_$$) && poml_error=$(cat /tmp/poml_error_$$ 2>/dev/null || echo ""); }; then
+
+    # pomljsでPOMLファイルを処理
+    if ! { poml_output=$(npx pomljs --file "$temp_poml" 2>/tmp/poml_error_$$) && poml_error=$(cat /tmp/poml_error_$$ 2>/dev/null || echo ""); }; then
+        local error_msg="$poml_output $poml_error"
         rm -f "$temp_poml" /tmp/poml_error_$$
-        error_exit "POMLプロセッサーの実行に失敗しました: $poml_output $poml_error"
+        error_exit "pomljsによるPOML変換に失敗しました: $error_msg"
     fi
     rm -f /tmp/poml_error_$$
 
     # 一時ファイルをクリーンアップ
     rm -f "$temp_poml"
 
-    # JSON出力からメッセージ内容を抽出
-    local markdown_content
+    # pomljsのJSON出力からマークダウンコンテンツを抽出
+    local markdown_text
     if command -v jq >/dev/null 2>&1; then
-        # jqが利用可能な場合
-        markdown_content=$(echo "$poml_output" | jq -r '.messages[0].content' 2>/dev/null)
-        if [[ -z "$markdown_content" || "$markdown_content" == "null" ]]; then
+        # jqが利用可能な場合、JSONからcontentを抽出
+        markdown_text=$(echo "$poml_output" | jq -r '.messages[0].content' 2>/dev/null)
+        if [[ -z "$markdown_text" || "$markdown_text" == "null" ]]; then
             # jqでの抽出に失敗した場合、poml_outputをそのまま使用
-            markdown_content="$poml_output"
+            markdown_text="$poml_output"
         fi
     else
-        # jqが利用できない場合、poml_outputをそのまま使用
-        markdown_content="$poml_output"
+        # jqが利用できない場合、sedで抽出を試行
+        markdown_text=$(echo "$poml_output" | sed -n 's/.*"content":"\([^"]*\)".*/\1/p' | head -1)
+        if [[ -z "$markdown_text" ]]; then
+            markdown_text="$poml_output"
+        fi
     fi
+
+    # エスケープされた文字を復元
+    markdown_text="${markdown_text//\\n/$'\n'}"
+    markdown_text="${markdown_text//\\\"/\"}"
+
+    # マークダウンコマンドファイル形式にラップ
+    local wf_name="$workflow_name"
+    local markdown_content="---
+description: ${wf_name} workflow
+argument-hint: [context]
+allowed-tools: [Read, Bash]
+---
+
+# ${wf_name}
+
+Execute multiple sub-agents sequentially using POML workflow orchestration.
+
+## Usage
+
+\`\`\`bash
+/${wf_name} \"your task or requirement\"
+\`\`\`
+
+\`\`\`bash
+# Get user input
+ARGUMENTS=\"\$*\"
+USER_TASK=\"\${ARGUMENTS:-\\\"workflow execution\\\"}\"
+
+# Execute workflow orchestrator
+claude subagent general-purpose \"$markdown_text\"
+\`\`\`
+
+## Workflow Details
+
+This workflow was generated from POML template with the following agents:
+$agent_list_space
+"
 
     # Markdownを出力
     echo "$markdown_content"
