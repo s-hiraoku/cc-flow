@@ -32,12 +32,15 @@ export const OrderScreen: React.FC<OrderScreenProps> = ({
 
   // Memoized input handler for better performance
   const handleInput = useCallback((input: string, key: any) => {
-    if (key.upArrow) {
+    // Debug: log key presses to understand what's being detected
+    console.log('Key pressed:', { input, key, ctrl: key.ctrl, upArrow: key.upArrow, downArrow: key.downArrow });
+    
+    if (key.upArrow && !key.ctrl) {
       setCurrentIndex(prev => Math.max(0, prev - 1));
-    } else if (key.downArrow) {
+    } else if (key.downArrow && !key.ctrl) {
       setCurrentIndex(prev => Math.min(orderedAgents.length - 1, prev + 1));
-    } else if (key.ctrl && key.upArrow) {
-      // Move current item up
+    } else if ((key.ctrl || key.meta) && key.upArrow) {
+      // Move current item up (Ctrl on Windows/Linux, Cmd on macOS)
       if (currentIndex > 0) {
         const newOrder = [...orderedAgents];
         const current = newOrder[currentIndex];
@@ -49,8 +52,8 @@ export const OrderScreen: React.FC<OrderScreenProps> = ({
         setOrderedAgents(newOrder);
         setCurrentIndex(prev => prev - 1);
       }
-    } else if (key.ctrl && key.downArrow) {
-      // Move current item down
+    } else if ((key.ctrl || key.meta) && key.downArrow) {
+      // Move current item down (Ctrl on Windows/Linux, Cmd on macOS)
       if (currentIndex < orderedAgents.length - 1) {
         const newOrder = [...orderedAgents];
         const current = newOrder[currentIndex];
@@ -72,6 +75,32 @@ export const OrderScreen: React.FC<OrderScreenProps> = ({
       // Reset to original order
       setOrderedAgents(selectedAgents);
       setCurrentIndex(0);
+    } else if (key.leftArrow) {
+      // Alternative: Move current item up with ←
+      if (currentIndex > 0) {
+        const newOrder = [...orderedAgents];
+        const current = newOrder[currentIndex];
+        const previous = newOrder[currentIndex - 1];
+        if (current && previous) {
+          newOrder[currentIndex] = previous;
+          newOrder[currentIndex - 1] = current;
+        }
+        setOrderedAgents(newOrder);
+        setCurrentIndex(prev => prev - 1);
+      }
+    } else if (key.rightArrow) {
+      // Alternative: Move current item down with →
+      if (currentIndex < orderedAgents.length - 1) {
+        const newOrder = [...orderedAgents];
+        const current = newOrder[currentIndex];
+        const next = newOrder[currentIndex + 1];
+        if (current && next) {
+          newOrder[currentIndex] = next;
+          newOrder[currentIndex + 1] = current;
+        }
+        setOrderedAgents(newOrder);
+        setCurrentIndex(prev => prev + 1);
+      }
     }
   }, [orderedAgents, currentIndex, selectedAgents, onNext, onBack, exit]);
 
@@ -91,7 +120,7 @@ export const OrderScreen: React.FC<OrderScreenProps> = ({
   ];
 
   const operationHints = [
-    '↑↓: 移動 | Ctrl+↑↓: 順序変更 | R: リセット',
+    '↑↓: 移動 | Ctrl/Cmd+↑↓: 順序変更 | ←→: 順序変更(代替) | R: リセット',
     'Enter: 確定 | Esc: 戻る | Q: 終了'
   ];
 
@@ -104,7 +133,7 @@ export const OrderScreen: React.FC<OrderScreenProps> = ({
       {/* Screen Description */}
       <ScreenDescription
         heading="サブエージェントの実行順序を調整"
-        subheading="Ctrl+↑↓キーで順序を変更します。上から順番に実行されます"
+        subheading="Ctrl/Cmd+↑↓キー（または←→キー）で順序を変更します。上から順番に実行されます"
         align="center"
       />
 
