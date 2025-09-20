@@ -85,8 +85,14 @@ generate_files() {
         local claude_dir="$path_before_claude/.claude"
         output_dir="$claude_dir/commands"
     else
-        # 従来の処理
-        output_dir=".claude/commands"
+        # 従来の処理: agent-discovery.shと同じロジックを使用
+        local cli_root="$(cd "$LIB_SCRIPT_DIR/../.." && pwd)"
+        if [[ -d "$cli_root/.claude" ]]; then
+            output_dir="$cli_root/.claude/commands"
+        else
+            local project_root="$(cd "$LIB_SCRIPT_DIR/../../.." && pwd)"
+            output_dir="$project_root/.claude/commands"
+        fi
     fi
 
     # 出力ディレクトリを作成

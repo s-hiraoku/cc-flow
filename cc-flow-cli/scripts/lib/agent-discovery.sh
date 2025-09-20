@@ -11,8 +11,16 @@ source "$LIB_SCRIPT_DIR/../utils/common.sh"
 discover_agents() {
     local agent_dir="$1"
 
-    # スクリプトディレクトリから3階層上のプロジェクトルートにある.claudeディレクトリを参照
-    local project_root="$(cd "$LIB_SCRIPT_DIR/../../.." && pwd)"
+    # プロジェクトルートを動的に検出
+    local project_root
+    # cc-flow-cli/scripts から実行された場合は、cc-flow-cli がプロジェクトルート
+    local cli_root="$(cd "$LIB_SCRIPT_DIR/../.." && pwd)"
+    if [[ -d "$cli_root/.claude" ]]; then
+        project_root="$cli_root"
+    else
+        # そうでなければ、3階層上を使用
+        project_root="$(cd "$LIB_SCRIPT_DIR/../../.." && pwd)"
+    fi
 
     if [[ "$agent_dir" == "all" ]]; then
         # 全エージェント検索
@@ -151,8 +159,16 @@ discover_items() {
     # "./"プレフィックスを削除してクリーンなパスを作成
     local clean_path="${target_path#./}"
 
-    # スクリプトディレクトリから3階層上のプロジェクトルートにある.claudeディレクトリを参照
-    local project_root="$(cd "$LIB_SCRIPT_DIR/../../.." && pwd)"
+    # プロジェクトルートを動的に検出
+    local project_root
+    # cc-flow-cli/scripts から実行された場合は、cc-flow-cli がプロジェクトルート
+    local cli_root="$(cd "$LIB_SCRIPT_DIR/../.." && pwd)"
+    if [[ -d "$cli_root/.claude" ]]; then
+        project_root="$cli_root"
+    else
+        # そうでなければ、3階層上を使用
+        project_root="$(cd "$LIB_SCRIPT_DIR/../../.." && pwd)"
+    fi
     local full_path="$project_root/.claude/$clean_path"
 
     case "$target_path" in
