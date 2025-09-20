@@ -85,7 +85,21 @@ export function updateProjectOverviewMemory(options = {}) {
     return { changed: false, skipped: false, version };
   }
 
-  writeFileSync(projectOverviewPath, updatedContent, 'utf8');
+  // Atomic write using temporary file to avoid race conditions
+  const tmpFile = join(tmpdir(), `project_overview_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.md`);
+  try {
+    writeFileSync(tmpFile, updatedContent, 'utf8');
+    renameSync(tmpFile, projectOverviewPath);
+  } catch (error) {
+    // Clean up temporary file if it exists
+    try {
+      readFileSync(tmpFile);
+      renameSync(tmpFile, projectOverviewPath); // Retry once
+    } catch {
+      // Ignore cleanup errors
+    }
+    throw error;
+  }
   log(`Updated project overview memory to version ${version}.`, chalk.green, silent);
 
   return { changed: true, skipped: false, version };
