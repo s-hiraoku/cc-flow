@@ -59,7 +59,7 @@ process_templates() {
 
     # convert_poml_to_markdown関数を呼び出して完全なMarkdownを生成
     local poml_result
-    poml_result=$(convert_poml_to_markdown "$WORKFLOW_POML_TEMPLATE" "$agent_list_space" "$workflow_name")
+    poml_result=$(convert_poml_to_markdown "$WORKFLOW_POML_TEMPLATE" "$agent_list_space" "$workflow_name" "$description")
 
     # convert_poml_to_markdownが既に完全なMarkdownを生成しているのでそのまま使用
     WORKFLOW_MD_CONTENT="$poml_result"

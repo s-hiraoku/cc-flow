@@ -76,6 +76,7 @@ convert_poml_to_markdown() {
     local poml_content="$1"
     local agent_list_space="$2"
     local workflow_name="$3"
+    local user_context="$4"
 
     # Node.js環境をチェック（サイレント）
     check_nodejs_dependencies >/dev/null 2>&1
@@ -102,7 +103,7 @@ convert_poml_to_markdown() {
     processed_poml="${processed_poml//\{WORKFLOW_AGENT_ARRAY\}/$agent_array}"
     processed_poml="${processed_poml//\{WORKFLOW_CONTEXT\}/'sequential agent execution'}"
     processed_poml="${processed_poml//\{WORKFLOW_NAME\}/'$workflow_name'}"
-    processed_poml="${processed_poml//\{USER_TASK_VAR\}/'\$USER_TASK'}"
+    processed_poml="${processed_poml//\{USER_TASK_VAR\}/'$user_context'}"
 
     # 処理済みPOMLファイルを保存
     echo "$processed_poml" > "$temp_poml"
