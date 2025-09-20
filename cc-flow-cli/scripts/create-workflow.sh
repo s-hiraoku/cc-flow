@@ -14,20 +14,23 @@ source "$SCRIPT_DIR/lib/agent-discovery.sh"
 source "$SCRIPT_DIR/lib/user-interaction.sh"
 source "$SCRIPT_DIR/lib/template-processor.sh"
 
-# グローバル変数の宣言
-declare -a AGENT_FILES
-declare -a AGENT_NAMES
-declare -a SELECTED_AGENTS
-declare -a ITEM_NAMES_SPECIFIED
-declare -a ITEM_FILES
-declare -a ITEM_NAMES
-declare WORKFLOW_MD_TEMPLATE
-declare WORKFLOW_POML_TEMPLATE
-declare WORKFLOW_MD_CONTENT
-declare WORKFLOW_POML_CONTENT
-declare WORKFLOW_NAME
-declare TARGET_PATH
-declare MODE
+# グローバル変数の宣言と初期化
+declare -a AGENT_FILES=()
+declare -a AGENT_NAMES=()
+declare -a SELECTED_AGENTS=()
+declare -a ITEM_NAMES_SPECIFIED=()
+declare -a ITEM_FILES=()
+declare -a ITEM_NAMES=()
+declare WORKFLOW_MD_TEMPLATE=""
+declare WORKFLOW_POML_TEMPLATE=""
+declare WORKFLOW_MD_CONTENT=""
+declare WORKFLOW_POML_CONTENT=""
+declare WORKFLOW_NAME=""
+declare TARGET_PATH=""
+declare MODE=""
+declare AGENT_DIR=""
+declare ORDER_SPEC=""
+declare GENERATED_FILE_PATH=""
 
 # 使用方法を表示
 show_usage() {
@@ -36,6 +39,7 @@ show_usage() {
     echo "対象パス形式:"
     echo "  ./agents/spec              # 特定ディレクトリ"
     echo "  ./agents                   # 全エージェント"
+    echo "  ../.claude/agents/demo     # 直接相対パス"
     echo "  spec                       # 旧形式（廃止予定）"
     echo ""
     echo "順序指定例:"
@@ -58,6 +62,14 @@ parse_arguments() {
     
     # 相対パス形式の処理
     case "$target_path" in
+        */.claude/agents/* | */.claude/commands/*)
+            # 直接.claudeパスが指定された場合
+            TARGET_PATH="$target_path"
+            # 後方互換性のためにAGENT_DIRも設定
+            AGENT_DIR=$(basename "$target_path")
+            [[ "$AGENT_DIR" == "agents" ]] && AGENT_DIR="all"
+            [[ "$AGENT_DIR" == "commands" ]] && AGENT_DIR="all"
+            ;;
         ./*)
             # 新形式: 相対パス
             TARGET_PATH="$target_path"
@@ -102,13 +114,18 @@ main() {
     
     # 処理開始メッセージ
     info "処理開始: 対象パス '$TARGET_PATH'"
-    
-    # アイテム検索（新形式では汎用的な関数を使用）
-    if [[ "$TARGET_PATH" == ./agents/* ]] || [[ "$TARGET_PATH" == ./commands/* ]]; then
+
+    # アイテム検索
+    if [[ "$TARGET_PATH" == */.claude/* ]]; then
+        # 直接.claudeパスが指定された場合
+        discover_direct_path "$TARGET_PATH"
+        extract_item_names
+    elif [[ "$TARGET_PATH" == ./* ]]; then
+        # 新形式: 相対パスを使用
         discover_items "$TARGET_PATH"
         extract_item_names
     else
-        # 後方互換性: 既存関数を使用
+        # 後方互換性: 旧形式の短縮形を使用
         discover_agents "$AGENT_DIR"
         extract_agent_names
     fi

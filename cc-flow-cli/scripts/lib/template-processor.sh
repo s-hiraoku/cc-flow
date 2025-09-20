@@ -77,46 +77,69 @@ process_templates() {
 
 # ファイルを生成
 generate_files() {
+    # 出力ディレクトリの決定
+    local output_dir
+    if [[ "$TARGET_PATH" == */.claude/* ]]; then
+        # 直接.claudeパスが指定された場合、.claudeディレクトリまでのパスを抽出
+        local path_before_claude="${TARGET_PATH%/.claude/*}"
+        local claude_dir="$path_before_claude/.claude"
+        output_dir="$claude_dir/commands"
+    else
+        # 従来の処理
+        output_dir=".claude/commands"
+    fi
+
     # 出力ディレクトリを作成
-    safe_mkdir ".claude/commands"
-    safe_mkdir ".claude/commands/poml"
-    
+    safe_mkdir "$output_dir"
+    safe_mkdir "$output_dir/poml"
+
     # POMLファイルを書き込み（中間ファイル）
-    local poml_file=".claude/commands/poml/$WORKFLOW_NAME.poml"
+    local poml_file="$output_dir/poml/$WORKFLOW_NAME.poml"
     safe_write_file "$poml_file" "$WORKFLOW_POML_CONTENT"
-    
+
     # 直接マークダウンファイルを生成（シンプルなテンプレート処理）
-    safe_write_file ".claude/commands/$WORKFLOW_NAME.md" "$WORKFLOW_MD_CONTENT"
-    
+    safe_write_file "$output_dir/$WORKFLOW_NAME.md" "$WORKFLOW_MD_CONTENT"
+
     # 中間POMLファイルを削除
     if [[ -f "$poml_file" ]]; then
         rm -f "$poml_file" >/dev/null 2>&1
         info "中間ファイルをクリーンアップしました: $poml_file"
     fi
-    
+
     # pomlディレクトリが空の場合は削除
-    if [[ -d ".claude/commands/poml" ]] && [[ -z "$(ls -A .claude/commands/poml)" ]]; then
-        rmdir ".claude/commands/poml" >/dev/null 2>&1
-        info "空のpomlディレクトリを削除しました: .claude/commands/poml"
+    if [[ -d "$output_dir/poml" ]] && [[ -z "$(ls -A "$output_dir/poml")" ]]; then
+        rmdir "$output_dir/poml" >/dev/null 2>&1
+        info "空のpomlディレクトリを削除しました: $output_dir/poml"
     fi
-    
+
     info "ワークフローファイルを生成しました"
+
+    # 生成されたファイルのパスを更新
+    GENERATED_FILE_PATH="$output_dir/$WORKFLOW_NAME.md"
 }
 
 # 成功メッセージを表示
 show_success_message() {
     local agent_order_display=""
-    
+
     # エージェント実行順序を表示用に整形
     for i in "${!SELECTED_AGENTS[@]}"; do
         [[ $i -gt 0 ]] && agent_order_display+=" → "
         agent_order_display+="${SELECTED_AGENTS[$i]}"
     done
-    
+
+    # 生成されたファイルのパスを決定
+    local display_file_path
+    if [[ -n "${GENERATED_FILE_PATH:-}" ]]; then
+        display_file_path="$GENERATED_FILE_PATH"
+    else
+        display_file_path=".claude/commands/$WORKFLOW_NAME.md"
+    fi
+
     # 成功メッセージ
     success "ワークフローコマンドを作成しました: /$WORKFLOW_NAME"
     echo "📁 生成されたファイル:"
-    echo "   - .claude/commands/$WORKFLOW_NAME.md"
+    echo "   - $display_file_path"
     echo ""
     echo "エージェント実行順序: $agent_order_display"
     echo ""
