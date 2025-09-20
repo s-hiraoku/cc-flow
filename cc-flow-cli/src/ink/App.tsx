@@ -247,7 +247,10 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
           <ConversionCompleteScreen
             result={conversionResult!}
             onAnother={() => navigateTo('conversion')}
-            onWorkflow={() => navigateTo('directory')}
+            onWorkflow={() => {
+              setWorkflowMode('create');
+              navigateTo('directory');
+            }}
             onMenu={() => navigateTo('menu')}
           />
         );
