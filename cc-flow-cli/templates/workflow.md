@@ -6,71 +6,58 @@ allowed-tools: [Read, Bash]
 
 # {WORKFLOW_NAME}
 
-Execute multiple sub-agents sequentially based on workflow type.
+Execute multiple sub-agents sequentially using POML workflow orchestration.
 
 ## Usage
 
-```
+```bash
 /{WORKFLOW_NAME} "your task or requirement"
 ```
 
-## Execution Instructions
+This command processes the task through the following agents in sequence:
+{WORKFLOW_AGENT_LIST}
 
-You are asked to execute a sequential workflow with the following agents:
-`{WORKFLOW_AGENT_LIST}`
+Each agent receives the user task and builds upon previous agent results.
 
-Please perform these steps:
+{POML_GENERATED_INSTRUCTIONS}
 
-1. **Parse Input**: Receive the user's context from the command arguments provided as "$*"
+## Workflow Execution
 
-2. **Sequential Agent Execution**: For each agent in the list above, execute in order:
-   
-   a. Display progress indicator: "→ [agent-name]"
-   
-   b. Invoke the sub-agent with the current accumulated context:
-      - Pass the task description and current context to the agent
-      - Use the pattern: "Task: [agent-name]. Context: [accumulated-context]"
-   
-   c. Capture and display the agent's response
-   
-   d. Update the accumulated context by appending:
-      "[agent-name]: [response]" to the existing context
-   
-   e. Continue to the next agent with the updated context
+The workflow is powered by POML (Prompt Orchestration Markup Language) which:
 
-3. **Completion**: After all agents have been executed successfully, display:
-   "✅ Workflow completed"
+1. **Defines sequential execution**: Agents execute in the specified order
+2. **Passes context**: Each agent receives the user input and accumulated context
+3. **Tracks progress**: Shows step-by-step execution with loop indexes
+4. **Standardizes output**: Consistent response format across all agents
 
-## Context Management
+## Sub-agent Execution Format
 
-- Initial context: User-provided command arguments
-- Context accumulation: Each agent's output enriches the context for subsequent agents
-- Final output: Complete trace of all agent executions and their responses
+For each agent in the workflow:
+```bash
+claude subagent "{agent-name}" "{user-task}"
+```
 
-## Error Handling
-
-If any agent fails to execute:
-- Display "Failed" for that agent
-- Continue with remaining agents using the available context
-- Include failure notation in the accumulated context
-
-## Template Variables Reference
-
-- `{DESCRIPTION}`: Brief workflow description
-- `{ARGUMENT_HINT}`: Expected arguments format  
-- `{WORKFLOW_NAME}`: Command name (matches filename)
-- `{WORKFLOW_AGENT_LIST}`: Space-separated list of agent names
+Output format:
+```
+Step {N} of {total}: Execute {agent-name}
+→ {agent-name}: [response]
+```
 
 ## Example
 
-For a workflow named `example-workflow` with agents `agent1 agent2`:
+For a workflow with agents `spec-requirements spec-design spec-implementation`:
 
-```
-/example-workflow "implement user authentication with JWT tokens"
+```bash
+/{WORKFLOW_NAME} "create a user authentication system"
 
-→ agent1
-[agent1 analyzes requirements and creates design]
-→ agent2  
-[agent2 implements the authentication logic]
+Step 1 of 3: Execute spec-requirements
+→ spec-requirements: [requirements analysis response]
+
+Step 2 of 3: Execute spec-design
+→ spec-design: [design specification response]
+
+Step 3 of 3: Execute spec-implementation
+→ spec-implementation: [implementation details response]
+
 ✅ Workflow completed
 ```

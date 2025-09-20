@@ -14,30 +14,37 @@ export class ScriptExecutor {
   }
 
   async executeWorkflowCreation(config: WorkflowConfig): Promise<void> {
-    const { targetPath, workflowName, selectedAgents } = config;
+    const { targetPath, workflowName, purpose, selectedAgents } = config;
     
     // Validate environment before execution
     await this.validateEnvironment();
     
     const scriptPath = this.getScriptPath();
+    const scriptsDir = dirname(scriptPath);
     const finalWorkflowName = workflowName || this.generateDefaultWorkflowName(targetPath);
     
-    // Set environment variable for workflow name
+    // Set environment variables for workflow name and purpose
     process.env['WORKFLOW_NAME'] = finalWorkflowName;
+    if (purpose) {
+      process.env['WORKFLOW_PURPOSE'] = purpose;
+    }
     
     // Script expects: <targetPath> [agent1,agent2,agent3] (comma-separated for item-names mode)
     // If no agents are selected, script will run in interactive mode
-    let command = `"${scriptPath}" "${targetPath}"`;
-    
+    // Use relative path when executing from scripts directory
+    const scriptName = './create-workflow.sh';
+    let command = `"${scriptName}" "${targetPath}"`;
+
     if (selectedAgents && selectedAgents.length > 0) {
       const agentNames = selectedAgents.map(agent => agent.name).join(',');
       // Add trailing comma to ensure item-names mode (not indices mode)
       const agentNamesWithComma = agentNames + ',';
-      command = `"${scriptPath}" "${targetPath}" "${agentNamesWithComma}"`;
+      command = `"${scriptName}" "${targetPath}" "${agentNamesWithComma}"`;
     }
     
     console.log(`\n🚀 Executing workflow creation script:`);
     console.log(`  Script path: ${scriptPath}`);
+    console.log(`  Working directory: ${scriptsDir}`);
     console.log(`  Target path: ${targetPath}`);
     
     if (selectedAgents && selectedAgents.length > 0) {
@@ -52,8 +59,9 @@ export class ScriptExecutor {
     console.log(`  Workflow name: ${finalWorkflowName}`);
     console.log(`  Full command: ${command}`);
     
+    // Execute from scripts directory to match shell script expectations
     const execOptions: ExecSyncOptions = {
-      cwd: this.basePath,
+      cwd: scriptsDir,
       stdio: 'inherit',
       encoding: 'utf8',
       timeout: 30000 // 30 second timeout
@@ -80,13 +88,22 @@ export class ScriptExecutor {
 
   private getScriptPath(): string {
     console.log('🔍 Debug: Searching for script...');
-    
-    // First try to find script in user's project root (for development)
-    const userProjectScript = join(this.basePath, 'scripts/create-workflow.sh');
-    console.log(`🔍 Debug: Checking user project: ${userProjectScript}`);
-    if (existsSync(userProjectScript)) {
-      console.log('✅ Debug: Found in user project');
-      return userProjectScript;
+
+    // First try to find script in user's project (for development)
+    // Check if we're in cc-flow-cli directory structure
+    const userProjectScript1 = join(this.basePath, 'scripts/create-workflow.sh');
+    const userProjectScript2 = join(this.basePath, 'cc-flow-cli/scripts/create-workflow.sh');
+
+    console.log(`🔍 Debug: Checking user project: ${userProjectScript1}`);
+    if (existsSync(userProjectScript1)) {
+      console.log('✅ Debug: Found in user project (scripts/)');
+      return userProjectScript1;
+    }
+
+    console.log(`🔍 Debug: Checking user project: ${userProjectScript2}`);
+    if (existsSync(userProjectScript2)) {
+      console.log('✅ Debug: Found in user project (cc-flow-cli/scripts/)');
+      return userProjectScript2;
     }
     
     // Fall back to package's built-in script (for npx usage)

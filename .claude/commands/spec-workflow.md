@@ -1,35 +1,37 @@
 ---
-description: 名前指定テスト
+description: Execute spec workflow
 argument-hint: [context]
 allowed-tools: [Read, Bash]
 ---
 
-# demo-workflow
+# spec-workflow
 
 Execute multiple sub-agents sequentially using POML workflow orchestration.
 
 ## Usage
 
 ```bash
-/demo-workflow "your task or requirement"
+/spec-workflow "your task or requirement"
 ```
 
 This command processes the task through the following agents in sequence:
-architecture-designer quality-checker
+spec-design spec-impl spec-init
 
 Each agent receives the user task and builds upon previous agent results.
 
 # Role
 
-demo-workflow Workflow Orchestrator
+spec-workflow Workflow Orchestrator
 
 # Task
 
 You are a workflow orchestrator that must delegate tasks to specialized sub-agents sequentially. User Instruction: workflow execution Context: sequential agent execution IMPORTANT: You MUST execute each sub-agent in the following order using the Task tool. DO NOT attempt to complete these tasks yourself. Instead, delegate each task to its specialized sub-agent. Execute the following sub-agents in sequence: 
 
-**Step 1 of 2: architecture-designer** Use the Task tool to launch the "architecture-designer" sub-agent with: - subagent_type: "architecture-designer" - description: "Execute architecture-designer for workflow step 1" - prompt: "workflow execution" The sub-agent will handle the specialized task and return its results. Wait for the sub-agent to complete before proceeding to the next step.
+**Step 1 of 3: spec-design** Use the Task tool to launch the "spec-design" sub-agent with: - subagent_type: "spec-design" - description: "Execute spec-design for workflow step 1" - prompt: "workflow execution" The sub-agent will handle the specialized task and return its results. Wait for the sub-agent to complete before proceeding to the next step.
 
-**Step 2 of 2: quality-checker** Use the Task tool to launch the "quality-checker" sub-agent with: - subagent_type: "quality-checker" - description: "Execute quality-checker for workflow step 2" - prompt: "workflow execution" The sub-agent will handle the specialized task and return its results. Wait for the sub-agent to complete before proceeding to the next step.
+**Step 2 of 3: spec-impl** Use the Task tool to launch the "spec-impl" sub-agent with: - subagent_type: "spec-impl" - description: "Execute spec-impl for workflow step 2" - prompt: "workflow execution" The sub-agent will handle the specialized task and return its results. Wait for the sub-agent to complete before proceeding to the next step.
+
+**Step 3 of 3: spec-init** Use the Task tool to launch the "spec-init" sub-agent with: - subagent_type: "spec-init" - description: "Execute spec-init for workflow step 3" - prompt: "workflow execution" The sub-agent will handle the specialized task and return its results. Wait for the sub-agent to complete before proceeding to the next step.
 
  **Final Step: Consolidation** After all sub-agents have completed their tasks: 1. Aggregate all sub-agent responses 2. Provide a comprehensive summary of the workflow results 3. Return the consolidated output with clear section headers for each sub-agent's contribution
 
@@ -64,7 +66,7 @@ Step {N} of {total}: Execute {agent-name}
 For a workflow with agents `spec-requirements spec-design spec-implementation`:
 
 ```bash
-/demo-workflow "create a user authentication system"
+/spec-workflow "create a user authentication system"
 
 Step 1 of 3: Execute spec-requirements
 → spec-requirements: [requirements analysis response]

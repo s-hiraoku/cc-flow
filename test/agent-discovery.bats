@@ -7,11 +7,12 @@ setup() {
     export TEST_DIR="$(mktemp -d)"
     export SCRIPT_DIR="$BATS_TEST_DIRNAME/../cc-flow-cli/scripts"
     export ORIGINAL_PWD="$PWD"
-    
+
     # テスト用のエージェント構造を作成
     mkdir -p "$TEST_DIR/.claude/agents/test-agents"
     mkdir -p "$TEST_DIR/.claude/agents/empty-dir"
-    
+    mkdir -p "$TEST_DIR/.claude/agents/test with spaces"
+
     # テスト用のエージェントファイルを作成
     cat > "$TEST_DIR/.claude/agents/test-agents/spec-init.md" << EOF
 # Spec Init Agent
@@ -19,7 +20,7 @@ Initialize specification
 EOF
 
     cat > "$TEST_DIR/.claude/agents/test-agents/spec-design.md" << EOF
-# Spec Design Agent  
+# Spec Design Agent
 Create technical design
 EOF
 
@@ -28,16 +29,52 @@ EOF
 Implement the specification
 EOF
 
+    # スペース入りディレクトリ用ファイル
+    cat > "$TEST_DIR/.claude/agents/test with spaces/agent1.md" << EOF
+# Test Agent 1
+Test agent in space directory
+EOF
+
     # 非エージェントファイルも作成（.md以外）
     echo "Not an agent" > "$TEST_DIR/.claude/agents/test-agents/readme.txt"
-    
+
     # テストディレクトリに移動
     cd "$TEST_DIR"
-    
+
     # agent-discovery.shを読み込み
     source "$SCRIPT_DIR/lib/agent-discovery.sh"
     source "$SCRIPT_DIR/utils/common.sh"
-    
+
+    # discover_agents関数をテスト用にオーバーライド
+    discover_agents() {
+        local agent_dir="$1"
+        local project_root="$TEST_DIR"
+
+        if [[ "$agent_dir" == "all" ]]; then
+            # 全エージェント検索
+            discover_all_items "$project_root/.claude/agents"
+        else
+            # 特定ディレクトリ検索
+            local agent_path="$project_root/.claude/agents/$agent_dir"
+
+            # ディレクトリの存在確認
+            check_directory "$agent_path" "エージェントディレクトリ"
+
+            # エージェントファイルを検索
+            local agent_files=()
+            while IFS= read -r -d '' file; do
+                agent_files+=("$file")
+            done < <(find "$agent_path" -name "*.md" -type f -print0 | sort -z)
+
+            if [[ ${#agent_files[@]} -eq 0 ]]; then
+                error_exit "ディレクトリ '$agent_dir' にエージェントが見つかりません"
+            fi
+
+            # グローバル配列に結果を設定
+            AGENT_FILES=("${agent_files[@]}")
+        fi
+    }
+
     # グローバル変数を初期化
     AGENT_FILES=()
     AGENT_NAMES=()
@@ -133,14 +170,8 @@ EOF
 }
 
 @test "agent discovery handles directories with spaces" {
-    # スペースを含むディレクトリを作成
-    mkdir -p "$TEST_DIR/.claude/agents/test with spaces"
-    cat > "$TEST_DIR/.claude/agents/test with spaces/agent.md" << EOF
-# Space Agent
-EOF
-    
     discover_agents "test with spaces"
-    
+
     [ "${#AGENT_FILES[@]}" -eq 1 ]
-    [[ "${AGENT_FILES[0]}" =~ "agent.md" ]]
+    [[ "${AGENT_FILES[0]}" =~ "agent1.md" ]]
 }

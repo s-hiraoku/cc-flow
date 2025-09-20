@@ -62,7 +62,7 @@
     "terminal-ui"
   ],
   "author": "CC-Flow Team",
-  "license": "ISC",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/s-hiraoku/cc-flow",

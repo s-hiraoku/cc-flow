@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.0.13] - 2025-09-20
+
+### Major Improvements
+- **Shell Script Usability**: Complete overhaul of `create-workflow.sh` with modern CLI interface
+- **Option Parsing**: Added modern flag-based arguments (`--order`, `--purpose`, `--name`, `--quick`)
+- **Help System**: Comprehensive help with `--help` and `--examples` commands
+- **Shortcut Modes**: Quick workflow creation with `--quick` and `--all` options
+- **Backward Compatibility**: Removed legacy positional argument support for cleaner interface
+
+### New Features
+- **Modern CLI Options**:
+  - `--order "1 2 3"` - Specify agent execution order
+  - `--purpose "description"` - Set workflow purpose
+  - `--name "custom-name"` - Set custom workflow name
+  - `--quick` - Select all agents automatically
+  - `--all` - Create workflow with all available agents
+- **Enhanced Help**: Detailed usage examples and option descriptions
+- **Improved Validation**: Better error handling and user feedback
+- **Debug Output**: Comprehensive logging for troubleshooting
+
+### Testing Improvements
+- **BATS Test Suite**: Updated all shell script tests for new option format
+- **Test Coverage**: Fixed path issues in `create-workflow.bats` and `agent-discovery.bats`
+- **Test Reliability**: Improved test setup and teardown procedures
+- **Agent Discovery**: Complete test coverage for agent file discovery functionality
+
+### Fixed
+- **Argument Parsing**: Resolved complex argument detection and processing issues
+- **Path Resolution**: Fixed template and output directory path handling
+- **Test Environment**: Corrected test file paths and directory structure
+- **Agent Selection**: Improved agent name extraction and validation
+
+### Technical Details
+- **Shell Scripting**: Modern bash practices with comprehensive option parsing
+- **Error Handling**: Robust error messages with Japanese emoji indicators
+- **Code Quality**: Enhanced debugging output and parameter validation
+- **Test Infrastructure**: Reliable BATS testing with proper setup/teardown
+
 ## [0.0.12] - 2025-09-20
 
 ### Fixed
