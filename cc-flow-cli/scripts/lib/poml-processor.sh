@@ -103,7 +103,6 @@ convert_poml_to_markdown() {
     processed_poml="${processed_poml//\{WORKFLOW_AGENT_ARRAY\}/$agent_array}"
     processed_poml="${processed_poml//\{WORKFLOW_CONTEXT\}/'sequential agent execution'}"
     processed_poml="${processed_poml//\{WORKFLOW_NAME\}/'$workflow_name'}"
-    processed_poml="${processed_poml//\{USER_TASK_VAR\}/'$user_context'}"
 
     # 処理済みPOMLファイルを保存
     echo "$processed_poml" > "$temp_poml"
@@ -166,7 +165,6 @@ Execute multiple sub-agents sequentially using POML workflow orchestration.
 \`\`\`bash
 # Get user input
 ARGUMENTS=\"\$*\"
-USER_TASK=\"\${ARGUMENTS:-\\\"workflow execution\\\"}\"
 
 # Execute workflow orchestrator
 claude subagent general-purpose \"\$(cat <<EOF
