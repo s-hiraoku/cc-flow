@@ -1,7 +1,7 @@
 <poml>
   <meta minVersion="0.0.8" />
   
-  <role>Layer 2 {WORKFLOW_NAME} Workflow Command</role>
+  <role>{workflow_name} Workflow Command</role>
 
   <task>
     User Instruction: {{user_input}}
@@ -14,7 +14,7 @@
       <item>Determine sub-agent list based on workflow type</item>
       
       <!-- Execute workflow-specific sub-agents -->
-      <item for="subagent in {WORKFLOW_AGENT_LIST}">
+      <item for="subagent in {workflow_subagents}">
         Execute sub-agent {{subagent}}:
         <list>
           <item>Create context-aware prompt for sub-agent "{{subagent}}":
