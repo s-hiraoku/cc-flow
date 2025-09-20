@@ -14,7 +14,7 @@ export class ScriptExecutor {
   }
 
   async executeWorkflowCreation(config: WorkflowConfig): Promise<void> {
-    const { targetPath, workflowName, selectedAgents } = config;
+    const { targetPath, workflowName, purpose, selectedAgents } = config;
     
     // Validate environment before execution
     await this.validateEnvironment();
@@ -23,8 +23,11 @@ export class ScriptExecutor {
     const scriptsDir = dirname(scriptPath);
     const finalWorkflowName = workflowName || this.generateDefaultWorkflowName(targetPath);
     
-    // Set environment variable for workflow name
+    // Set environment variables for workflow name and purpose
     process.env['WORKFLOW_NAME'] = finalWorkflowName;
+    if (purpose) {
+      process.env['WORKFLOW_PURPOSE'] = purpose;
+    }
     
     // Script expects: <targetPath> [agent1,agent2,agent3] (comma-separated for item-names mode)
     // If no agents are selected, script will run in interactive mode

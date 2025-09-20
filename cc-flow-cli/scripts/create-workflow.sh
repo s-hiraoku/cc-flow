@@ -25,7 +25,7 @@ declare WORKFLOW_MD_TEMPLATE=""
 declare WORKFLOW_POML_TEMPLATE=""
 declare WORKFLOW_MD_CONTENT=""
 declare WORKFLOW_POML_CONTENT=""
-declare WORKFLOW_NAME=""
+declare WORKFLOW_NAME="${WORKFLOW_NAME:-}"  # 環境変数から読み込み、未設定なら空文字列
 declare TARGET_PATH=""
 declare MODE=""
 declare AGENT_DIR=""
@@ -34,7 +34,7 @@ declare GENERATED_FILE_PATH=""
 
 # 使用方法を表示
 show_usage() {
-    echo "使用方法: $0 <対象パス> [順序またはアイテム名]"
+    echo "使用方法: $0 <対象パス> [順序またはアイテム名] [目的]"
     echo ""
     echo "対象パス形式:"
     echo "  ./agents/spec              # 特定ディレクトリ"
@@ -48,14 +48,25 @@ show_usage() {
     echo "  $0 ./agents/spec \"spec-init,spec-impl\"     # アイテム名指定"
     echo "  $0 ./agents \"spec-init,utility-date\"       # 横断指定"
     echo ""
+    echo "目的指定例:"
+    echo "  $0 ./agents/spec \"1 2\" \"API仕様書作成\"    # 目的を指定"
+    echo "  $0 ./agents/spec \"\" \"テスト作成\"           # 対話モード+目的指定"
+    echo ""
     echo "指定された対象パスから、順次実行するワークフローコマンドを生成します。"
     echo "順序を指定しない場合は対話モードで実行されます。"
+    echo "目的を指定すると、生成されるスラッシュコマンドの説明に反映されます。"
 }
 
 # 引数を解析
 parse_arguments() {
     local target_path="$1"
     local order_spec="${2:-}"
+    local purpose="${3:-}"
+    
+    # purpose が指定された場合、環境変数に設定
+    if [[ -n "$purpose" ]]; then
+        export WORKFLOW_PURPOSE="$purpose"
+    fi
     
     # 引数のバリデーション
     validate_args "$target_path" "対象パス"
@@ -108,10 +119,11 @@ parse_arguments() {
 main() {
     local target_path="$1"
     local order_spec="${2:-}"
-    
+    local purpose="${3:-}"
+
     # 引数解析
-    parse_arguments "$target_path" "$order_spec"
-    
+    parse_arguments "$target_path" "$order_spec" "$purpose"
+
     # 処理開始メッセージ
     info "処理開始: 対象パス '$TARGET_PATH'"
 
