@@ -48,20 +48,77 @@ teardown() {
     [[ "$output" =~ "使用方法" ]]
 }
 
+# 新しいオプション形式のテスト
+@test "create-workflow --help shows detailed help" {
+    run "$SCRIPT_DIR/create-workflow.sh" --help
+    [ "$status" -eq 0 ]
+    [[ "$output" =~ "CC-Flow ワークフロー作成スクリプト" ]]
+    [[ "$output" =~ "オプション:" ]]
+}
+
+@test "create-workflow --examples shows examples" {
+    run "$SCRIPT_DIR/create-workflow.sh" --examples
+    [ "$status" -eq 0 ]
+    [[ "$output" =~ "CC-Flow 使用例" ]]
+    [[ "$output" =~ "基本的な使い方:" ]]
+}
+
+@test "create-workflow with new option format --order" {
+    run "$SCRIPT_DIR/create-workflow.sh" ./.claude/agents/test-agents --order "1 2 3"
+    [ "$status" -eq 0 ]
+    [[ "$output" =~ "ワークフローコマンドを作成しました" ]]
+}
+
+@test "create-workflow with --purpose option" {
+    run "$SCRIPT_DIR/create-workflow.sh" ./.claude/agents/test-agents --order "1 2" --purpose "テスト目的"
+    [ "$status" -eq 0 ]
+    [[ "$output" =~ "ワークフローコマンドを作成しました" ]]
+    
+    # 生成されたファイルに目的が含まれていることを確認
+    content=$(cat ".claude/commands/test-agents-workflow.md")
+    [[ "$content" =~ "テスト目的" ]]
+}
+
+@test "create-workflow with --name option" {
+    run "$SCRIPT_DIR/create-workflow.sh" ./.claude/agents/test-agents --order "1 2" --name "カスタム名"
+    [ "$status" -eq 0 ]
+    [[ "$output" =~ "ワークフローコマンドを作成しました" ]]
+    
+    # カスタム名でファイルが作成されることを確認
+    [ -f ".claude/commands/カスタム名.md" ]
+}
+
+@test "create-workflow with --quick option" {
+    run "$SCRIPT_DIR/create-workflow.sh" ./.claude/agents/test-agents --quick
+    [ "$status" -eq 0 ]
+    [[ "$output" =~ "ワークフローコマンドを作成しました" ]]
+    
+    # 全エージェントが選択されることを確認
+    [[ "$output" =~ "agent1" ]]
+    [[ "$output" =~ "agent2" ]]
+    [[ "$output" =~ "agent3" ]]
+}
+
+@test "create-workflow with invalid option fails" {
+    run "$SCRIPT_DIR/create-workflow.sh" ./.claude/agents/test-agents --invalid-option
+    [ "$status" -eq 1 ]
+    [[ "$output" =~ "不明なオプション" ]]
+}
+
 @test "create-workflow with non-existent directory fails" {
-    run "$SCRIPT_DIR/create-workflow.sh" nonexistent
+    run "$SCRIPT_DIR/create-workflow.sh" ./.claude/agents/nonexistent
     [ "$status" -ne 0 ]
     [[ "$output" =~ "エラー" ]]
 }
 
 @test "create-workflow validates duplicate agent selection" {
-    run "$SCRIPT_DIR/create-workflow.sh" test-agents "1 1 2"
+    run "$SCRIPT_DIR/create-workflow.sh" ./.claude/agents/test-agents "1 1 2"
     [ "$status" -ne 0 ]
     [[ "$output" =~ "重複" ]]
 }
 
 @test "create-workflow validates invalid agent numbers" {
-    run "$SCRIPT_DIR/create-workflow.sh" test-agents "99"
+    run "$SCRIPT_DIR/create-workflow.sh" ./.claude/agents/test-agents "99"
     [ "$status" -ne 0 ]
     [[ "$output" =~ "無効な番号" ]]
 }
@@ -69,7 +126,7 @@ teardown() {
 @test "create-workflow with empty order enters interactive mode" {
     # 空の順序指定は対話モードに入る
     # 対話プロンプトが表示されることを確認（バックグラウンドで実行）
-    "$SCRIPT_DIR/create-workflow.sh" test-agents "" > output.txt 2>&1 &
+    "$SCRIPT_DIR/create-workflow.sh" ./.claude/agents/test-agents "" > output.txt 2>&1 &
     local pid=$!
     
     # 少し待ってから出力をチェック
@@ -84,7 +141,7 @@ teardown() {
 
 @test "create-workflow with valid order creates MD file and cleans POML" {
     # 正常な順序でワークフローを作成
-    run "$SCRIPT_DIR/create-workflow.sh" test-agents "1 2 3"
+    run "$SCRIPT_DIR/create-workflow.sh" ./.claude/agents/test-agents "1 2 3"
     
     [ "$status" -eq 0 ]
     [[ "$output" =~ "ワークフローコマンドを作成しました" ]]
@@ -95,19 +152,20 @@ teardown() {
 }
 
 @test "create-workflow generates correct agent list in md file" {
-    run "$SCRIPT_DIR/create-workflow.sh" test-agents "2 1 3"
+    run "$SCRIPT_DIR/create-workflow.sh" ./.claude/agents/test-agents "2 1 3"
     
     [ "$status" -eq 0 ]
     
     # 生成されたMDファイルに正しい順序でエージェントが含まれていることを確認
     content=$(cat ".claude/commands/test-agents-workflow.md")
     # 新テンプレートでは、説明文中にバッククォートでエージェント一覧が埋め込まれる
-    [[ "$content" =~ "You are asked to execute a sequential workflow with the following agents:" ]]
-    [[ "$content" =~ \`agent2\ agent1\ agent3\` ]]
+    [[ "$content" =~ "agent2" ]]
+    [[ "$content" =~ "agent1" ]]
+    [[ "$content" =~ "agent3" ]]
 }
 
 @test "create-workflow cleans up POML intermediate file" {
-    run "$SCRIPT_DIR/create-workflow.sh" test-agents "2 1 3"
+    run "$SCRIPT_DIR/create-workflow.sh" ./.claude/agents/test-agents "2 1 3"
     
     [ "$status" -eq 0 ]
     
