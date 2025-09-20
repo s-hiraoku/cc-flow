@@ -63,7 +63,7 @@ export const wrapAndAlign = (
   width: number,
   align: 'left' | 'center' | 'right' = 'left'
 ): string[] => {
-  const lines = wrapLines(value, width).map(line => line.replace(/\s+$/u, ''));
+  const lines = wrapLines(value, width).map(line => line.replace(/\s+$/, ''));
 
   switch (align) {
     case 'center':

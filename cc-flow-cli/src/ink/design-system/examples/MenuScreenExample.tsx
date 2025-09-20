@@ -11,7 +11,7 @@ import { UnifiedScreen, ScreenDescription, MenuSection } from '../ScreenComponen
 import { createScreenLayout } from '../ScreenPatterns.js';
 import { useTheme } from '../../themes/theme.js';
 import type { MenuItem } from '../../components/Interactive.js';
-import packageJson from '../../../../package.json';
+import packageJson from '../../../../package.json' with { type: 'json' };
 
 interface MenuScreenProps {
   onSelect: (action: string) => void;

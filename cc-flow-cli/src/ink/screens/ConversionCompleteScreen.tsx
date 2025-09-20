@@ -5,7 +5,7 @@ import { createScreenLayout, useScreenDimensions } from '../design-system/Screen
 import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
 import { MenuItem } from '../components/Interactive.js';
-import packageJson from '../../../package.json';
+import packageJson from '../../../package.json' with { type: 'json' };
 
 interface ConversionResult {
   success: boolean;

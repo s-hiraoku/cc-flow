@@ -26,16 +26,20 @@ interface PreviewScreenProps {
   config: WorkflowConfig;
   onGenerate: () => void;
   onBack: () => void;
+  isProcessing?: boolean;
+  processingError?: string | null;
 }
 
-export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate, onBack }) => {
+export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate, onBack, isProcessing, processingError }) => {
   const { exit } = useApp();
   const theme = useTheme();
   const { contentWidth } = useScreenDimensions();
 
-  const choices: MenuItem[] = [
+  const choices: MenuItem[] = isProcessing ? [
+    { label: '⏳ 作成中...', value: 'processing', disabled: true },
+    { label: '❌ キャンセル', value: 'cancel' }
+  ] : [
     { label: '🚀 ワークフローを作成する', value: 'generate' },
-    { label: '✏️ 設定を修正する', value: 'back' },
     { label: '❌ キャンセル', value: 'cancel' }
   ];
 
@@ -45,16 +49,14 @@ export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate
       onBack();
     } else if (input === 'q' || input === 'Q') {
       exit();
-    } else if (key.return) {
+    } else if (key.return && !isProcessing) {
       onGenerate();
     }
-  }, [onBack, exit, onGenerate]));
+  }, [onBack, exit, onGenerate, isProcessing]));
 
   const handleSelect = (item: MenuItem) => {
-    if (item.value === 'generate') {
+    if (item.value === 'generate' && !isProcessing) {
       onGenerate();
-    } else if (item.value === 'back') {
-      onBack();
     } else if (item.value === 'cancel') {
       exit();
     }
@@ -64,8 +66,8 @@ export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate
 
   // Screen configuration using design system patterns
   const screenConfig = createScreenLayout('preview', {
-    title: 'ワークフロー プレビュー',
-    subtitle: '作成するワークフローの設定を確認してください',
+    title: '最終確認 - ワークフロー作成',
+    subtitle: '設定内容を確認してワークフローを作成してください',
     icon: '📋'
   });
 
@@ -92,12 +94,12 @@ export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate
           
           <Flex>
             <Text color={theme.colors.hex.lightBlue}>対象パス: </Text>
-            <Text color={theme.colors.gray}>{config.targetPath || './agents'}</Text>
+            <Text color={theme.colors.hex.green} bold>{config.targetPath || './agents'}</Text>
           </Flex>
           
           <Flex>
             <Text color={theme.colors.hex.lightBlue}>実行環境: </Text>
-            <Text color={theme.colors.gray}>{config.environment || 'Claude Code'}</Text>
+            <Text color={theme.colors.hex.green} bold>{config.environment || 'Claude Code'}</Text>
           </Flex>
           
           {config.purpose && (
@@ -129,17 +131,31 @@ export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate
       {/* Generated Files */}
       <Section title="📦 生成されるファイル" spacing="sm">
         <Box flexDirection="column" gap={1}>
-          <Text color={theme.colors.gray}>• .claude/commands/{config.workflowName || 'my-workflow'}.md</Text>
-          <Text color={theme.colors.gray}>• 一時的なPOMLファイル (処理後に削除)</Text>
+          <Text color={theme.colors.hex.lightBlue}>• .claude/commands/{config.workflowName || 'my-workflow'}.md</Text>
+          <Text color={theme.colors.hex.lightBlue}>• 一時的なPOMLファイル (処理後に削除)</Text>
         </Box>
       </Section>
 
       {/* Execution Instructions */}
       <Section title="⚡ 実行方法" spacing="sm">
-        <Text color={theme.colors.gray}>
+        <Text color={theme.colors.hex.lightBlue}>
           作成後は /{config.workflowName || 'my-workflow'} コマンドで実行可能
         </Text>
       </Section>
+
+      {/* Error Display */}
+      {processingError && (
+        <Section title="❌ エラー" spacing="sm">
+          <Box
+            borderStyle="single"
+            borderColor={theme.colors.error}
+            padding={1}
+            width="100%"
+          >
+            <Text color={theme.colors.error}>{processingError}</Text>
+          </Box>
+        </Section>
+      )}
 
       {/* Action Selection */}
       <MenuSection

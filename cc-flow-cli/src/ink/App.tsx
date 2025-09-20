@@ -11,14 +11,8 @@ import { ConversionScreen } from './screens/ConversionScreen.js';
 import { ConversionCompleteScreen } from './screens/ConversionCompleteScreen.js';
 import { WorkflowNameScreen } from './screens/WorkflowNameScreen.js';
 import { EnvironmentScreen } from './screens/EnvironmentScreen.js';
-// Simplified types for now
-interface WorkflowConfig {
-  targetPath?: string;
-  selectedAgents?: any[];
-  workflowName?: string;
-  purpose?: string;
-  environment?: string;
-}
+import { ScriptExecutor } from '../services/ScriptExecutor.js';
+import type { WorkflowConfig } from '../models/Agent.js';
 
 interface ConversionResult {
   success: boolean;
@@ -49,6 +43,8 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
   const [workflowConfig, setWorkflowConfig] = useState<Partial<WorkflowConfig>>({});
   const [conversionResult, setConversionResult] = useState<ConversionResult | null>(null);
   const [screenHistory, setScreenHistory] = useState<ScreenType[]>(['welcome']);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingError, setProcessingError] = useState<string | null>(null);
 
   const navigateTo = (screen: ScreenType) => {
     setScreenHistory(prev => [...prev, screen]);
@@ -64,6 +60,40 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
         setScreenHistory(newHistory);
         setCurrentScreen(previousScreen);
       }
+    }
+  };
+
+  const handleWorkflowGeneration = async () => {
+    console.log('🔧 Starting workflow generation...');
+    console.log('📦 Current workflowConfig:', workflowConfig);
+    
+    setIsProcessing(true);
+    setProcessingError(null);
+    
+    try {
+      // Create proper WorkflowConfig with required fields
+      const config: WorkflowConfig = {
+        targetPath: workflowConfig.targetPath || './agents',
+        purpose: workflowConfig.purpose || 'Custom workflow',
+        selectedAgents: workflowConfig.selectedAgents || [],
+        executionOrder: (workflowConfig.selectedAgents || []).map(agent => agent.name),
+        createdAt: new Date(),
+        ...(workflowConfig.workflowName && { workflowName: workflowConfig.workflowName })
+      };
+      
+      console.log('📝 Final config for ScriptExecutor:', config);
+      
+      const executor = new ScriptExecutor();
+      await executor.executeWorkflowCreation(config);
+      
+      // Success - navigate to complete screen
+      navigateTo('complete');
+    } catch (error) {
+      console.error('Workflow generation failed:', error);
+      setProcessingError(error instanceof Error ? error.message : 'Unknown error occurred');
+      // Stay on preview screen to show error
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -122,7 +152,7 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
       case 'order':
         return (
           <OrderScreen
-            selectedAgents={workflowConfig.selectedAgents || []}
+            selectedAgents={workflowConfig.selectedAgents as any[] || []}
             onNext={(orderedAgents: any[]) => {
               setWorkflowConfig((prev: Partial<WorkflowConfig>) => ({ ...prev, selectedAgents: orderedAgents }));
               navigateTo('workflow-name');
@@ -157,11 +187,10 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
       case 'preview':
         return (
           <PreviewScreen
-            config={workflowConfig as WorkflowConfig}
-            onGenerate={() => {
-              // Execute workflow generation
-              navigateTo('complete');
-            }}
+            config={workflowConfig as any}
+            onGenerate={handleWorkflowGeneration}
+            isProcessing={isProcessing}
+            processingError={processingError}
             onBack={goBack}
           />
         );
@@ -169,7 +198,7 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
       case 'complete':
         return (
           <CompleteScreen
-            config={workflowConfig as WorkflowConfig}
+            config={workflowConfig as any}
             onAnother={() => {
               setWorkflowConfig({});
               navigateTo('menu');

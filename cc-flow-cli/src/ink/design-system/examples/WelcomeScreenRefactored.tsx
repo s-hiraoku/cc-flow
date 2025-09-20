@@ -17,7 +17,7 @@ import {
 } from '../ScreenComponents.js';
 import { createScreenLayout } from '../ScreenPatterns.js';
 import type { MenuItem } from '../../components/Interactive.js';
-import packageJson from '../../../../package.json';
+import packageJson from '../../../../package.json' with { type: 'json' };
 
 interface WelcomeScreenProps {
   onNext: () => void;

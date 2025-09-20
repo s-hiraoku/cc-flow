@@ -26,9 +26,18 @@ export class ScriptExecutor {
     // Set environment variable for workflow name
     process.env['WORKFLOW_NAME'] = finalWorkflowName;
     
-    const command = `"${scriptPath}" "${targetPath}" "${agentNames}"`;
+    // Script expects: <targetPath> [agent1,agent2,agent3]
+    // If agentNames is empty, script will run in interactive mode
+    const command = agentNames 
+      ? `"${scriptPath}" "${targetPath}" "${agentNames}"`
+      : `"${scriptPath}" "${targetPath}"`;
     
-    console.log(`\nExecuting: ${command}`);
+    console.log(`\n🚀 Executing workflow creation script:`);
+    console.log(`  Script path: ${scriptPath}`);
+    console.log(`  Target path: ${targetPath}`);
+    console.log(`  Agent names: ${agentNames || '(none - interactive mode)'}`);
+    console.log(`  Workflow name: ${finalWorkflowName}`);
+    console.log(`  Full command: ${command}`);
     
     const execOptions: ExecSyncOptions = {
       cwd: this.basePath,

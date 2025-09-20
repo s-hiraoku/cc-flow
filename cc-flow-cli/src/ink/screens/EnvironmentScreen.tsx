@@ -119,7 +119,7 @@ export const EnvironmentScreen: React.FC<EnvironmentScreenProps> = ({ onNext, on
       statusItems={statusItems}
       customStatusMessage={!isComplete ? 
         '環境確認中です... しばらくお待ちください' : 
-        '✅ Enterキーでプレビュー画面に進みます'}
+        '✅ 環境確認完了 - Enterキーで最終確認画面へ進みます'}
     >
       {/* Environment Check Results */}
       <Section title="環境チェック結果" spacing="sm">
@@ -140,7 +140,8 @@ export const EnvironmentScreen: React.FC<EnvironmentScreenProps> = ({ onNext, on
       {isComplete && (
         <>
           <ScreenDescription
-            heading="🎉 環境チェック完了!"
+            heading="🎉 環境確認完了 - 次のステップへ"
+            description="ワークフロー作成の準備が整いました。最終確認画面に進んでワークフローを生成してください。"
             align="center"
           />
 
@@ -150,6 +151,12 @@ export const EnvironmentScreen: React.FC<EnvironmentScreenProps> = ({ onNext, on
               contentWidth={contentWidth}
             />
           </Section>
+
+          <Box marginTop={1} marginBottom={1}>
+            <Text color={theme.colors.hex.orange}>
+              💡 まだワークフローは作成されていません。Enterキーを押してワークフロー作成を完了してください。
+            </Text>
+          </Box>
         </>
       )}
     </UnifiedScreen>

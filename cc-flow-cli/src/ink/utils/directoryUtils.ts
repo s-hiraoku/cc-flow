@@ -230,11 +230,11 @@ function extractAgentDescription(filePath: string, agentName: string): string {
     const content = readFileSync(filePath, 'utf-8');
     
     // YAML frontmatterから説明を抽出を試行
-    const frontmatterMatch = content.match(/^---\s*\n(.*?)\n---/s);
-    if (frontmatterMatch) {
+    const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
+    if (frontmatterMatch && frontmatterMatch[1]) {
       const yaml = frontmatterMatch[1];
       const descMatch = yaml.match(/description:\s*(.+)/);
-      if (descMatch) {
+      if (descMatch && descMatch[1]) {
         return descMatch[1].replace(/["']/g, '').trim();
       }
     }

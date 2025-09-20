@@ -8,7 +8,7 @@ import {
 } from "../components/Interactive.js";
 import { useTheme } from "../themes/theme.js";
 import { renderLines } from "../utils/text.js";
-import packageJson from "../../../package.json";
+import packageJson from "../../../package.json" with { type: 'json' };
 
 interface WelcomeScreenProps {
   onNext: () => void;

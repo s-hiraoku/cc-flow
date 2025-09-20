@@ -3,7 +3,7 @@ import { useApp } from 'ink';
 import { UnifiedScreen, ScreenDescription, MenuSection } from '../design-system/index.js';
 import { createScreenLayout } from '../design-system/ScreenPatterns.js';
 import { MenuItem } from '../components/Interactive.js';
-import packageJson from '../../../package.json';
+import packageJson from '../../../package.json' with { type: 'json' };
 
 interface MenuScreenProps {
   onSelect: (action: string) => void;
