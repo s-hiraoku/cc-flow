@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync, renameSync } from 'fs';
+import { readFileSync, writeFileSync, renameSync, mkdtempSync, rmSync } from 'fs';
 import { dirname, join } from 'path';
 import { tmpdir } from 'os';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -85,16 +85,19 @@ export function updateProjectOverviewMemory(options = {}) {
     return { changed: false, skipped: false, version };
   }
 
-  // Atomic write using temporary file to avoid race conditions
-  const tmpFile = join(tmpdir(), `project_overview_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.md`);
+  // Atomic write using secure temporary directory to avoid race conditions
+  const tmpDir = mkdtempSync(join(tmpdir(), 'cc-flow-update-'));
+  const tmpFile = join(tmpDir, 'project_overview.md');
   try {
-    writeFileSync(tmpFile, updatedContent, 'utf8');
+    // Write to temporary file with restricted permissions (0o600 = owner read/write only)
+    writeFileSync(tmpFile, updatedContent, { encoding: 'utf8', mode: 0o600 });
     renameSync(tmpFile, projectOverviewPath);
+    // Clean up temporary directory
+    rmSync(tmpDir, { recursive: true, force: true });
   } catch (error) {
-    // Clean up temporary file if it exists
+    // Clean up temporary directory on error
     try {
-      readFileSync(tmpFile);
-      renameSync(tmpFile, projectOverviewPath); // Retry once
+      rmSync(tmpDir, { recursive: true, force: true });
     } catch {
       // Ignore cleanup errors
     }
