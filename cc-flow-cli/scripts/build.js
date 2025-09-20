@@ -10,7 +10,6 @@ import { existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import chalk from 'chalk';
-import { updateProjectOverviewMemory } from './update-project-overview.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..');
@@ -53,21 +52,8 @@ try {
   console.log(chalk.gray(`    - ${indexFile}`));
   console.log(chalk.gray(`    - ${binFile}`));
 
-  console.log(chalk.gray('  Syncing Serena project overview memory...'));
-  try {
-    const { changed, skipped, version } = updateProjectOverviewMemory({ silent: true });
-
-    if (skipped) {
-      console.log(chalk.yellow('⚠️  Skipped: Serena project overview memory was not found.'));
-    } else if (changed) {
-      console.log(chalk.gray(`    Updated to version ${version}.`));
-    } else {
-      console.log(chalk.gray(`    Already aligned at version ${version}.`));
-    }
-  } catch (syncError) {
-    console.error(chalk.red('❌ Failed to sync Serena project overview memory.'));
-    throw syncError;
-  }
+  // Skip Serena project overview memory sync for now
+  console.log(chalk.gray('  Skipping Serena project overview memory sync...'));
 
   // Run build validation tests
   console.log(chalk.gray('  Running build validation...'));
