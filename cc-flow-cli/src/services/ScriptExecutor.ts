@@ -20,22 +20,35 @@ export class ScriptExecutor {
     await this.validateEnvironment();
     
     const scriptPath = this.getScriptPath();
-    const agentNames = selectedAgents.map(agent => agent.name).join(',');
     const finalWorkflowName = workflowName || this.generateDefaultWorkflowName(targetPath);
     
     // Set environment variable for workflow name
     process.env['WORKFLOW_NAME'] = finalWorkflowName;
     
-    // Script expects: <targetPath> [agent1,agent2,agent3]
-    // If agentNames is empty, script will run in interactive mode
-    const command = agentNames 
-      ? `"${scriptPath}" "${targetPath}" "${agentNames}"`
-      : `"${scriptPath}" "${targetPath}"`;
+    // Script expects: <targetPath> [agent1,agent2,agent3] (comma-separated for item-names mode)
+    // If no agents are selected, script will run in interactive mode
+    let command = `"${scriptPath}" "${targetPath}"`;
+    
+    if (selectedAgents && selectedAgents.length > 0) {
+      const agentNames = selectedAgents.map(agent => agent.name).join(',');
+      // Add trailing comma to ensure item-names mode (not indices mode)
+      const agentNamesWithComma = agentNames + ',';
+      command = `"${scriptPath}" "${targetPath}" "${agentNamesWithComma}"`;
+    }
     
     console.log(`\n🚀 Executing workflow creation script:`);
     console.log(`  Script path: ${scriptPath}`);
     console.log(`  Target path: ${targetPath}`);
-    console.log(`  Agent names: ${agentNames || '(none - interactive mode)'}`);
+    
+    if (selectedAgents && selectedAgents.length > 0) {
+      const agentNames = selectedAgents.map(agent => agent.name).join(',');
+      console.log(`  Agent names: ${agentNames}`);
+      console.log(`  Mode: item-names (comma-separated)`);
+    } else {
+      console.log(`  Agent names: (none - interactive mode)`);
+      console.log(`  Mode: interactive`);
+    }
+    
     console.log(`  Workflow name: ${finalWorkflowName}`);
     console.log(`  Full command: ${command}`);
     
