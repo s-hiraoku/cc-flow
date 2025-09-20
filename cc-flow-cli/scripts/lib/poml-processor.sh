@@ -81,7 +81,7 @@ process_poml_to_markdown() {
 # POMLファイルをMarkdownに変換（pomljsを使用）
 convert_poml_to_markdown() {
     local poml_content="$1"
-    local agent_list_json="$2"
+    local agent_list_space="$2"
     local workflow_name="$3"
 
     # Node.js環境をチェック（サイレント）
@@ -90,15 +90,34 @@ convert_poml_to_markdown() {
     # 一時POMLファイルを作成
     local temp_poml="/tmp/workflow_${workflow_name}_$$.poml"
 
-    # POMLテンプレートからエージェントリストを置換した内容を作成
-    echo "$poml_content" | sed "s/{WORKFLOW_AGENT_LIST}/$agent_list_json/g" | sed "s/{WORKFLOW_NAME}/$workflow_name/g" > "$temp_poml"
+    # POMLテンプレートをそのまま保存
+    echo "$poml_content" > "$temp_poml"
 
-    # pomljsでPOMLを実行してMarkdownを生成（必要な変数を渡す）
+    # エージェントリストを配列形式に変換
+    local agent_array="["
+    local first=true
+    for agent in $agent_list_space; do
+        if [[ "$first" == "true" ]]; then
+            first=false
+        else
+            agent_array+=", "
+        fi
+        agent_array+="\"$agent\""
+    done
+    agent_array+="]"
+
+    # pomljsでPOMLを実行してMarkdownを生成（コンテキスト変数を渡す）
     local poml_output
-    if ! poml_output=$(npx pomljs --file "$temp_poml" --context 'user_input=workflow execution' --context 'context=sequential agent execution' 2>/dev/null); then
-        rm -f "$temp_poml"
-        error_exit "pomljsの実行に失敗しました: $poml_output"
+    local poml_error
+    if ! { poml_output=$(npx pomljs --file "$temp_poml" \
+        --context "user_input=workflow execution" \
+        --context "context=sequential agent execution" \
+        --context "workflow_name=$workflow_name" \
+        --context "agent_list=$agent_array" 2>/tmp/poml_error_$$) && poml_error=$(cat /tmp/poml_error_$$ 2>/dev/null || echo ""); }; then
+        rm -f "$temp_poml" /tmp/poml_error_$$
+        error_exit "pomljsの実行に失敗しました: $poml_output $poml_error"
     fi
+    rm -f /tmp/poml_error_$$
 
     # 一時ファイルをクリーンアップ
     rm -f "$temp_poml"
@@ -109,14 +128,12 @@ convert_poml_to_markdown() {
         # jqが利用可能な場合
         markdown_content=$(echo "$poml_output" | jq -r '.messages[0].content' 2>/dev/null)
         if [[ -z "$markdown_content" || "$markdown_content" == "null" ]]; then
+            # jqでの抽出に失敗した場合、poml_outputをそのまま使用
             markdown_content="$poml_output"
         fi
     else
-        # jqが利用できない場合はシンプルな抽出
-        markdown_content=$(echo "$poml_output" | sed -n 's/.*"content":"\([^"]*\)".*/\1/p' | head -1)
-        if [[ -z "$markdown_content" ]]; then
-            markdown_content="$poml_output"
-        fi
+        # jqが利用できない場合、poml_outputをそのまま使用
+        markdown_content="$poml_output"
     fi
 
     # Markdownを出力

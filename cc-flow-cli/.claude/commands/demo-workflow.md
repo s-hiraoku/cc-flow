@@ -21,6 +21,7 @@ This workflow executes each sub-agent in the specified sequence, passing accumul
 ### Workflow Process
 
 1. **Initialize Context**
+
    - Start with user-provided context: `$*`
 
 2. **Execute Each Sub-Agent**
@@ -28,11 +29,13 @@ This workflow executes each sub-agent in the specified sequence, passing accumul
    For each agent in the sequence **architecture-designer code-generator**:
 
    - **Display Progress**
+
      ```
      → [agent-name]
      ```
 
    - **Invoke Sub-Agent**
+
      ```
      claude subagent "[agent-name]" "[accumulated-context]"
      ```
