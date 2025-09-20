@@ -2,9 +2,10 @@
   "compilerOptions": {
     // Target ES2022 for Node.js 18+ compatibility (import.meta support)
     "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Node",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
     "lib": ["ES2022"],
+    "jsx": "react-jsx",
     
     // Output Configuration - ES Module output
     "outDir": "./dist",
@@ -30,7 +31,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "isolatedModules": true,
-    "verbatimModuleSyntax": false,
+    "verbatimModuleSyntax": true,
     
     // Resolution - Optimized for ESM
     "resolveJsonModule": true,
@@ -50,6 +51,10 @@
   "exclude": [
     "node_modules",
     "dist",
-    "test"
+    "test",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "src/test/**/*"
   ]
 }

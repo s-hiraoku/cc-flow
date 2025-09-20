@@ -27,7 +27,7 @@ const tests = [
   },
   {
     name: 'Check CLI entry file exists',
-    test: () => existsSync(join(distDir, 'cli', 'main.js'))
+    test: () => existsSync(join(distDir, 'index.js'))
   },
   {
     name: 'Check type declarations exist',
@@ -42,7 +42,7 @@ const tests = [
     test: async () => {
       try {
         const mod = await import(join(distDir, 'index.js'));
-        return mod.WorkflowBuilder && typeof mod.WorkflowBuilder === 'function';
+        return mod.InkApp && typeof mod.InkApp === 'function';
       } catch (error) {
         console.error(chalk.dim(`    Import error: ${error.message}`));
         return false;
@@ -53,8 +53,8 @@ const tests = [
     name: 'Import CLI module',
     test: async () => {
       try {
-        const mod = await import(join(distDir, 'cli', 'main.js'));
-        return mod.WorkflowBuilder && typeof mod.WorkflowBuilder === 'function';
+        const mod = await import(join(distDir, 'index.js'));
+        return mod.InkApp && typeof mod.InkApp === 'function';
       } catch (error) {
         console.error(chalk.dim(`    Import error: ${error.message}`));
         return false;

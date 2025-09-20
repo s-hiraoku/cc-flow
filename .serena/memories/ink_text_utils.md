@@ -1,0 +1,1 @@
+Added `alignWithinWidth` helper to Ink text utilities to center/right pad strings using string-width/strip-ansi. Utilities centralize visible-width calculations for wrap and padding. Allows Ink boxes to stay aligned even with multibyte characters or ANSI colors. Useful for future TUI components.

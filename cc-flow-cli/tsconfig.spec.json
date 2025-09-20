@@ -1,0 +1,34 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Test-specific overrides
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "isolatedModules": false,
+    "skipLibCheck": true,
+    "types": ["vitest/globals", "node"],
+    "target": "ES2022",
+    "module": "ESNext",
+    
+    // Test environment specific
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    
+    // Less strict for test files
+    "noUncheckedIndexedAccess": false,
+    "exactOptionalPropertyTypes": false
+  },
+  "include": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx", 
+    "src/**/*.spec.ts",
+    "src/test/**/*",
+    "vitest.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

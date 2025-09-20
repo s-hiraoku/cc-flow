@@ -12,6 +12,7 @@ export interface WorkflowConfig {
   workflowName?: string;   // "spec-workflow" or custom name
   purpose: string;         // User-defined workflow purpose (required)
   selectedAgents: Agent[]; // Selected agents
+  selectedCommands?: any[]; // Selected commands for conversion
   executionOrder: string[]; // Agent names in execution order
   createdAt: Date;
 }

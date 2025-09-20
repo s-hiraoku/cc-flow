@@ -3,17 +3,15 @@
 // This is the entry point for the npx @hiraoku/cc-flow-cli command (binary: cc-flow)
 // It imports and runs the compiled TypeScript code
 
-import { WorkflowBuilder } from '../dist/cli/main.js';
-import { ErrorHandler } from '../dist/utils/ErrorHandler.js';
+import React from 'react';
+import { render } from 'ink';
+import { InkApp } from '../dist/index.js';
 
-// Setup global error handlers
-ErrorHandler.handleProcessErrors();
+// Create and render the React Ink application
+const app = render(React.createElement(InkApp));
 
-// Run the CLI application
-const builder = new WorkflowBuilder();
-builder.run().catch((error) => {
-  ErrorHandler.handleError(error, {
-    operation: 'cli-execution',
-    component: 'main'
-  });
+// Wait for the app to exit
+app.waitUntilExit().catch((error) => {
+  console.error('Application error:', error);
+  process.exit(1);
 });
