@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
 import Spinner from 'ink-spinner';
-import { UnifiedScreen, ScreenDescription, FeatureHighlights } from '../design-system/index.js';
-import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
+import { UnifiedScreen } from '../design-system/index.js';
+import { createScreenLayout } from '../design-system/ScreenPatterns.js';
 import { Section } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
 import { execSync } from 'child_process';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { join } from 'path';
 
 interface ConversionStep {
   name: string;
@@ -32,17 +31,14 @@ interface ConversionScreenProps {
 
 export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, selectedCommands = [], onComplete, onBack }) => {
   const [steps, setSteps] = useState<ConversionStep[]>([
-    { name: 'スラッシュコマンド検索', status: 'pending', message: '開始待ち...' },
-    { name: 'コマンド解析', status: 'pending', message: '開始待ち...' },
-    { name: 'エージェント形式変換', status: 'pending', message: '開始待ち...' },
-    { name: 'ファイル生成', status: 'pending', message: '開始待ち...' },
-    { name: 'ワークフロー作成', status: 'pending', message: '開始待ち...' },
+    { name: 'コマンド検証', status: 'pending', message: '開始待ち...' },
+    { name: 'エージェント変換', status: 'pending', message: '開始待ち...' },
+    { name: '完了', status: 'pending', message: '開始待ち...' },
   ]);
   const [currentStep, setCurrentStep] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const { exit } = useApp();
   const theme = useTheme();
-  const { contentWidth } = useScreenDimensions();
 
   // Handle keyboard input
   useInput(useCallback((input: string, key: any) => {
@@ -56,6 +52,12 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
   // Real conversion process using existing shell script
   useEffect(() => {
     const runConversion = async () => {
+      // Determine output directory based on source category
+      // Extract category from target path, fallback to 'commands' for root directory
+      const pathParts = targetPath?.split('/') || [];
+      const category = pathParts[pathParts.length - 1] || 'commands';
+      const outputDir = `.claude/agents/${category}`;
+      
       try {
         // Step 1: Validate selected commands
         setCurrentStep(0);
@@ -72,74 +74,56 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
           index === 0 ? { ...step, status: 'success' as const, message: `${selectedCommands.length}個のコマンドを確認しました` } : step
         ));
 
-        // Step 2: Prepare conversion
+        // Step 2: Execute conversion
         setCurrentStep(1);
         setSteps(prev => prev.map((step, index) => 
-          index === 1 ? { ...step, status: 'processing' as const, message: '変換スクリプトを準備中...' } : step
-        ));
-        
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setSteps(prev => prev.map((step, index) => 
-          index === 1 ? { ...step, status: 'success' as const, message: '変換準備が完了しました' } : step
+          index === 1 ? { ...step, status: 'processing' as const, message: `${selectedCommands.length}個のコマンドを変換中...` } : step
         ));
 
-        // Step 3: Execute conversion script
+        // Convert each selected command individually using convert-command.sh
+        let convertedCount = 0;
+        
+        for (const command of selectedCommands) {
+          try {
+            // Convert absolute paths to relative paths
+            const sourcePath = command.path.replace(process.cwd() + '/', '');
+            const targetDirectory = outputDir;
+            
+            // Use relative path for script
+            const scriptPath = './scripts/convert-command.sh';
+            const commandStr = `bash "${scriptPath}" "${sourcePath}" "${targetDirectory}"`;
+            
+            console.log(`Converting: ${command.name} (${sourcePath})`);
+            
+            execSync(commandStr, { 
+              cwd: process.cwd(),
+              stdio: 'pipe', // Capture output
+              encoding: 'utf8',
+              shell: '/bin/bash'
+            });
+            
+            convertedCount++;
+            console.log(`✅ Converted: ${command.name}`);
+            
+            // Update progress
+            setSteps(prev => prev.map((step, index) => 
+              index === 2 ? { ...step, message: `${convertedCount}/${selectedCommands.length}個のコマンドを変換済み` } : step
+            ));
+            
+          } catch (error) {
+            console.error(`❌ Failed to convert ${command.name}:`, error);
+            // Continue with other commands even if one fails
+          }
+        }
+
+        setSteps(prev => prev.map((step, index) => 
+          index === 1 ? { ...step, status: 'success' as const, message: `${convertedCount}個のコマンドを変換完了` } : step
+        ));
+
+        // Step 3: Complete
         setCurrentStep(2);
         setSteps(prev => prev.map((step, index) => 
-          index === 2 ? { ...step, status: 'processing' as const, message: 'スラッシュコマンドを変換中...' } : step
-        ));
-
-        // Get directory name from targetPath for script argument
-        // e.g., "./.claude/commands/test" -> "test", "./.claude/commands" -> "all"
-        console.log('DEBUG: targetPath =', targetPath);
-        let commandDir = 'all';
-        if (targetPath?.includes('.claude/commands') && targetPath !== './.claude/commands') {
-          commandDir = targetPath.split('/').pop() || 'all';
-        }
-        console.log('DEBUG: commandDir =', commandDir);
-        
-        // Use ScriptExecutor pattern for script path resolution
-        // When running from cc-flow-cli, need to go up one level to find scripts/
-        const basePath = process.cwd();
-        const isInCliDir = basePath.endsWith('cc-flow-cli');
-        const projectRoot = isInCliDir ? join(basePath, '..') : basePath;
-        const scriptPath = join(projectRoot, 'scripts', 'convert-slash-commands.sh');
-        const command = `bash "${scriptPath}" "${commandDir}"`;
-        console.log('DEBUG: Executing command:', command);
-        
-        execSync(command, { 
-          cwd: projectRoot,
-          stdio: 'inherit', // Show output for debugging
-          encoding: 'utf8',
-          shell: '/bin/bash', // Force bash shell
-          env: { ...process.env, BASH_VERSION: '5.0' } // Ensure bash environment
-        });
-
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setSteps(prev => prev.map((step, index) => 
-          index === 2 ? { ...step, status: 'success' as const, message: 'エージェント形式への変換が完了しました' } : step
-        ));
-
-        // Step 4: Verify output
-        setCurrentStep(3);
-        setSteps(prev => prev.map((step, index) => 
-          index === 3 ? { ...step, status: 'processing' as const, message: '変換されたファイルを確認中...' } : step
-        ));
-        
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setSteps(prev => prev.map((step, index) => 
-          index === 3 ? { ...step, status: 'success' as const, message: `${outputDir} に保存しました` } : step
-        ));
-
-        // Step 5: Complete
-        setCurrentStep(4);
-        setSteps(prev => prev.map((step, index) => 
-          index === 4 ? { ...step, status: 'processing' as const, message: '変換を完了しています...' } : step
-        ));
-        
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setSteps(prev => prev.map((step, index) => 
-          index === 4 ? { ...step, status: 'success' as const, message: '変換が正常に完了しました' } : step
+          index === 2 ? { ...step, status: 'success' as const, message: `${outputDir}に保存完了` } : step
         ));
 
         setIsComplete(true);
@@ -148,7 +132,7 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
           onComplete({
             success: true,
             message: 'スラッシュコマンドの変換が完了しました',
-            convertedCount: selectedCommands.length,
+            convertedCount: convertedCount,
             targetDirectory: outputDir,
             convertedCommands: selectedCommands.map((cmd: any) => cmd.name || cmd.id)
           });
@@ -202,21 +186,9 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
   });
 
   const statusItems = [
-    { key: 'Progress', value: `${currentStep + 1}/${steps.length}` },
+    { key: 'Commands', value: `${selectedCommands.length}個` },
     { key: 'Status', value: isComplete ? 'Complete' : 'Processing', color: isComplete ? '#00ff00' : '#ffaa00' }
   ];
-
-  const conversionResults = isComplete ? [
-    '• 3個のスラッシュコマンドを変換',
-    '• エージェント形式のMarkdownファイルを生成',
-    '• .claude/agents/converted/ に保存完了'
-  ] : [];
-
-  const convertedCommands = isComplete ? [
-    '• analyze-code - コード解析エージェント',
-    '• generate-docs - ドキュメント生成エージェント',
-    '• create-tests - テスト作成エージェント'
-  ] : [];
 
   return (
     <UnifiedScreen
@@ -241,29 +213,13 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
         </Box>
       </Section>
 
-      {/* Completion Results */}
+      {/* Completion Message */}
       {isComplete && (
-        <>
-          <ScreenDescription
-            heading="🎉 変換完了!"
-            align="center"
-          />
-
-          <FeatureHighlights
-            features={conversionResults}
-            contentWidth={contentWidth}
-          />
-
-          <Section title="📝 変換されたコマンド" spacing="sm">
-            <Box flexDirection="column" gap={1}>
-              {convertedCommands.map((command, index) => (
-                <Text key={index} color={theme.colors.gray}>
-                  {command}
-                </Text>
-              ))}
-            </Box>
-          </Section>
-        </>
+        <Section title="🎉 変換完了" spacing="sm">
+          <Text color={theme.colors.hex.green}>
+            {selectedCommands.length}個のスラッシュコマンドをエージェント形式に変換しました
+          </Text>
+        </Section>
       )}
     </UnifiedScreen>
   );
