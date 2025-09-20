@@ -6,79 +6,74 @@ allowed-tools: [Read, Bash]
 
 # demo-workflow
 
-Execute sub-agents in sequence: **architecture-designer code-generator**
+Execute multiple sub-agents sequentially using POML workflow orchestration.
 
 ## Usage
 
-```
+```bash
 /demo-workflow "your task or requirement"
 ```
 
-## Execution Instructions
+This command processes the task through the following agents in sequence:
+architecture-designer code-generator
 
-This workflow executes each sub-agent in the specified sequence, passing accumulated context between agents.
+Each agent receives the user task and builds upon previous agent results.
 
-### Workflow Process
+# Role
 
-1. **Initialize Context**
+demo-workflow Workflow Orchestrator
 
-   - Start with user-provided context: `$*`
+# Task
 
-2. **Execute Each Sub-Agent**
+User Instruction: workflow execution Context: sequential agent execution Execute sequential workflow with the following sub-agents: 
 
-   For each agent in the sequence **architecture-designer code-generator**:
+**Step 0 of 2: Execute architecture-designer** - Task: architecture-designer - Context: sequential agent execution - User Input: workflow execution Call: `claude subagent "architecture-designer" "workflow execution"` Expected Output Format: → architecture-designer: [response]
 
-   - **Display Progress**
+**Step 1 of 2: Execute code-generator** - Task: code-generator - Context: sequential agent execution - User Input: workflow execution Call: `claude subagent "code-generator" "workflow execution"` Expected Output Format: → code-generator: [response]
 
-     ```
-     → [agent-name]
-     ```
+ **Final Step: Consolidation** - Aggregate all sub-agent responses - Return consolidated workflow output
 
-   - **Invoke Sub-Agent**
+# Output Format
 
-     ```
-     claude subagent "[agent-name]" "[accumulated-context]"
-     ```
+For each sub-agent execution: → [agent-name]: [response] Final output: ✅ Workflow completed
 
-   - **Accumulate Context**
+## Workflow Execution
 
-     Add the agent's response to the context for the next agent
+The workflow is powered by POML (Prompt Orchestration Markup Language) which:
 
-3. **Complete Workflow**
-   ```
-   ✅ Workflow completed
-   ```
+1. **Defines sequential execution**: Agents execute in the specified order
+2. **Passes context**: Each agent receives the user input and accumulated context
+3. **Tracks progress**: Shows step-by-step execution with loop indexes
+4. **Standardizes output**: Consistent response format across all agents
 
-### Context Management
+## Sub-agent Execution Format
 
-- **Initial Context**: User input from command arguments
-- **Progressive Context**: Each agent's output enriches the context
-- **Final Output**: Complete trace of all agent executions
-
-### Expected Execution Pattern
-
+For each agent in the workflow:
+```bash
+claude subagent "{agent-name}" "{user-task}"
 ```
-Initialize: "your task description"
 
-→ architecture-designer
-[Sub-agent executes with initial context]
-Context: "your task description\narchitecture-designer: [design output]"
-
-→ code-generator
-[Sub-agent executes with enriched context]
-Context: "your task description\narchitecture-designer: [design output]\ncode-generator: [implementation output]"
-
-✅ Workflow completed
+Output format:
+```
+Step {N} of {total}: Execute {agent-name}
+→ {agent-name}: [response]
 ```
 
 ## Example
 
-```
-/demo-workflow "implement user authentication with JWT tokens"
+For a workflow with agents `spec-requirements spec-design spec-implementation`:
 
-→ architecture-designer
-[architecture-designer analyzes requirements and creates design]
-→ code-generator
-[code-generator implements the authentication logic]
+```bash
+/demo-workflow "create a user authentication system"
+
+Step 1 of 3: Execute spec-requirements
+→ spec-requirements: [requirements analysis response]
+
+Step 2 of 3: Execute spec-design
+→ spec-design: [design specification response]
+
+Step 3 of 3: Execute spec-implementation
+→ spec-implementation: [implementation details response]
+
 ✅ Workflow completed
 ```
