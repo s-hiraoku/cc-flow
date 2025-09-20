@@ -1,39 +1,42 @@
 /**
  * CC-Flow TUI Design System - DirectoryScreen Implementation Example
- * 
+ *
  * This example shows how to migrate DirectoryScreen to use the unified design system
  * removing inconsistent Spacer usage and standardizing layout.
  */
 
-import React, { useState, useEffect } from 'react';
-import { Text, Box } from 'ink';
-import { 
-  UnifiedScreen, 
-  ScreenDescription, 
-  MenuSection, 
-  HintBox 
-} from '../ScreenComponents.js';
-import { createScreenLayout } from '../ScreenPatterns.js';
-import { Section } from '../../components/Layout.js';
-import { useTheme } from '../../themes/theme.js';
-import { getAgentDirectories } from '../../utils/directoryUtils.js';
-import type { MenuItem } from '../../components/Interactive.js';
+import React, { useState, useEffect } from "react";
+import { Text, Box } from "ink";
+import {
+  UnifiedScreen,
+  ScreenDescription,
+  MenuSection,
+  HintBox,
+} from "../ScreenComponents.js";
+import { createScreenLayout } from "../ScreenPatterns.js";
+import { Section } from "../../components/Layout.js";
+import { useTheme } from "../../themes/theme.js";
+import { getAgentDirectories } from "../../utils/directoryUtils.js";
+import type { MenuItem } from "../../components/Interactive.js";
 
 interface DirectoryScreenProps {
   onNext: (targetPath: string) => void;
   onBack: () => void;
 }
 
-export const DirectoryScreenExample: React.FC<DirectoryScreenProps> = ({ onNext, onBack }) => {
+export const DirectoryScreenExample: React.FC<DirectoryScreenProps> = ({
+  onNext,
+  onBack,
+}) => {
   const theme = useTheme();
   const [directories, setDirectories] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Define screen layout configuration
-  const config = createScreenLayout('selection', {
-    title: 'エージェントディレクトリ選択',
-    subtitle: 'ワークフロー作成対象の選択',
-    icon: '📂'
+  const config = createScreenLayout("selection", {
+    title: "エージェントディレクトリ選択",
+    subtitle: "ワークフロー作成対象の選択",
+    icon: "📂",
   });
 
   // Load directories
@@ -41,24 +44,28 @@ export const DirectoryScreenExample: React.FC<DirectoryScreenProps> = ({ onNext,
     const loadDirectories = async () => {
       try {
         setIsLoading(true);
-        const dirs = getAgentDirectories('.claude/agents').map<MenuItem>((dir) => ({
-          id: dir.id,
-          label: dir.label,
-          value: dir.value,
-          icon: dir.icon,
-          description: dir.description
-        }));
+        const dirs = getAgentDirectories(".claude/agents").map<MenuItem>(
+          (dir) => ({
+            id: dir.id,
+            label: dir.label,
+            value: dir.value,
+            icon: dir.icon,
+            description: dir.description,
+          })
+        );
         setDirectories(dirs);
       } catch (error) {
-        console.error('Failed to load directories:', error);
+        console.error("Failed to load directories:", error);
         // Error fallback
-        setDirectories([{
-          id: 'back',
-          label: '戻る',
-          value: 'back',
-          icon: '↩️',
-          description: '前の画面に戻ります'
-        }]);
+        setDirectories([
+          {
+            id: "back",
+            label: "戻る",
+            value: "back",
+            icon: "↩️",
+            description: "前の画面に戻ります",
+          },
+        ]);
       } finally {
         setIsLoading(false);
       }
@@ -69,7 +76,7 @@ export const DirectoryScreenExample: React.FC<DirectoryScreenProps> = ({ onNext,
 
   // Handle directory selection
   const handleSelect = (item: MenuItem) => {
-    if (item.value === 'back') {
+    if (item.value === "back") {
       onBack();
     } else {
       onNext(item.value);
@@ -79,11 +86,11 @@ export const DirectoryScreenExample: React.FC<DirectoryScreenProps> = ({ onNext,
   return (
     <UnifiedScreen config={config}>
       {/* Screen description with unified styling */}
-      <ScreenDescription 
+      <ScreenDescription
         heading="選択したディレクトリ内のエージェントが"
         subheading="ワークフロー作成時に利用可能になります"
       />
-      
+
       {/* Directory selection section */}
       <Section title="📁 利用可能なディレクトリ" spacing="sm">
         {isLoading ? (
@@ -93,21 +100,22 @@ export const DirectoryScreenExample: React.FC<DirectoryScreenProps> = ({ onNext,
             </Text>
           </Box>
         ) : (
-          <MenuSection 
+          <MenuSection
             items={directories}
             onSelect={handleSelect}
             showDescription={true}
+            spacing="xs"
           />
         )}
       </Section>
-      
+
       {/* Hint box with consistent styling */}
-      <HintBox 
+      <HintBox
         title="💡 ディレクトリ構成について"
         hints={[
           "• spec/: プロジェクト仕様・要件定義・設計関連",
-          "• utility/: 汎用ツール・ヘルパー機能", 
-          "• 全体: すべてのエージェントから自由に選択可能"
+          "• utility/: 汎用ツール・ヘルパー機能",
+          "• 全体: すべてのエージェントから自由に選択可能",
         ]}
       />
     </UnifiedScreen>
@@ -115,7 +123,7 @@ export const DirectoryScreenExample: React.FC<DirectoryScreenProps> = ({ onNext,
 };
 
 // Migration comparison:
-// REMOVED: 
+// REMOVED:
 // - Manual Spacer components (replaced with consistent Section spacing)
 // - Inconsistent Box with manual borderStyle/borderColor
 // - Mixed Flex/Box layout patterns

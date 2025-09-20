@@ -289,7 +289,7 @@ export const Section: React.FC<SectionProps> = ({
   return (
     <Box width="100%" flexDirection="column" marginTop={margin}>
       {title && (
-        <Box marginBottom={1}>
+        <Box>
           <TextBlock
             value={icon ? `${icon} ${title}` : title}
             width={contentWidth}

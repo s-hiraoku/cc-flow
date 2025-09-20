@@ -49,6 +49,7 @@ const useSelectableIndex = <T extends { disabled?: boolean }>(
 interface FocusableMenuProps {
   items: MenuItem[];
   onSelect: (item: MenuItem) => void;
+  onSelectionChange?: (item: MenuItem) => void;
   width?: number;
   showDescription?: boolean;
   focusId?: string;
@@ -59,6 +60,7 @@ interface FocusableMenuProps {
 export const FocusableMenu: React.FC<FocusableMenuProps> = ({
   items,
   onSelect,
+  onSelectionChange,
   width,
   showDescription = false,
   align = 'left',
@@ -67,9 +69,16 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
   const theme = useTheme();
   const listWidth = width ?? resolveListWidth(theme.responsive.terminalWidth, theme.layout.minWidth, theme.layout.maxWidth);
   const contentWidth = Math.max(8, listWidth - 6);
-  const lineContainerWidth = contentWidth + 2; // indicator + space + content
+  const lineContainerWidth = Math.min(contentWidth + 2, listWidth); // indicator + space + content, clamped to available width
 
   const [selectedIndex, moveIndex] = useSelectableIndex(items);
+
+  // Call onSelectionChange when selection changes
+  React.useEffect(() => {
+    if (onSelectionChange && items[selectedIndex]) {
+      onSelectionChange(items[selectedIndex]);
+    }
+  }, [selectedIndex, items, onSelectionChange]);
 
   useInput(useCallback((input, key) => {
     if (key.upArrow) {
