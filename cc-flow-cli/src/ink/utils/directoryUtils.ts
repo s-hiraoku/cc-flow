@@ -198,31 +198,11 @@ export function getAgentsFromPath(targetPath: string): Agent[] {
       ? join(process.cwd(), '.claude', targetPath.slice(2))
       : targetPath;
     
-    try {
-      const files = readdirSync(normalizedPath);
-      
-      for (const file of files) {
-        if (file.endsWith('.md')) {
-          const filePath = join(normalizedPath, file);
-          const stats = statSync(filePath);
-          
-          if (stats.isFile()) {
-            const agentName = file.replace('.md', '');
-            const description = extractAgentDescription(filePath, agentName);
-            const icon = getAgentIcon(agentName);
-            
-            agents.push({
-              id: agentName,
-              name: agentName,
-              description,
-              path: filePath,
-              icon
-            });
-          }
-        }
-      }
-    } catch (error) {
-      console.warn(`Warning: Could not read directory ${normalizedPath}:`, error);
+    // "すべてのエージェント"の場合は再帰的にサブディレクトリも探す
+    if (targetPath === './agents') {
+      collectAgentsRecursively(normalizedPath, agents);
+    } else {
+      collectAgentsFromDirectory(normalizedPath, agents);
     }
     
     // 名前でソート
@@ -232,6 +212,77 @@ export function getAgentsFromPath(targetPath: string): Agent[] {
   } catch (error) {
     console.error('Error getting agents from path:', error);
     return [];
+  }
+}
+
+/**
+ * 指定されたディレクトリから再帰的にエージェントファイルを収集
+ */
+function collectAgentsRecursively(dirPath: string, agents: Agent[]): void {
+  try {
+    const items = readdirSync(dirPath);
+    
+    for (const item of items) {
+      const itemPath = join(dirPath, item);
+      
+      try {
+        const stats = statSync(itemPath);
+        
+        if (stats.isDirectory()) {
+          // サブディレクトリを再帰的に探索
+          collectAgentsRecursively(itemPath, agents);
+        } else if (stats.isFile() && item.endsWith('.md')) {
+          // エージェントファイルを追加
+          const agentName = item.replace('.md', '');
+          const description = extractAgentDescription(itemPath, agentName);
+          const icon = getAgentIcon(agentName);
+          
+          agents.push({
+            id: agentName,
+            name: agentName,
+            description,
+            path: itemPath,
+            icon
+          });
+        }
+      } catch (error) {
+        console.warn(`Warning: Could not process ${item}:`, error);
+      }
+    }
+  } catch (error) {
+    console.warn(`Warning: Could not read directory ${dirPath}:`, error);
+  }
+}
+
+/**
+ * 指定されたディレクトリからエージェントファイルを収集（非再帰）
+ */
+function collectAgentsFromDirectory(dirPath: string, agents: Agent[]): void {
+  try {
+    const files = readdirSync(dirPath);
+    
+    for (const file of files) {
+      if (file.endsWith('.md')) {
+        const filePath = join(dirPath, file);
+        const stats = statSync(filePath);
+        
+        if (stats.isFile()) {
+          const agentName = file.replace('.md', '');
+          const description = extractAgentDescription(filePath, agentName);
+          const icon = getAgentIcon(agentName);
+          
+          agents.push({
+            id: agentName,
+            name: agentName,
+            description,
+            path: filePath,
+            icon
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.warn(`Warning: Could not read directory ${dirPath}:`, error);
   }
 }
 
