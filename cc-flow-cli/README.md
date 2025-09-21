@@ -135,5 +135,5 @@ cc-flow-cli/
 
 ## License
 
-ISC
+MIT
 
