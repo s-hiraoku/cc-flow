@@ -1,12 +1,12 @@
 ---
-description: {DESCRIPTION}
-argument-hint: {ARGUMENT_HINT}
+description: { DESCRIPTION }
+argument-hint: { ARGUMENT_HINT }
 allowed-tools: [Read, Bash]
 ---
 
 # {WORKFLOW_NAME}
 
-Execute multiple sub-agents sequentially using POML workflow orchestration.
+Execute multiple sub-agents sequentially or in parallel to efficiently process complex tasks.
 
 ## Usage
 
@@ -19,11 +19,11 @@ This command processes the task through the following agents in sequence:
 
 Each agent receives the user task and builds upon previous agent results.
 
+######## POML GENERATED INSTRUCTIONS ########
 {POML_GENERATED_INSTRUCTIONS}
+######## POML GENERATED INSTRUCTIONS ########
 
 ## Workflow Execution
-
-The workflow is powered by POML (Prompt Orchestration Markup Language) which:
 
 1. **Defines sequential execution**: Agents execute in the specified order
 2. **Passes context**: Each agent receives the user input and accumulated context
@@ -33,11 +33,13 @@ The workflow is powered by POML (Prompt Orchestration Markup Language) which:
 ## Sub-agent Execution Format
 
 For each agent in the workflow:
+
 ```bash
 claude subagent "{agent-name}" "{user-task}"
 ```
 
 Output format:
+
 ```
 Step {N} of {total}: Execute {agent-name}
 → {agent-name}: [response]
