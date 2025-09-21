@@ -55,7 +55,11 @@ process_templates() {
     agent_array_json="$(create_agent_array_json)"
 
     # POMLからMarkdown実行指示を生成
-    local temp_instructions="/tmp/poml_instructions_$$.md"
+    local temp_instructions
+    if ! temp_instructions=$(mktemp "${TMPDIR:-/tmp}/poml_instructions_XXXXXX.md"); then
+        error_exit "一時指示ファイルの作成に失敗しました"
+    fi
+    trap "rm -f '$temp_instructions'" EXIT
     local poml_result
     poml_result=$(convert_poml_to_markdown "$WORKFLOW_POML_TEMPLATE" "$workflow_name" "$description")
 

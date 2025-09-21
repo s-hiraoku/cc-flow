@@ -18,7 +18,20 @@ check_nodejs_dependencies() {
         error_exit "npmが見つかりません。npmをインストールしてください"
     fi
 
+    if ! command -v npx >/dev/null 2>&1; then
+        error_exit "npxが見つかりません。Node.js 8.2.0以上をインストールしてください"
+    fi
+
     success "Node.js環境の確認が完了しました"
+}
+
+# jq依存関係チェック
+check_jq_dependency() {
+    if ! command -v jq >/dev/null 2>&1; then
+        warn "jqが見つかりません。JSONパースでフォールバック処理を使用します"
+        return 1
+    fi
+    return 0
 }
 
 # SELECTED_AGENTS から JSON 配列文字列を生成
@@ -52,8 +65,14 @@ convert_poml_to_markdown() {
     # ワークフローコンテキストは標準値を使用（必要に応じて拡張）
     local workflow_context="'sequential agent execution'"
 
-    # 一時POMLファイルを作成
-    local temp_poml="/tmp/workflow_${workflow_name}_$$.poml"
+    # 一時POMLファイルを安全に作成
+    local temp_poml
+    if ! temp_poml=$(mktemp "${TMPDIR:-/tmp}/workflow_${workflow_name}_XXXXXX.poml"); then
+        error_exit "一時POMLファイルの作成に失敗しました"
+    fi
+
+    # クリーンアップのためのtrap設定
+    trap "rm -f '$temp_poml'" EXIT
 
     # POMLテンプレートの変数置換を行う
     local processed_poml="$poml_content"
@@ -71,20 +90,26 @@ convert_poml_to_markdown() {
     local poml_output
     local poml_error
 
-    # pomljsでPOMLファイルを処理
-    if ! { poml_output=$(npx pomljs --file "$temp_poml" 2>/tmp/poml_error_$$) && poml_error=$(cat /tmp/poml_error_$$ 2>/dev/null || echo ""); }; then
+    # pomljsでPOMLファイルを処理 (--format dict for stable JSON output)
+    local temp_dir
+    temp_dir="$(dirname "$temp_poml")"
+    local temp_error
+    if ! temp_error=$(mktemp "${TMPDIR:-/tmp}/poml_error_XXXXXX"); then
+        error_exit "一時エラーファイルの作成に失敗しました"
+    fi
+    trap "rm -f '$temp_poml' '$temp_error'" EXIT
+
+    if ! { poml_output=$(npx pomljs --file "$temp_poml" --cwd "$temp_dir" --format dict 2>"$temp_error") && poml_error=$(cat "$temp_error" 2>/dev/null || echo ""); }; then
         local error_msg="$poml_output $poml_error"
-        rm -f "$temp_poml" /tmp/poml_error_$$
         error_exit "pomljsによるPOML変換に失敗しました: $error_msg"
     fi
-    rm -f /tmp/poml_error_$$
 
     # 一時ファイルをクリーンアップ
     rm -f "$temp_poml"
 
     # pomljsのJSON出力からマークダウンコンテンツを抽出
     local markdown_text
-    if command -v jq >/dev/null 2>&1; then
+    if check_jq_dependency; then
         # jqが利用可能な場合、JSONからcontentを抽出
         markdown_text=$(echo "$poml_output" | jq -r '.messages[0].content' 2>/dev/null)
         if [[ -z "$markdown_text" || "$markdown_text" == "null" ]]; then
