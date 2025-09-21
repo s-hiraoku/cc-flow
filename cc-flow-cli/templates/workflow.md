@@ -14,10 +14,8 @@ Execute multiple sub-agents sequentially or in parallel to efficiently process c
 /{WORKFLOW_NAME} "your task or requirement"
 ```
 
-This command processes the task through the following agents in sequence:
-{WORKFLOW_AGENT_LIST}
-
-Each agent receives the user task and builds upon previous agent results.
+This command processes the task through the configured sub-agents in order.
+Each agent receives the user task and builds upon previous agent results (see the generated instructions for the exact sequence).
 
 ######## POML GENERATED INSTRUCTIONS ########
 {POML_GENERATED_INSTRUCTIONS}

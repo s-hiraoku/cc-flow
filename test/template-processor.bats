@@ -20,13 +20,15 @@ argument-hint: {ARGUMENT_HINT}
 
 # {WORKFLOW_NAME}
 
-AGENT_LIST="{WORKFLOW_AGENT_LIST}"
+POML OUTPUT:
+{POML_GENERATED_INSTRUCTIONS}
 EOF
 
     cat > "$TEST_DIR/templates/workflow.poml" << 'EOF'
 <poml>
   <role>{WORKFLOW_NAME}</role>
-  <item for="subagent in {WORKFLOW_AGENT_LIST}">
+  <let name="workflowAgents" value="{WORKFLOW_AGENT_ARRAY}" />
+  <item for="subagent in workflowAgents">
     Execute {{subagent}}
   </item>
 </poml>
@@ -41,6 +43,24 @@ EOF
     
     # テスト用のグローバル変数を設定
     SELECTED_AGENTS=("agent1" "agent2" "agent3")
+
+    # pomljsをモック
+    mkdir -p "$TEST_DIR/mock_bin"
+    cat > "$TEST_DIR/mock_bin/pomljs" <<'EOF'
+#!/bin/bash
+echo '{"messages":[{"content":"# Generated Markdown\n\nThis is generated from POML."}]}'
+EOF
+    chmod +x "$TEST_DIR/mock_bin/pomljs"
+
+    cat > "$TEST_DIR/mock_bin/npx" <<'EOF'
+#!/bin/bash
+if [[ "$1" == "pomljs" ]]; then
+    shift
+    exec "$TEST_DIR/mock_bin/pomljs" "$@"
+fi
+EOF
+    chmod +x "$TEST_DIR/mock_bin/npx"
+    export PATH="$TEST_DIR/mock_bin:$PATH"
 }
 
 teardown() {
@@ -48,28 +68,28 @@ teardown() {
     rm -rf "$TEST_DIR"
 }
 
-@test "create_agent_list_json creates correct JSON format" {
+@test "create_agent_array_json creates correct JSON format" {
     SELECTED_AGENTS=("spec-init" "spec-design" "spec-impl")
     
-    result=$(create_agent_list_json)
+    result=$(create_agent_array_json)
     expected="['spec-init', 'spec-design', 'spec-impl']"
     
     [ "$result" = "$expected" ]
 }
 
-@test "create_agent_list_json handles single agent" {
+@test "create_agent_array_json handles single agent" {
     SELECTED_AGENTS=("single-agent")
     
-    result=$(create_agent_list_json)
+    result=$(create_agent_array_json)
     expected="['single-agent']"
     
     [ "$result" = "$expected" ]
 }
 
-@test "create_agent_list_json handles empty array" {
+@test "create_agent_array_json handles empty array" {
     SELECTED_AGENTS=()
     
-    result=$(create_agent_list_json)
+    result=$(create_agent_array_json)
     expected="[]"
     
     [ "$result" = "$expected" ]
@@ -82,7 +102,7 @@ teardown() {
     [ -n "$WORKFLOW_MD_TEMPLATE" ]
     [ -n "$WORKFLOW_POML_TEMPLATE" ]
     [[ "$WORKFLOW_MD_TEMPLATE" =~ "{WORKFLOW_NAME}" ]]
-    [[ "$WORKFLOW_POML_TEMPLATE" =~ "{WORKFLOW_AGENT_LIST}" ]]
+    [[ "$WORKFLOW_POML_TEMPLATE" =~ "{WORKFLOW_AGENT_ARRAY}" ]]
 }
 
 @test "process_templates replaces variables correctly" {
@@ -96,11 +116,13 @@ teardown() {
     # MD テンプレートの変数置換を確認
     [[ "$WORKFLOW_MD_CONTENT" =~ "test-workflow" ]]
     [[ "$WORKFLOW_MD_CONTENT" =~ "Execute test workflow" ]]
-    [[ "$WORKFLOW_MD_CONTENT" =~ "AGENT_LIST=\"agent1 agent2\"" ]]
-    
+    [[ "$WORKFLOW_MD_CONTENT" =~ "POML OUTPUT" ]]
+    [[ "$WORKFLOW_MD_CONTENT" != *"{POML_GENERATED_INSTRUCTIONS}"* ]]
+
     # POML テンプレートの変数置換を確認
     [[ "$WORKFLOW_POML_CONTENT" =~ "test-workflow" ]]
     [[ "$WORKFLOW_POML_CONTENT" =~ "['agent1', 'agent2']" ]]
+    [[ "$WORKFLOW_POML_CONTENT" != *"{WORKFLOW_AGENT_ARRAY}"* ]]
 }
 
 @test "process_templates sets workflow name globally" {
@@ -130,6 +152,6 @@ teardown() {
     poml_content=$(cat ".claude/commands/poml/test-workflow.poml")
     
     [[ "$md_content" =~ "test-workflow" ]]
-    [[ "$md_content" =~ "agent1 agent2" ]]
     [[ "$poml_content" =~ "['agent1', 'agent2']" ]]
+    [[ "$poml_content" =~ "workflowAgents" ]]
 }

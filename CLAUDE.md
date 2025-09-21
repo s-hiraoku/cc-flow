@@ -115,7 +115,7 @@ ARGUMENTS="$*"
 
 ### POML Integration
 
-- **Templates**: Use `{WORKFLOW_AGENT_LIST}` placeholder for agent arrays
+- **Templates**: Use `{WORKFLOW_AGENT_ARRAY}` placeholder for agent arrays
 - **Syntax**: Arrays must use single quotes: `['agent1', 'agent2']`
 - **Variables**: Use `{{variable}}` for POML context variables
 - **Loops**: `<item for="item in ['a', 'b']">{{item}}</item>`

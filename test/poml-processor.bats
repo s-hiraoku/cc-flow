@@ -136,36 +136,34 @@ EOF
     [[ "$result" =~ "--context \"workflow_name=my-workflow\"" ]]
 }
 
-# process_poml_to_markdown 関数のテスト
-@test "process_poml_to_markdown processes valid POML file" {
+# convert_poml_file_to_markdown 関数のテスト
+@test "convert_poml_file_to_markdown converts valid POML file" {
     local input_file=".claude/commands/poml/test-workflow.poml"
     local output_file="$TEST_DIR/output.md"
-    local context_vars="--context \"workflow_name=test\" --context \"user_input=hello\""
-    
-    run process_poml_to_markdown "$input_file" "$output_file" "$context_vars"
-    
+
+    run convert_poml_file_to_markdown "$input_file" "$output_file" "test-workflow" "test context"
+
     [ "$status" -eq 0 ]
     [ -f "$output_file" ]
     [[ "$output" =~ "マークダウンファイルを生成しました" ]]
-    
-    # 出力ファイルの内容を確認
+
     content=$(cat "$output_file")
     [[ "$content" =~ "Generated Markdown" ]]
 }
 
-@test "process_poml_to_markdown fails with non-existent file" {
+@test "convert_poml_file_to_markdown fails with non-existent file" {
     local input_file="non-existent.poml"
     local output_file="$TEST_DIR/output.md"
-    
-    run process_poml_to_markdown "$input_file" "$output_file" ""
-    
+
+    run convert_poml_file_to_markdown "$input_file" "$output_file" "missing" ""
+
     [ "$status" -eq 1 ]
     [[ "$output" =~ "ファイルが見つかりません" ]]
 }
 
-@test "process_poml_to_markdown requires valid arguments" {
-    run process_poml_to_markdown "" ""
-    
+@test "convert_poml_file_to_markdown requires valid arguments" {
+    run convert_poml_file_to_markdown "" ""
+
     [ "$status" -eq 1 ]
     [[ "$output" =~ "エラー" ]]
 }
@@ -255,9 +253,7 @@ EOF
 @test "process_multiple_poml_files processes multiple POML files" {
     local poml_dir="$TEST_DIR/multiple_poml"
     local output_dir="$TEST_DIR/output"
-    local context_vars="--context \"test=value\""
-    
-    run process_multiple_poml_files "$poml_dir" "$output_dir" "$context_vars"
+    run process_multiple_poml_files "$poml_dir" "$output_dir"
     
     [ "$status" -eq 0 ]
     [ -f "$output_dir/workflow1.md" ]
@@ -272,7 +268,7 @@ EOF
     
     mkdir -p "$poml_dir"
     
-    run process_multiple_poml_files "$poml_dir" "$output_dir" ""
+    run process_multiple_poml_files "$poml_dir" "$output_dir"
     
     [ "$status" -eq 0 ]
     [[ "$output" =~ "POMLファイルが見つかりませんでした" ]]
@@ -282,7 +278,7 @@ EOF
     local poml_dir="$TEST_DIR/non_existent"
     local output_dir="$TEST_DIR/output"
     
-    run process_multiple_poml_files "$poml_dir" "$output_dir" ""
+    run process_multiple_poml_files "$poml_dir" "$output_dir"
     
     [ "$status" -eq 1 ]
     [[ "$output" =~ "ディレクトリが見つかりません" ]]
@@ -297,10 +293,10 @@ EOF
     # 2. コンテキスト作成
     SELECTED_AGENTS=("agent1" "agent2")
     local context_vars=$(create_workflow_context "integration-test" "integration context")
-    
+
     # 3. POML処理
     local output_file="$TEST_DIR/integration-output.md"
-    process_poml_to_markdown "$poml_file" "$output_file" "$context_vars"
+    convert_poml_file_to_markdown "$poml_file" "$output_file" "integration-test" "$context_vars"
     
     # 4. 結果確認
     [ -f "$output_file" ]

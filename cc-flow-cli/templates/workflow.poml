@@ -8,9 +8,11 @@
   <let name="workflowContext" value="{WORKFLOW_CONTEXT}" />
   <let name="workflowName" value="{WORKFLOW_NAME}" />
 
-  <role>{{workflowName}} Workflow Orchestrator</role>
+  <role captionStyle="bold">{{workflowName}} Workflow Orchestrator</role>
 
-  <task>
+  <task captionStyle="hidden">
+    ## POML Generated Instructions
+
     You are a {{workflowName}} orchestrator that must delegate tasks to specialized sub-agents sequentially.
 
     User Instruction: $ARGUMENTS
@@ -19,8 +21,7 @@
     IMPORTANT: You MUST execute each sub-agent in the following order using the Task tool.
     DO NOT attempt to complete these tasks yourself. Instead, delegate each task to its specialized sub-agent.
 
-    Execute the following sub-agents in sequence:
-
+    ### Sub-agent Execution Order
     <list for="agent in workflowAgents">
       <item>
         **Step {{loop.index + 1}} of {{loop.length}}: {{agent}}**
@@ -33,7 +34,7 @@
       </item>
     </list>
 
-    **Final Step: Consolidation**
+    ### Final Consolidation
     After all sub-agents have completed their tasks:
     1. Aggregate all sub-agent responses
     2. Provide a comprehensive summary of the workflow results
@@ -46,8 +47,8 @@
     ✅ Workflow completed
   </task>
 
-  <example>
-    Example workflow execution:
+  <example captionStyle="bold">
+    ### Example Workflow Execution
     <list for="agent in workflowAgents">
       <item>
         Step {{loop.index + 1}}: Execute {{agent}}
@@ -57,7 +58,8 @@
     </list>
   </example>
 
-  <stepwiseInstructions>
+  <stepwiseInstructions captionStyle="bold">
+    ### Stepwise Instructions
     <list for="agent in workflowAgents">
       <item>
         Step {{loop.index + 1}}: Launch {{agent}} sub-agent

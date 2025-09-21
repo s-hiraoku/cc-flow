@@ -277,10 +277,11 @@ process_templates <agent_dir>
    - `{DESCRIPTION}` -> 動的生成された説明
    - `{ARGUMENT_HINT}` -> "[context]"
    - `{WORKFLOW_NAME}` -> 生成されたワークフロー名
-   - `{WORKFLOW_AGENT_LIST}` -> スペース区切りのエージェントリスト
+   - `{POML_GENERATED_INSTRUCTIONS}` -> pomljsで生成されたワークフロー手順
 4. workflow.pomlテンプレートの変数置換:
    - `{WORKFLOW_NAME}` -> 生成されたワークフロー名
-   - `{WORKFLOW_AGENT_LIST}` -> JSON配列形式のエージェントリスト
+   - `{WORKFLOW_AGENT_ARRAY}` -> JSON配列形式のエージェントリスト
+   - `{WORKFLOW_CONTEXT}` -> `'sequential agent execution'`
    - その他のプレースホルダーを空文字で置換
 
 **変数置換パターン**:
@@ -870,36 +871,32 @@ check_nodejs_dependencies
 
 **戻り値**: なし (成功時は処理継続)
 
-#### 5.4.2 process_poml_to_markdown()（任意）
-**目的**: POMLファイルを処理してマークダウンファイルを生成する（既定フローでは未使用）
+#### 5.4.2 convert_poml_file_to_markdown()
+**目的**: POMLファイルを読み込み、`convert_poml_to_markdown` を介した正規ルートでMarkdownへ変換する
 
 **構文**: 
 ```bash
-process_poml_to_markdown <poml_file> <output_file> [context_vars]
+convert_poml_file_to_markdown <poml_file> <output_file> [workflow_name] [user_context]
 ```
 
 **パラメータ**:
 - `poml_file` (必須): 入力POMLファイルパス
 - `output_file` (必須): 出力マークダウンファイルパス
-- `context_vars` (オプション): コンテキスト変数文字列
+- `workflow_name` (オプション): POMLに適用するワークフロー名。省略時はファイル名から推測
+- `user_context` (オプション): 追加コンテキスト文字列（将来拡張用）
 
 **処理フロー**:
-1. 引数の妥当性検証
-2. POMLファイルの存在確認
-3. pomljsコマンドの構築（コンテキスト変数含む）
-4. pomljsの実行とエラーハンドリング
-5. 出力ファイルへの結果書き込み
-
-**コマンド例**:
-```bash
-npx pomljs --file input.poml --context "var1=value1" --context "var2=value2"
-```
+1. 引数の妥当性検証と入力ファイル存在確認
+2. ワークフロー名を決定（引数またはファイル名）
+3. POMLファイル内容を読み込み
+4. `convert_poml_to_markdown` を呼び出してMarkdown文字列を生成
+5. `safe_write_file` で出力ファイルに書き込み、成功メッセージを表示
 
 **エラーハンドリング**:
-- 引数不正: `validate_args`によるチェック
-- POMLファイル不存在: `check_file`によるチェック
-- pomljs実行失敗: `error_exit`でプロセス終了
-- 出力ファイル書き込み失敗: `error_exit`でプロセス終了
+- 引数不正: `validate_args`が `error_exit`
+- POMLファイル不存在: `check_file`が `error_exit`
+- 変換失敗: `convert_poml_to_markdown` 内で `error_exit`
+- 出力ファイル書き込み失敗: `error_exit`
 
 **戻り値**: なし (成功時はファイル生成)
 
@@ -1064,20 +1061,20 @@ process_multiple_poml_files <poml_dir> <output_dir> [context_vars]
 check_nodejs_dependencies
 
 # POMLファイルを処理
-process_poml_to_markdown "input.poml" "output.md" "--context \"var=value\""
+convert_poml_file_to_markdown "input.poml" "output.md" "input" "user context"
 
 # ワークフロー用POML処理
 process_workflow_poml "spec-workflow" "create todo app"
 
 # 詳細制御の例
 context_vars=$(create_workflow_context "spec-workflow" "user input")
-process_poml_to_markdown "spec-workflow.poml" "spec-workflow.md" "$context_vars"
+convert_poml_file_to_markdown "spec-workflow.poml" "spec-workflow.md" "spec-workflow" "$context_vars"
 ```
 
 #### バッチ処理
 ```bash
 # 複数ファイル処理
-process_multiple_poml_files ".claude/commands/poml" ".claude/commands" "--context \"batch=true\""
+process_multiple_poml_files ".claude/commands/poml" ".claude/commands"
 ```
 
 ### 5.6 技術仕様

@@ -25,75 +25,36 @@ check_nodejs_dependencies() {
     success "Node.js環境の確認が完了しました"
 }
 
-# POMMLファイルからマークダウンを生成
-process_poml_to_markdown() {
-    local poml_file="$1"
-    local output_file="$2"
-    local context_vars="$3"
-    
-    # 引数の検証
-    validate_args "$poml_file" "POMLファイルパス"
-    validate_args "$output_file" "出力ファイルパス"
-    
-    # POMLファイルの存在確認
-    check_file "$poml_file" "POMLファイル"
-    
-    info "POMMLファイルを処理しています: $poml_file"
-    
-    # POMLプロセッサーコマンド (内部実装)
-    local poml_command="echo '# Generated workflow from POML template'"
-    
-    # コンテキスト変数が指定されている場合は追加
-    if [[ -n "$context_vars" ]]; then
-        poml_command="$poml_command $context_vars"
-    fi
-    
-    # POMMLファイルを処理してマークダウンを生成
-    local poml_output
-    if ! poml_output=$(eval "$poml_command" 2>&1); then
-        error_exit "POMLプロセッサーの実行に失敗しました: $poml_output"
-    fi
-    
-    # JSON出力からメッセージ内容を抽出
-    local markdown_content
-    if [[ "$poml_output" =~ \"content\":\"([^\"]*) ]]; then
-        # JSONから実際のコンテンツを抽出しようとする
-        markdown_content=$(echo "$poml_output" | jq -r '.messages[0].content' 2>/dev/null || echo "$poml_output")
-    else
-        markdown_content="$poml_output"
-    fi
-    
-    # 出力ファイルに書き込み
-    if ! echo "$markdown_content" > "$output_file" 2>/dev/null; then
-        error_exit "出力ファイル '$output_file' への書き込みに失敗しました"
-    fi
-    
-    success "マークダウンファイルを生成しました: $output_file"
+# SELECTED_AGENTS から JSON 配列文字列を生成
+create_agent_array_json() {
+    local first=true
+    printf '['
+    for agent in "${SELECTED_AGENTS[@]}"; do
+        if [[ "$first" == true ]]; then
+            first=false
+        else
+            printf ', '
+        fi
+        printf "'%s'" "$agent"
+    done
+    printf ']'
 }
 
 # POMLファイルをMarkdownに変換（内部プロセッサーを使用）
 convert_poml_to_markdown() {
     local poml_content="$1"
-    local agent_list_space="$2"
-    local workflow_name="$3"
-    local user_context="$4"
+    local workflow_name="$2"
+    local user_context="$3"
 
     # Node.js環境をチェック（サイレント）
     check_nodejs_dependencies >/dev/null 2>&1
 
-    # エージェントリストを正式なPOML配列形式に変換
-    local agent_array="["
-    local first=true
-    for agent in $agent_list_space; do
-        if [[ "$first" == "true" ]]; then
-            first=false
-        else
-            agent_array+=", "
-        fi
-        # POMLでは文字列はシングルクォートを推奨
-        agent_array+="'$agent'"
-    done
-    agent_array+="]"
+    # エージェントリストを唯一のソースから生成
+    local agent_array
+    agent_array="$(create_agent_array_json)"
+
+    # ワークフローコンテキストは標準値を使用（必要に応じて拡張）
+    local workflow_context="'sequential agent execution'"
 
     # 一時POMLファイルを作成
     local temp_poml="/tmp/workflow_${workflow_name}_$$.poml"
@@ -101,7 +62,7 @@ convert_poml_to_markdown() {
     # POMLテンプレートの変数置換を行う
     local processed_poml="$poml_content"
     processed_poml="${processed_poml//\{WORKFLOW_AGENT_ARRAY\}/$agent_array}"
-    processed_poml="${processed_poml//\{WORKFLOW_CONTEXT\}/'sequential agent execution'}"
+    processed_poml="${processed_poml//\{WORKFLOW_CONTEXT\}/$workflow_context}"
     processed_poml="${processed_poml//\{WORKFLOW_NAME\}/'$workflow_name'}"
 
     # 処理済みPOMLファイルを保存
@@ -147,6 +108,41 @@ convert_poml_to_markdown() {
     printf '%s\n' "$markdown_text"
 }
 
+# ファイルからPOMLを読み込んでMarkdownに変換
+convert_poml_file_to_markdown() {
+    local poml_file="$1"
+    local output_file="$2"
+    local workflow_name="$3"
+    local user_context="$4"
+
+    validate_args "$poml_file" "POMLファイルパス"
+    validate_args "$output_file" "出力ファイルパス"
+    check_file "$poml_file" "POMLファイル"
+
+    info "POMLファイルを変換しています: $poml_file"
+
+    local effective_workflow_name="$workflow_name"
+    if [[ -z "$effective_workflow_name" ]]; then
+        effective_workflow_name="$(basename "$poml_file" .poml)"
+    fi
+
+    local poml_content
+    if ! poml_content=$(cat "$poml_file" 2>/dev/null); then
+        error_exit "POMLファイル '$poml_file' の読み込みに失敗しました"
+    fi
+
+    local markdown_output
+    if ! markdown_output=$(convert_poml_to_markdown "$poml_content" "$effective_workflow_name" "$user_context"); then
+        error_exit "POMLからMarkdownへの変換に失敗しました"
+    fi
+
+    if ! safe_write_file "$output_file" "$markdown_output"; then
+        error_exit "出力ファイル '$output_file' への書き込みに失敗しました"
+    fi
+
+    success "マークダウンファイルを生成しました: $output_file"
+}
+
 # ワークフロー用のコンテキスト変数を生成
 create_workflow_context() {
     local workflow_name="$1"
@@ -179,17 +175,11 @@ create_workflow_context() {
 process_workflow_poml() {
     local workflow_name="$1"
     local user_context="${2:-default_context}"
-    
-    # ファイルパスを構築
+
     local poml_file=".claude/commands/poml/$workflow_name.poml"
     local output_file=".claude/commands/$workflow_name.md"
-    
-    # コンテキスト変数を生成
-    local context_vars
-    context_vars=$(create_workflow_context "$workflow_name" "$user_context")
-    
-    # POMLファイルを処理
-    process_poml_to_markdown "$poml_file" "$output_file" "$context_vars"
+
+    convert_poml_file_to_markdown "$poml_file" "$output_file" "$workflow_name" "$user_context"
 }
 
 # POML処理の事前チェック
@@ -235,7 +225,7 @@ show_poml_processing_info() {
     echo "🔧 POML処理詳細:"
     echo "   入力: $poml_file"
     echo "   出力: $output_file"
-    echo "   処理エンジン: 内部プロセッサー"
+    echo "   処理エンジン: pomljs"
     
     # POMLファイルのサイズ情報
     if [[ -f "$poml_file" ]]; then
@@ -251,7 +241,6 @@ show_poml_processing_info() {
 process_multiple_poml_files() {
     local poml_dir="$1"
     local output_dir="$2"
-    local context_vars="$3"
     
     # ディレクトリの存在確認
     check_directory "$poml_dir" "POMLディレクトリ"
@@ -278,7 +267,7 @@ process_multiple_poml_files() {
         
         echo ""
         progress "処理中: $basename"
-        process_poml_to_markdown "$poml_file" "$output_file" "$context_vars"
+        convert_poml_file_to_markdown "$poml_file" "$output_file" "$basename" ""
     done
     
     success "全てのPOMLファイルの処理が完了しました"

@@ -30,19 +30,6 @@ load_templates() {
     WORKFLOW_POML_TEMPLATE="$workflow_poml_template"
 }
 
-# エージェントリストをJSON配列形式に変換
-create_agent_list_json() {
-    local json="["
-    
-    for i in "${!SELECTED_AGENTS[@]}"; do
-        [[ $i -gt 0 ]] && json+=", "
-        json+="'${SELECTED_AGENTS[$i]}'"
-    done
-    
-    json+="]"
-    echo "$json"
-}
-
 # プレースホルダーを空白有無どちらの形式でも置換
 replace_placeholder_variants() {
     local content="$1"
@@ -62,15 +49,15 @@ process_templates() {
     local workflow_name="${WORKFLOW_NAME:-${agent_dir}-workflow}"
     local description="${WORKFLOW_PURPOSE:-Execute $agent_dir workflow}"
     local argument_hint="[context]"
-    local agent_list_json
-    
-    # エージェントリストをスペース区切り形式に変換（POMLでシンプルに処理するため）
-    local agent_list_space="${SELECTED_AGENTS[*]}"
+    local agent_array_json
+
+    # エージェント配列JSONを唯一のソースとして生成
+    agent_array_json="$(create_agent_array_json)"
 
     # POMLからMarkdown実行指示を生成
     local temp_instructions="/tmp/poml_instructions_$$.md"
     local poml_result
-    poml_result=$(convert_poml_to_markdown "$WORKFLOW_POML_TEMPLATE" "$agent_list_space" "$workflow_name" "$description")
+    poml_result=$(convert_poml_to_markdown "$WORKFLOW_POML_TEMPLATE" "$workflow_name" "$description")
 
     # 結果をファイルに書き込み
     echo "$poml_result" > "$temp_instructions"
@@ -80,9 +67,6 @@ process_templates() {
     WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "DESCRIPTION" "$description")
     WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "ARGUMENT_HINT" "$argument_hint")
     WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "WORKFLOW_NAME" "$workflow_name")
-
-    # エージェントリストをテンプレートに挿入
-    WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "WORKFLOW_AGENT_LIST" "$agent_list_space")
 
     # POMLで生成された実行指示を挿入（シンプルな文字列置換）
     local poml_instructions=$(cat "$temp_instructions")
@@ -94,7 +78,8 @@ process_templates() {
     # workflow.pomlテンプレートの変数置換
     WORKFLOW_POML_CONTENT="$WORKFLOW_POML_TEMPLATE"
     WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_NAME" "$workflow_name")
-    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_AGENT_LIST" "$agent_list_json")
+    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_AGENT_ARRAY" "$agent_array_json")
+    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_CONTEXT" "'sequential agent execution'")
     WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_TYPE_DEFINITIONS" "")
     WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_SPECIFIC_INSTRUCTIONS" "")
     WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "ACCUMULATED_CONTEXT" "")
