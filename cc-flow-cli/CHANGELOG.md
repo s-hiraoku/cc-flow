@@ -15,6 +15,31 @@
 - **Temporary Files**: Secure temporary file creation using mktemp with proper cleanup
 - **POML Integration**: Added --cwd and --format dict flags to pomljs for stable output
 
+## [0.0.14] - 2025-09-21
+
+### Major Features
+- **POML Integration**: Complete implementation of POML-based workflow processing
+- **Template System**: Redesigned workflow templates with proper POML syntax
+- **Agent Processing**: Enhanced agent management and workflow generation
+
+### New Features
+- **POML Processor**: Added convert_poml_to_markdown functionality with pomljs integration
+- **Template Redesign**: Updated workflow.poml templates with {WORKFLOW_AGENT_ARRAY} placeholders
+- **JSON Array Generation**: Implemented create_agent_array_json for proper POML formatting
+- **Workflow Context**: Added support for dynamic workflow context variables
+
+### Improvements
+- **Script Processing**: Enhanced template-processor.sh with POML support
+- **Agent Arrays**: Proper JSON array formatting for POML workflow execution
+- **Context Passing**: Improved workflow context and variable injection
+- **Template Variables**: Standardized placeholder replacement with consistent naming
+
+### Technical Changes
+- **POML Workflow**: Converted from internal processing to formal POML files
+- **Sub-agent Execution**: Enabled sequential agent execution according to POML instructions
+- **Template Conversion**: Convert agent selections into proper POML workflow files
+- **Execution Flow**: Generated workflows now call claude subagent for each step
+
 ## [0.0.13] - 2025-09-20
 
 ### Major Improvements
