@@ -44,7 +44,7 @@ create_agent_array_json() {
         else
             printf ', '
         fi
-        printf "'%s'" "$agent"
+        printf '"%s"' "$agent"
     done
     printf ']'
 }
@@ -53,7 +53,7 @@ create_agent_array_json() {
 convert_poml_to_markdown() {
     local poml_content="$1"
     local workflow_name="$2"
-    local user_context="$3"
+    local workflow_purpose="$3"
 
     # Node.js環境をチェック（サイレント）
     check_nodejs_dependencies >/dev/null 2>&1
@@ -63,49 +63,61 @@ convert_poml_to_markdown() {
     agent_array="$(create_agent_array_json)"
 
     # ワークフローコンテキストは標準値を使用（必要に応じて拡張）
-    local workflow_context="'sequential agent execution'"
+    local workflow_context="sequential agent execution"
 
     # 一時POMLファイルを安全に作成
     local temp_poml
-    if ! temp_poml=$(mktemp "${TMPDIR:-/tmp}/workflow_${workflow_name}_XXXXXX.poml"); then
-        error_exit "一時POMLファイルの作成に失敗しました"
+    local template_root="$LIB_SCRIPT_DIR/../../templates"
+
+    local temp_dir
+    if ! temp_dir=$(mktemp -d "${TMPDIR:-/tmp}/workflow_${workflow_name}_XXXXXX"); then
+        error_exit "一時ディレクトリの作成に失敗しました"
     fi
 
-    # クリーンアップのためのtrap設定
-    trap "rm -f '$temp_poml'" EXIT
+    local temp_poml="$temp_dir/workflow.poml"
 
     # POMLテンプレートの変数置換を行う
     local processed_poml="$poml_content"
-    processed_poml="${processed_poml//\{WORKFLOW_AGENT_ARRAY\}/$agent_array}"
-    processed_poml="${processed_poml//\{WORKFLOW_CONTEXT\}/$workflow_context}"
-
-    local escaped_workflow_name
-    escaped_workflow_name="${workflow_name//\'/\\\'}"
-    processed_poml="${processed_poml//\{WORKFLOW_NAME\}/$escaped_workflow_name}"
 
     # 処理済みPOMLファイルを保存
     echo "$processed_poml" > "$temp_poml"
 
+    # include 参照を解決するため、partials ディレクトリをコピー
+    if [[ -d "$template_root/partials" ]]; then
+        cp -R "$template_root/partials" "$temp_dir/"
+    fi
+
     # pomljsを使ってPOMLをマークダウンに変換
     local poml_output
-    local poml_error
+    local temp_error="$temp_dir/poml_error.log"
+    trap "rm -rf '$temp_dir'" EXIT
 
-    # pomljsでPOMLファイルを処理 (--format dict for stable JSON output)
-    local temp_dir
-    temp_dir="$(dirname "$temp_poml")"
-    local temp_error
-    if ! temp_error=$(mktemp "${TMPDIR:-/tmp}/poml_error_XXXXXX"); then
-        error_exit "一時エラーファイルの作成に失敗しました"
-    fi
-    trap "rm -f '$temp_poml' '$temp_error'" EXIT
+    local context_file="$temp_dir/context.json"
+    NODE_CONTEXT_PATH="$context_file" \
+    NODE_WORKFLOW_NAME="$workflow_name" \
+    NODE_WORKFLOW_CONTEXT="$workflow_context" \
+    NODE_WORKFLOW_PURPOSE="${workflow_purpose:-}" \
+    NODE_WORKFLOW_AGENTS_JSON="$agent_array" \
+    node - <<'NODE'
+const fs = require('fs');
+const data = {
+  workflowName: process.env.NODE_WORKFLOW_NAME,
+  workflowContext: process.env.NODE_WORKFLOW_CONTEXT,
+  workflowPurpose: process.env.NODE_WORKFLOW_PURPOSE || '',
+  workflowAgents: JSON.parse(process.env.NODE_WORKFLOW_AGENTS_JSON)
+};
+fs.writeFileSync(process.env.NODE_CONTEXT_PATH, JSON.stringify(data));
+NODE
 
-    if ! { poml_output=$(npx pomljs --file "$temp_poml" --cwd "$temp_dir" --format dict 2>"$temp_error") && poml_error=$(cat "$temp_error" 2>/dev/null || echo ""); }; then
-        local error_msg="$poml_output $poml_error"
-        error_exit "pomljsによるPOML変換に失敗しました: $error_msg"
+    if ! poml_output=$(npx pomljs --file "$temp_poml" --cwd "$temp_dir" --format dict --context-file "$context_file" 2>"$temp_error"); then
+        local poml_error
+        poml_error=$(cat "$temp_error" 2>/dev/null || echo "")
+        error_exit "pomljsによるPOML変換に失敗しました: $poml_error"
     fi
 
     # 一時ファイルをクリーンアップ
-    rm -f "$temp_poml"
+    rm -rf "$temp_dir"
+    trap - EXIT
 
     # pomljsのJSON出力からマークダウンコンテンツを抽出
     local markdown_text

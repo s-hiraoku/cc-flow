@@ -1,0 +1,1 @@
+Refactored workflow template into modular partials and updated poml conversion to assemble a temp workspace and pass context via pomljs --context-file JSON, enabling direct use of workflowName/workflowAgents/workflowPurpose variables.

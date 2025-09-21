@@ -26,11 +26,10 @@ EOF
 
     cat > "$TEST_DIR/templates/workflow.poml" << 'EOF'
 <poml>
-  <role>{WORKFLOW_NAME}</role>
-  <let name="workflowAgents" value="{WORKFLOW_AGENT_ARRAY}" />
-  <item for="subagent in workflowAgents">
-    Execute {{subagent}}
-  </item>
+  <role>{{workflowName}}</role>
+  <list for="subagent in workflowAgents">
+    <item>Execute {{subagent}}</item>
+  </list>
 </poml>
 EOF
     
@@ -72,7 +71,7 @@ teardown() {
     SELECTED_AGENTS=("spec-init" "spec-design" "spec-impl")
     
     result=$(create_agent_array_json)
-    expected="['spec-init', 'spec-design', 'spec-impl']"
+    expected='["spec-init", "spec-design", "spec-impl"]'
     
     [ "$result" = "$expected" ]
 }
@@ -81,7 +80,7 @@ teardown() {
     SELECTED_AGENTS=("single-agent")
     
     result=$(create_agent_array_json)
-    expected="['single-agent']"
+    expected='["single-agent"]'
     
     [ "$result" = "$expected" ]
 }
@@ -102,7 +101,7 @@ teardown() {
     [ -n "$WORKFLOW_MD_TEMPLATE" ]
     [ -n "$WORKFLOW_POML_TEMPLATE" ]
     [[ "$WORKFLOW_MD_TEMPLATE" =~ "{WORKFLOW_NAME}" ]]
-    [[ "$WORKFLOW_POML_TEMPLATE" =~ "{WORKFLOW_AGENT_ARRAY}" ]]
+    [[ "$WORKFLOW_POML_TEMPLATE" =~ "workflowAgents" ]]
 }
 
 @test "process_templates replaces variables correctly" {
@@ -115,14 +114,13 @@ teardown() {
     
     # MD テンプレートの変数置換を確認
     [[ "$WORKFLOW_MD_CONTENT" =~ "test-workflow" ]]
-    [[ "$WORKFLOW_MD_CONTENT" =~ "Execute test workflow" ]]
     [[ "$WORKFLOW_MD_CONTENT" =~ "POML OUTPUT" ]]
+    [[ "$WORKFLOW_MD_CONTENT" =~ "Generated Markdown" ]]
     [[ "$WORKFLOW_MD_CONTENT" != *"{POML_GENERATED_INSTRUCTIONS}"* ]]
 
     # POML テンプレートの変数置換を確認
-    [[ "$WORKFLOW_POML_CONTENT" =~ "test-workflow" ]]
-    [[ "$WORKFLOW_POML_CONTENT" =~ "['agent1', 'agent2']" ]]
-    [[ "$WORKFLOW_POML_CONTENT" != *"{WORKFLOW_AGENT_ARRAY}"* ]]
+    [[ "$WORKFLOW_POML_CONTENT" =~ "<role>{{workflowName}}</role>" ]]
+    [[ "$WORKFLOW_POML_CONTENT" =~ "<list for=\"subagent in workflowAgents\">" ]]
 }
 
 @test "process_templates sets workflow name globally" {
@@ -152,6 +150,7 @@ teardown() {
     poml_content=$(cat ".claude/commands/poml/test-workflow.poml")
     
     [[ "$md_content" =~ "test-workflow" ]]
-    [[ "$poml_content" =~ "['agent1', 'agent2']" ]]
-    [[ "$poml_content" =~ "workflowAgents" ]]
+    [[ "$md_content" =~ "Generated Markdown" ]]
+    [[ "$poml_content" =~ "<role>{{workflowName}}</role>" ]]
+    [[ "$poml_content" =~ "<list for=\"subagent in workflowAgents\">" ]]
 }

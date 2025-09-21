@@ -1,0 +1,17 @@
+<stepwiseInstructions captionStyle="bold">
+  <section caption="Stepwise Instructions">
+    <list for="agent in workflowAgents">
+      <item>
+        <paragraph>Step {{loop.index + 1}}: Launch {{agent}} sub-agent</paragraph>
+        <paragraph>- Use Task tool with subagent_type: "{{agent}}"</paragraph>
+        <paragraph>- Pass user task: $ARGUMENTS</paragraph>
+        <paragraph>- Wait for completion before next step</paragraph>
+      </item>
+    </list>
+    <list>
+      <item>
+        <paragraph>Final Step: Consolidate all sub-agent responses into comprehensive summary</paragraph>
+      </item>
+    </list>
+  </section>
+</stepwiseInstructions>

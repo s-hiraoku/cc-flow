@@ -49,11 +49,6 @@ process_templates() {
     local workflow_name="${WORKFLOW_NAME:-${agent_dir}-workflow}"
     local description="${WORKFLOW_PURPOSE:-Execute $agent_dir workflow}"
     local argument_hint="[context]"
-    local agent_array_json
-
-    # エージェント配列JSONを唯一のソースとして生成
-    agent_array_json="$(create_agent_array_json)"
-
     # POMLからMarkdown実行指示を生成
     local temp_instructions
     if ! temp_instructions=$(mktemp "${TMPDIR:-/tmp}/poml_instructions_XXXXXX.md"); then
@@ -79,14 +74,8 @@ process_templates() {
     # 一時ファイルをクリーンアップ
     rm -f "$temp_instructions"
     
-    # workflow.pomlテンプレートの変数置換
+    # workflow.pomlテンプレートはプレーンテキストのまま保持
     WORKFLOW_POML_CONTENT="$WORKFLOW_POML_TEMPLATE"
-    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_NAME" "$workflow_name")
-    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_AGENT_ARRAY" "$agent_array_json")
-    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_CONTEXT" "'sequential agent execution'")
-    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_TYPE_DEFINITIONS" "")
-    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_SPECIFIC_INSTRUCTIONS" "")
-    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "ACCUMULATED_CONTEXT" "")
     
     # ワークフロー名をグローバル変数に設定
     WORKFLOW_NAME="$workflow_name"

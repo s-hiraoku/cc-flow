@@ -15,11 +15,13 @@ allowed-tools: [Read, Bash]
 
 You are a demo-workflow orchestrator that delegates specialized work to sub-agents. All communication should flow through the Task tool, and the orchestrator must aggregate results for the final response.
 
+Purpose: デモ用のスラッシュコマンドです
+
+- architecture-designer
+
 - code-generator
 
 - deployment-manager
-
-- architecture-designer
 
 `/demo-workflow "your task or requirement"`
 
@@ -40,27 +42,35 @@ Output format:
 
 **Example:**
 
-- Step 1: Execute code-generator
-
-  - Input: $ARGUMENTS
-
-  - Expected: Specialized processing by code-generator
-
-- Step 2: Execute deployment-manager
-
-  - Input: $ARGUMENTS
-
-  - Expected: Specialized processing by deployment-manager
-
-- Step 3: Execute architecture-designer
+- Step 1: Execute architecture-designer
 
   - Input: $ARGUMENTS
 
   - Expected: Specialized processing by architecture-designer
 
+- Step 2: Execute code-generator
+
+  - Input: $ARGUMENTS
+
+  - Expected: Specialized processing by code-generator
+
+- Step 3: Execute deployment-manager
+
+  - Input: $ARGUMENTS
+
+  - Expected: Specialized processing by deployment-manager
+
 **Stepwise Instructions:**
 
-- Step 1: Launch code-generator sub-agent
+- Step 1: Launch architecture-designer sub-agent
+
+  - Use Task tool with subagent_type: "architecture-designer"
+
+  - Pass user task: $ARGUMENTS
+
+  - Wait for completion before next step
+
+- Step 2: Launch code-generator sub-agent
 
   - Use Task tool with subagent_type: "code-generator"
 
@@ -68,17 +78,9 @@ Output format:
 
   - Wait for completion before next step
 
-- Step 2: Launch deployment-manager sub-agent
+- Step 3: Launch deployment-manager sub-agent
 
   - Use Task tool with subagent_type: "deployment-manager"
-
-  - Pass user task: $ARGUMENTS
-
-  - Wait for completion before next step
-
-- Step 3: Launch architecture-designer sub-agent
-
-  - Use Task tool with subagent_type: "architecture-designer"
 
   - Pass user task: $ARGUMENTS
 
