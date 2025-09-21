@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.0.15] - 2025-09-21
+
+### Fixed
+- **License**: Updated README license field from ISC to MIT for consistency
+- **Shell Scripts**: Enhanced security with mktemp for temporary file creation
+- **POML Processing**: Added proper dependency checks for npx and jq
+- **Error Handling**: Improved JSON parsing with fallback mechanisms
+- **CodeRabbit**: Addressed security and code quality recommendations
+
+### Improvements
+- **Dependencies**: Added robust checks for Node.js toolchain (node, npm, npx)
+- **JSON Parsing**: Enhanced jq dependency handling with graceful fallbacks
+- **Temporary Files**: Secure temporary file creation using mktemp with proper cleanup
+- **POML Integration**: Added --cwd and --format dict flags to pomljs for stable output
+
 ## [0.0.13] - 2025-09-20
 
 ### Major Improvements
