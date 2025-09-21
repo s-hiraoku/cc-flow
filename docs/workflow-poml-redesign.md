@@ -39,6 +39,11 @@
      ```
    - `mode` で並列／順次などの振る舞いを説明可能にし、POML 側で文言やラベルを出し分け。
 
+#### Phase 1 の扱い
+- 当面は `workflowAgents`（一次元配列）を唯一の動的データとして POML に渡す。
+- メインテンプレートでは `<include src="partials/steps.poml" />` などで部品化し、`partials/steps.poml` 内で `<list for="agent in workflowAgents">` を用いて順序付き出力を行う。
+- 将来的に `workflowSteps` に移行する際は、`workflowAgents` を `workflowSteps` に変換するフォールバックロジックを維持しつつ、`partials/steps.poml` だけ差し替える想定。
+
 4. **POML コンポーネント設計**
    - `<meta minVersion="0.0.8" />` と `<stylesheet>` をメインに配置し、captionStyle を統一管理。
    - `<task captionStyle="hidden">` 内は Markdown 見出しではなく `<section>` / `<panel>` / `<step>` を使用。
@@ -61,7 +66,7 @@
 2. `convert_poml_to_markdown` を `--var` 方式に切り替え、テンプレート側で `{{workflowAgents}}`（一次元配列）を直接扱うようにする。
 3. Markdown テンプレートの軽量化と、`{POML_GENERATED_INSTRUCTIONS}` を最終本文として扱うラッパー構成に変更。
 4. テスト更新＋ドキュメント追従。
- 5. Phase2 を想定したプレースホルダ（例: `<!-- future-step-list -->`）を設置し、後続拡張時の差分を局所化。
+5. Phase2 を想定したプレースホルダ（例: `<!-- future-step-list -->`）を設置し、後続拡張時の差分を局所化。
 
 ### Phase 2: 複数エージェント／ステップ構造への拡張
 1. シェル側で `workflowSteps` を構築するヘルパーを追加し、`--var workflowSteps` を POML に渡す。
