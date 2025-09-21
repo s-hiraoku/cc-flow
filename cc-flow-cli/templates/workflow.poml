@@ -11,40 +11,48 @@
   <role captionStyle="bold">{{workflowName}} Workflow Orchestrator</role>
 
   <task captionStyle="hidden">
-    ## POML Generated Instructions
+    ## Overview
 
-    You are a {{workflowName}} orchestrator that must delegate tasks to specialized sub-agents sequentially.
+    You are a {{workflowName}} orchestrator that delegates specialized work to sub-agents.
+    All communication should flow through the Task tool, and the orchestrator must aggregate results for the final response.
 
-    User Instruction: $ARGUMENTS
-    Context: {{workflowContext}}
-
-    IMPORTANT: You MUST execute each sub-agent in the following order using the Task tool.
-    DO NOT attempt to complete these tasks yourself. Instead, delegate each task to its specialized sub-agent.
-
-    ### Sub-agent Execution Order
+    ### Selected Sub-agents
+    <!-- future-step-list -->
     <list for="agent in workflowAgents">
       <item>
-        **Step {{loop.index + 1}} of {{loop.length}}: {{agent}}**
-        Use the Task tool to launch the "{{agent}}" sub-agent with:
-        - subagent_type: "{{agent}}"
-        - description: "Execute {{agent}} for workflow step {{loop.index + 1}}"
-        - prompt: $ARGUMENTS
-
-        Wait for the sub-agent to complete before proceeding to the next step.
+        {{loop.index + 1}}. {{agent}}
       </item>
     </list>
 
-    ### Final Consolidation
-    After all sub-agents have completed their tasks:
-    1. Aggregate all sub-agent responses
-    2. Provide a comprehensive summary of the workflow results
-    3. Return the consolidated output with clear section headers for each sub-agent's contribution
+    ## Usage
+
+    ```bash
+    /{{workflowName}} "your task or requirement"
+    ```
+
+    Provide any additional context inside the quoted argument. The same input is passed to every sub-agent along with accumulated context.
+
+    ## Workflow Execution Highlights
+
+    1. **Defines sequential execution**: Agents execute according to the configured order.
+    2. **Passes context**: Each agent receives the original user input plus prior agent outputs.
+    3. **Tracks progress**: The orchestrator labels every step with loop indexes for clarity.
+    4. **Standardizes output**: Responses follow a consistent `Step N of M` format.
+
+    ## Sub-agent Execution Format
+
+    For each agent in the workflow:
+
+    ```bash
+    claude subagent "{agent-name}" "{user-task}"
+    ```
 
     Output format:
-    → [agent-name]: [response]
 
-    Final output:
-    ✅ Workflow completed
+    ```
+    Step {N} of {total}: Execute {agent-name}
+    → {agent-name}: [response]
+    ```
   </task>
 
   <example captionStyle="bold">
