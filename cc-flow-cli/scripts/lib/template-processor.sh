@@ -56,13 +56,24 @@ process_templates() {
 
     # POMLからMarkdown実行指示を生成
     local temp_instructions="/tmp/poml_instructions_$$.md"
-
-    # convert_poml_to_markdown関数を呼び出して完全なMarkdownを生成
     local poml_result
     poml_result=$(convert_poml_to_markdown "$WORKFLOW_POML_TEMPLATE" "$agent_list_space" "$workflow_name" "$description")
 
-    # convert_poml_to_markdownが既に完全なMarkdownを生成しているのでそのまま使用
-    WORKFLOW_MD_CONTENT="$poml_result"
+    # 結果をファイルに書き込み
+    echo "$poml_result" > "$temp_instructions"
+
+    # workflow.mdテンプレートの変数置換
+    WORKFLOW_MD_CONTENT="$WORKFLOW_MD_TEMPLATE"
+    WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{DESCRIPTION\}/$description}"
+    WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{ARGUMENT_HINT\}/$argument_hint}"
+    WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{WORKFLOW_NAME\}/$workflow_name}"
+
+    # エージェントリストをテンプレートに挿入
+    WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{WORKFLOW_AGENT_LIST\}/$agent_list_space}"
+
+    # POMLで生成された実行指示を挿入（シンプルな文字列置換）
+    local poml_instructions=$(cat "$temp_instructions")
+    WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{POML_GENERATED_INSTRUCTIONS\}/$poml_instructions}"
 
     # 一時ファイルをクリーンアップ
     rm -f "$temp_instructions"
