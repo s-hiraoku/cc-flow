@@ -58,6 +58,16 @@ if [[ "$1" == "pomljs" ]]; then
     exec "$TEST_DIR/mock_bin/pomljs" "$@"
 fi
 EOF
+    local system_node
+    system_node=$(command -v node || true)
+    if [[ -n "$system_node" ]]; then
+        cat > "$TEST_DIR/mock_bin/node" <<'EOF'
+#!/bin/bash
+"$system_node" "$@"
+EOF
+        chmod +x "$TEST_DIR/mock_bin/node"
+    fi
+
     chmod +x "$TEST_DIR/mock_bin/npx"
     export PATH="$TEST_DIR/mock_bin:$PATH"
 }

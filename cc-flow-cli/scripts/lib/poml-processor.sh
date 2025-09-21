@@ -63,9 +63,6 @@ convert_poml_to_markdown() {
     # Node.js環境をチェック（サイレント）
     check_nodejs_dependencies >/dev/null 2>&1
 
-    # ワークフローコンテキストは標準値を使用（必要に応じて拡張）
-    local workflow_context="sequential agent execution"
-
     # workflowSteps をバリデート＆整形し、steps 由来のエージェント配列を抽出
     local sanitized_steps_json agents_from_steps
     if ! IFS=$'\n' read -r sanitized_steps_json agents_from_steps < <(
@@ -131,20 +128,17 @@ NODE
     local context_file="$temp_dir/context.json"
     NODE_WORKFLOW_NAME="$workflow_name" \
     NODE_WORKFLOW_PURPOSE="${workflow_purpose:-}" \
-    NODE_WORKFLOW_CONTEXT="$workflow_context" \
     NODE_WORKFLOW_STEPS_JSON="$sanitized_steps_json" \
     NODE_WORKFLOW_AGENTS_JSON="$workflow_agents_json" \
     node - <<'NODE' > "$context_file"
 const workflowName = process.env.NODE_WORKFLOW_NAME || '';
 const workflowPurpose = process.env.NODE_WORKFLOW_PURPOSE || '';
-const workflowContext = process.env.NODE_WORKFLOW_CONTEXT || '';
 const steps = JSON.parse(process.env.NODE_WORKFLOW_STEPS_JSON || '[]');
 const agents = JSON.parse(process.env.NODE_WORKFLOW_AGENTS_JSON || '[]');
 
 const context = {
   workflowName,
   workflowPurpose,
-  workflowContext,
   workflowSteps: steps,
   workflowAgents: agents
 };

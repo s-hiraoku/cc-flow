@@ -19,44 +19,57 @@
 
 ### 基本的な使用手順
 ```bash
-# 1. エージェント準備（例: specディレクトリ）
-.claude/agents/spec/
-├── spec-init.md
-├── spec-requirements.md
-├── spec-design.md
-└── spec-impl.md
+# 1. ワークフロー定義 JSON を用意
+cat > ./tmp/spec-workflow.json <<'JSON'
+{
+  "workflowName": "spec-workflow",
+  "workflowPurpose": "Design review workflow",
+  "workflowSteps": [
+    {
+      "title": "Planning",
+      "mode": "sequential",
+      "purpose": "Collect requirements",
+      "agents": ["spec-init"]
+    },
+    {
+      "title": "Delivery",
+      "mode": "parallel",
+      "purpose": "Draft solution and validate",
+      "agents": ["spec-design", "spec-impl"]
+    }
+  ]
+}
+JSON
 
-# 2. ワークフローコマンド生成（推奨の新形式: 相対パス指定）
-scripts/create-workflow.sh ./agents/spec "1 3 4"
-
-# 旧形式（短縮形）は後方互換のために動作しますが警告付き（非推奨）
-scripts/create-workflow.sh spec "1 3 4"
+# 2. JSON ファイルを指定して生成
+scripts/create-workflow.sh ./agents/spec \
+  --steps-json ./tmp/spec-workflow.json
 
 # 3. 生成されたコマンドを使用
-/spec-workflow "Todoアプリを作成して"
+/spec-workflow "要件整理から実装まで"
 ```
 
 ## 入力仕様
 
 ### コマンド構文
 ```bash
-scripts/create-workflow.sh <target_path> [order_spec]
+scripts/create-workflow.sh <target_path> --steps-json <path>
 ```
 
+### 主なオプション
+
+| オプション | 説明 |
+| --- | --- |
+| `--steps-json <path>` | ワークフローステップ定義ファイル。トップレベル配列、`{ "workflowSteps": [...] }`、`{ "WORKFLOW_STEPS_JSON": [...] }` の各形式をサポート。オブジェクトに `workflowName` / `workflowPurpose` が含まれている場合は、未指定時のデフォルト値として利用される |
 ### 引数
-- `<target_path>`: 対象パス（新形式）
+- `<target_path>`: 対象パス
   - `./agents/<dir>`（例: `./agents/spec`）
   - `./agents`（全エージェント横断）
-  - 短縮形 `<dir>` は後方互換のために受け付けますが、非推奨です（警告が出ます）。
-- `[order_spec]`: 実行順序指定（省略時は対話モード）
-  - 数値インデックス（スペース区切り）例: `"1 3 4"`
-  - アイテム名（カンマ区切り）例: `"spec-init,spec-requirements,spec-design"`
+  - 相対パス `../.claude/agents/...` なども指定可能
   
-備考: 現時点ではカスタムのワークフロー名引数は未対応です（既定の `<dir>-workflow`／`all-workflow` が使用されます）。
 
 ### モード
-- インタラクティブ: `order_spec` を省略すると対話的に番号入力で順序を決定します。
-- 非インタラクティブ: `order_spec` を与えると検証後にその順序で生成します。
+- ステップ定義モードのみ: `--steps-json` で指定した JSON ファイルから `{ title, mode, agents[], purpose? }` を読み込み、テンプレートへ注入する。`mode` は `sequential` または `parallel` を想定。
 
 ## テンプレート変数置換
 
@@ -65,12 +78,12 @@ scripts/create-workflow.sh <target_path> [order_spec]
 - `{ARGUMENT_HINT}` → `"[context]"`
 - `{WORKFLOW_NAME}` → `"<category>-workflow"`
 
-### workflow.pomlテンプレート（中間ファイル）
-- `{WORKFLOW_NAME}` → `"<category>-workflow"`
-- `{WORKFLOW_AGENT_ARRAY}` → 選択されたエージェントリスト（JSON配列形式）
-- その他の変数は現状空文字で置換
+-### workflow.pomlテンプレート
+- `workflowName` / `workflowPurpose` / `workflowSteps` / `workflowAgents` は `pomljs --context-file` で注入され、`partials/*.poml` から参照される。
+- `workflowSteps` は `{ title, mode, agents[], purpose? }` の配列。`purpose` は任意だが、指定すると各ステップの説明として出力される。`mode` に応じてシーケンシャル／パラレルの文言が切り替わる。
+- `workflowAgents` は一次元配列。`workflowSteps` が空の場合のフォールバックとして利用。
 
-備考: POML ファイルは中間生成のみ行い、最終的に削除します（既定フローでは `pomljs` は起動しません）。
+備考: `pomljs` の実行結果を Markdown として `.claude/commands/<workflow_name>.md` へ書き出し、テンポラリの `.poml` と `context.json` は後処理で削除される。
 
 ## 出力仕様
 
@@ -103,11 +116,9 @@ scripts/create-workflow.sh <target_path> [order_spec]
 3. **エージェントなし**: `エラー: ディレクトリ '...' にエージェントが見つかりません`
 4. **テンプレート不存在**: `エラー: テンプレートファイルが見つかりません`
 5. **ファイル書き込み権限**: `エラー: コマンドディレクトリに書き込みできません`
-6. **無効な順序入力**: `エラー: 無効なエージェント番号 '...'`
-7. **重複選択**: `エラー: エージェント '...' が重複して選択されています`
-8. **空の順序選択**: `エラー: 実行するエージェントが選択されていません`
-9. **POML処理失敗**: `エラー: pomljsの実行に失敗しました`
-10. **Node.js/npm不存在**: `エラー: Node.jsまたはnpmが見つかりません`
+6. **POML処理失敗**: `エラー: pomljsの実行に失敗しました`
+7. **Node.js/npm不存在**: `エラー: Node.jsまたはnpmが見つかりません`
+8. **ステップ定義不正**: `エラー: ステップ定義にエージェントが含まれていません` / `エラー: ステップ定義の読み込みに失敗しました`
 
 ## 技術仕様
 
@@ -125,10 +136,11 @@ scripts/
 ```
 
 ### 依存関係
-- `templates/workflow.md`, `templates/workflow.poml`
-- `.claude/agents/` ディレクトリ構造
+- `templates/workflow.md`, `templates/workflow.poml`, `templates/partials/*.poml`
+- `.claude/agents/` ディレクトリ構造（エージェントの `.md` ファイル）
 - `.claude/commands/` ディレクトリ（書き込み権限）
-- 備考: 既定フローでは `pomljs` は不要です（POML は一時生成して削除）。
+- Node.js 18 以上 / npm
+- `pomljs`（`npm install` によりローカル解決できること。ネットワークアクセスが無い環境では事前インストール必須）
 
 ### エージェント名抽出規則
 - ファイル名から `.md` 拡張子を除去してエージェント名とする

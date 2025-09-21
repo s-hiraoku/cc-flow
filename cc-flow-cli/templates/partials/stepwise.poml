@@ -4,6 +4,9 @@
       <item>
         <paragraph>Step {{loop.index + 1}}: {{step.title || ('Workflow Step ' + (loop.index + 1))}}</paragraph>
         <paragraph>Mode: {{step.mode || 'sequential'}}</paragraph>
+        <if condition="step.purpose">
+          <paragraph>Purpose: {{step.purpose}}</paragraph>
+        </if>
         <list for="agent in step.agents">
           <item>
             Use Task tool with subagent_type: "{{agent}}" and pass user task: $ARGUMENTS

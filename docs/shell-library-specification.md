@@ -890,6 +890,9 @@ convert_poml_file_to_markdown <poml_file> <output_file> [workflow_name] [user_co
 2. ワークフロー名を決定（引数またはファイル名）
 3. POMLファイル内容を読み込み
 4. `convert_poml_to_markdown` を呼び出してMarkdown文字列を生成
+   - `pomljs --context-file` を用いて `workflowName` / `workflowPurpose` / `workflowSteps` / `workflowAgents` を注入
+   - `workflowSteps` 要素は `{ title, mode, agents[], purpose? }`。`purpose` が指定されていればテンプレート側で表示される
+   - `workflowSteps` から抽出できない場合のみ `workflowAgents`（一次元配列）でフォールバック
 5. `safe_write_file` で出力ファイルに書き込み、成功メッセージを表示
 
 **エラーハンドリング**:
