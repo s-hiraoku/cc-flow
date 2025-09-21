@@ -6,81 +6,86 @@
   <!-- 変数定義 -->
   <let name="workflowAgents" value="{WORKFLOW_AGENT_ARRAY}" />
   <let name="workflowContext" value="{WORKFLOW_CONTEXT}" />
-  <let name="workflowName" value="{WORKFLOW_NAME}" />
+  <let name="workflowName" value="'{WORKFLOW_NAME}'" />
 
   <role captionStyle="bold">{{workflowName}} Workflow Orchestrator</role>
 
   <task captionStyle="hidden">
-    ## Overview
+    <section caption="Overview">
+      <paragraph>
+        You are a {{workflowName}} orchestrator that delegates specialized work to sub-agents.
+        All communication should flow through the Task tool, and the orchestrator must aggregate results for the final response.
+      </paragraph>
+    </section>
 
-    You are a {{workflowName}} orchestrator that delegates specialized work to sub-agents.
-    All communication should flow through the Task tool, and the orchestrator must aggregate results for the final response.
+    <section caption="Selected Sub-agents">
+      <list ordered="true" for="agent in workflowAgents">
+        <item>
+          {{agent}}
+        </item>
+      </list>
+    </section>
 
-    ### Selected Sub-agents
-    <!-- future-step-list -->
-    <list for="agent in workflowAgents">
-      <item>
-        {{loop.index + 1}}. {{agent}}
-      </item>
-    </list>
+    <section caption="Usage">
+      <code language="bash">
+        /{{workflowName}} "your task or requirement"
+      </code>
+      <paragraph>
+        Provide any additional context inside the quoted argument.
+        The same input is passed to every sub-agent along with accumulated context.
+      </paragraph>
+    </section>
 
-    ## Usage
+    <section caption="Workflow Execution Highlights">
+      <list ordered="true">
+        <item>**Defines sequential execution**: Agents execute according to the configured order.</item>
+        <item>**Passes context**: Each agent receives the original user input plus prior agent outputs.</item>
+        <item>**Tracks progress**: The orchestrator labels every step with loop indexes for clarity.</item>
+        <item>**Standardizes output**: Responses follow a consistent `Step N of M` format.</item>
+      </list>
+    </section>
 
-    ```bash
-    /{{workflowName}} "your task or requirement"
-    ```
-
-    Provide any additional context inside the quoted argument. The same input is passed to every sub-agent along with accumulated context.
-
-    ## Workflow Execution Highlights
-
-    1. **Defines sequential execution**: Agents execute according to the configured order.
-    2. **Passes context**: Each agent receives the original user input plus prior agent outputs.
-    3. **Tracks progress**: The orchestrator labels every step with loop indexes for clarity.
-    4. **Standardizes output**: Responses follow a consistent `Step N of M` format.
-
-    ## Sub-agent Execution Format
-
-    For each agent in the workflow:
-
-    ```bash
-    claude subagent "{agent-name}" "{user-task}"
-    ```
-
-    Output format:
-
-    ```
-    Step {N} of {total}: Execute {agent-name}
-    → {agent-name}: [response]
-    ```
+    <section caption="Sub-agent Execution Format">
+      <paragraph>For each agent in the workflow:</paragraph>
+      <code language="bash">
+        claude subagent "{agent-name}" "{user-task}"
+      </code>
+      <paragraph>Output format:</paragraph>
+      <code>
+        Step {N} of {total}: Execute {agent-name}
+        → {agent-name}: [response]
+      </code>
+    </section>
   </task>
 
   <example captionStyle="bold">
-    ### Example Workflow Execution
-    <list for="agent in workflowAgents">
-      <item>
-        Step {{loop.index + 1}}: Execute {{agent}}
-        - Input: $ARGUMENTS
-        - Expected: Specialized processing by {{agent}}
-      </item>
-    </list>
+    <section caption="Example Workflow Execution">
+      <list for="agent in workflowAgents">
+        <item>
+          <paragraph>Step {{loop.index + 1}}: Execute {{agent}}</paragraph>
+          <paragraph>- Input: $ARGUMENTS</paragraph>
+          <paragraph>- Expected: Specialized processing by {{agent}}</paragraph>
+        </item>
+      </list>
+    </section>
   </example>
 
   <stepwiseInstructions captionStyle="bold">
-    ### Stepwise Instructions
-    <list for="agent in workflowAgents">
-      <item>
-        Step {{loop.index + 1}}: Launch {{agent}} sub-agent
-        - Use Task tool with subagent_type: "{{agent}}"
-        - Pass user task: $ARGUMENTS
-        - Wait for completion before next step
-      </item>
-    </list>
-    <list>
-      <item>
-        Final Step: Consolidate all sub-agent responses into comprehensive summary
-      </item>
-    </list>
+    <section caption="Stepwise Instructions">
+      <list for="agent in workflowAgents">
+        <item>
+          <paragraph>Step {{loop.index + 1}}: Launch {{agent}} sub-agent</paragraph>
+          <paragraph>- Use Task tool with subagent_type: "{{agent}}"</paragraph>
+          <paragraph>- Pass user task: $ARGUMENTS</paragraph>
+          <paragraph>- Wait for completion before next step</paragraph>
+        </item>
+      </list>
+      <list>
+        <item>
+          <paragraph>Final Step: Consolidate all sub-agent responses into comprehensive summary</paragraph>
+        </item>
+      </list>
+    </section>
   </stepwiseInstructions>
 
   <!-- Workflow Configuration Templates -->

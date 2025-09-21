@@ -9,19 +9,15 @@ source "$LIB_SCRIPT_DIR/../utils/common.sh"
 # Node.js環境の依存関係チェック
 check_nodejs_dependencies() {
     info "Node.js環境をチェックしています..."
-    
-    # Node.jsの存在確認
+
     if ! command -v node >/dev/null 2>&1; then
         error_exit "Node.jsが見つかりません。Node.jsをインストールしてください"
     fi
-    
-    # npmの存在確認
+
     if ! command -v npm >/dev/null 2>&1; then
         error_exit "npmが見つかりません。npmをインストールしてください"
     fi
-    
-    # POMLプロセッサー依存関係の確認が完了
-    
+
     success "Node.js環境の確認が完了しました"
 }
 
@@ -63,7 +59,10 @@ convert_poml_to_markdown() {
     local processed_poml="$poml_content"
     processed_poml="${processed_poml//\{WORKFLOW_AGENT_ARRAY\}/$agent_array}"
     processed_poml="${processed_poml//\{WORKFLOW_CONTEXT\}/$workflow_context}"
-    processed_poml="${processed_poml//\{WORKFLOW_NAME\}/'$workflow_name'}"
+
+    local escaped_workflow_name
+    escaped_workflow_name="${workflow_name//\'/\\\'}"
+    processed_poml="${processed_poml//\{WORKFLOW_NAME\}/$escaped_workflow_name}"
 
     # 処理済みPOMLファイルを保存
     echo "$processed_poml" > "$temp_poml"
