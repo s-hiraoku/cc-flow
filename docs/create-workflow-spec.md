@@ -67,7 +67,7 @@ scripts/create-workflow.sh <target_path> [order_spec]
 
 ### workflow.pomlテンプレート（中間ファイル）
 - `{WORKFLOW_NAME}` → `"<category>-workflow"`
-- `{WORKFLOW_AGENT_LIST}` → 選択されたエージェントリスト（JSON配列形式）
+- `{WORKFLOW_AGENT_ARRAY}` → 選択されたエージェントリスト（JSON配列形式）
 - その他の変数は現状空文字で置換
 
 備考: POML ファイルは中間生成のみ行い、最終的に削除します（既定フローでは `pomljs` は起動しません）。
