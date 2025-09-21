@@ -43,6 +43,19 @@ create_agent_list_json() {
     echo "$json"
 }
 
+# プレースホルダーを空白有無どちらの形式でも置換
+replace_placeholder_variants() {
+    local content="$1"
+    local key="$2"
+    local value="$3"
+
+    for pattern in "{$key}" "{ $key}" "{$key }" "{ $key }"; do
+        content="${content//$pattern/$value}"
+    done
+
+    printf '%s' "$content"
+}
+
 # テンプレート変数を置換
 process_templates() {
     local agent_dir="$1"
@@ -64,27 +77,27 @@ process_templates() {
 
     # workflow.mdテンプレートの変数置換
     WORKFLOW_MD_CONTENT="$WORKFLOW_MD_TEMPLATE"
-    WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{DESCRIPTION\}/$description}"
-    WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{ARGUMENT_HINT\}/$argument_hint}"
-    WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{WORKFLOW_NAME\}/$workflow_name}"
+    WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "DESCRIPTION" "$description")
+    WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "ARGUMENT_HINT" "$argument_hint")
+    WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "WORKFLOW_NAME" "$workflow_name")
 
     # エージェントリストをテンプレートに挿入
-    WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{WORKFLOW_AGENT_LIST\}/$agent_list_space}"
+    WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "WORKFLOW_AGENT_LIST" "$agent_list_space")
 
     # POMLで生成された実行指示を挿入（シンプルな文字列置換）
     local poml_instructions=$(cat "$temp_instructions")
-    WORKFLOW_MD_CONTENT="${WORKFLOW_MD_CONTENT//\{POML_GENERATED_INSTRUCTIONS\}/$poml_instructions}"
+    WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "POML_GENERATED_INSTRUCTIONS" "$poml_instructions")
 
     # 一時ファイルをクリーンアップ
     rm -f "$temp_instructions"
     
     # workflow.pomlテンプレートの変数置換
     WORKFLOW_POML_CONTENT="$WORKFLOW_POML_TEMPLATE"
-    WORKFLOW_POML_CONTENT="${WORKFLOW_POML_CONTENT//\{WORKFLOW_NAME\}/$workflow_name}"
-    WORKFLOW_POML_CONTENT="${WORKFLOW_POML_CONTENT//\{WORKFLOW_AGENT_LIST\}/$agent_list_json}"
-    WORKFLOW_POML_CONTENT="${WORKFLOW_POML_CONTENT//\{WORKFLOW_TYPE_DEFINITIONS\}/}"
-    WORKFLOW_POML_CONTENT="${WORKFLOW_POML_CONTENT//\{WORKFLOW_SPECIFIC_INSTRUCTIONS\}/}"
-    WORKFLOW_POML_CONTENT="${WORKFLOW_POML_CONTENT//\{ACCUMULATED_CONTEXT\}/}"
+    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_NAME" "$workflow_name")
+    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_AGENT_LIST" "$agent_list_json")
+    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_TYPE_DEFINITIONS" "")
+    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_SPECIFIC_INSTRUCTIONS" "")
+    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "ACCUMULATED_CONTEXT" "")
     
     # ワークフロー名をグローバル変数に設定
     WORKFLOW_NAME="$workflow_name"
