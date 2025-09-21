@@ -80,6 +80,33 @@
 - `include` 用パス管理：テンプレート一式をリポジトリに常駐させるか、一時出力に書くか。
 - 最終 Markdown に追加で必要なセクション（例：CLI コマンド例、実行上の注意など）を POML 側に内包するか否か。
 
+## 最終要件までのタスク一覧
+
+### 1. テンプレート／レンダリング基盤
+- [ ] `workflow.poml` を `<include>` ベースに分割し、`partials/` ディレクトリへ配置。
+- [ ] `convert_poml_to_markdown` で `pomljs --file ... --var` を使うルートに切り替え、従来の文字列置換を削減。
+- [ ] `workflow.md` を frontmatter＋`{POML_GENERATED_INSTRUCTIONS}` のみに保つ最終形へ移行し、不要な補足文を削除。
+- [ ] Phase1 用の一次元配列 (`workflowAgents`) と Phase2 用の多段配列 (`workflowSteps`) をテンプレート側で両対応できるようガード処理を追加。
+
+### 2. Shell / CLI (`create-workflow.sh` 系)
+- [ ] CLI 引数から `workflowSteps` を組み立てるヘルパーを実装し、JSON 形で `pomljs --var` に渡す。
+- [ ] 既存の順次モードと後方互換を保つフォールバック（`workflowAgents` → 単一ステップ）を用意。
+- [ ] config ファイル（YAML / JSON）を読み込み、ステップ＋並列モードを指定できる仕組みを追加。
+- [ ] 生成結果の検証ロジック（空ステップ、重複エージェントなど）を強化。
+
+### 3. React Ink / TUI 側
+- [ ] 「ステップ追加」「ステップ内エージェント並び替え」「mode 選択」を行える UI を実装。
+- [ ] TUI の出力フォーマットを CLI の新オプション（config or JSON）に合わせる。
+- [ ] 並列モードやバッチ実行をどうユーザーに説明するかを UI 内のヘルプ／ツールチップで整備。
+
+### 4. テスト・ドキュメント・運用
+- [ ] BATS テストを `workflowSteps` 入力ケースで更新し、生成 Markdown の差分をスナップショット化。
+- [ ] `docs/shell-library-specification.md` や `docs/create-workflow-spec.md` に新しい CLI オプション／データモデルを追記。
+- [ ] `docs/poml-cheatsheet.md` / 本文中のサンプルを `workflowSteps` 対応に更新。
+- [ ] サンプルテンプレート（`cc-flow-cli/templates/` 配下）や `.claude/commands` のデモを新仕様で再生成。
+
+完了の定義: 上記タスクを満たし、複数エージェント／複数ステップ（並列含む）のワークフローを TUI・CLI の双方から生成できる状態になること。
+
 ---
 
 以上をベースに、次はテンプレート分割の具体的なファイル構成と `workflowSteps` の生成ロジックを掘り下げる予定。
