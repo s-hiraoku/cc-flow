@@ -1,5 +1,5 @@
 ---
-description: デモ用のスラッシュコマンドです
+description: Execute demo workflow
 argument-hint: [context]
 allowed-tools: [Read, Bash]
 ---
@@ -15,13 +15,27 @@ allowed-tools: [Read, Bash]
 
 You are a demo-workflow orchestrator that delegates specialized work to sub-agents. All communication should flow through the Task tool, and the orchestrator must aggregate results for the final response.
 
-Purpose: デモ用のスラッシュコマンドです
+Purpose: Execute demo workflow
 
 - architecture-designer
 
 - code-generator
 
-- deployment-manager
+- quality-checker
+
+- Step 1: Design
+
+  Mode: Sequential (agents run in order)
+
+  - architecture-designer
+
+- Step 2: QA
+
+  Mode: Parallel (agents run concurrently)
+
+  - code-generator
+
+  - quality-checker
 
 `/demo-workflow "your task or requirement"`
 
@@ -42,49 +56,51 @@ Output format:
 
 **Example:**
 
-- Step 1: Execute architecture-designer
+- Step 1: Design
 
-  - Input: $ARGUMENTS
+  Mode: sequential
 
-  - Expected: Specialized processing by architecture-designer
+  - Agent: architecture-designer 
 
-- Step 2: Execute code-generator
+    - Input: $ARGUMENTS
 
-  - Input: $ARGUMENTS
+    - Expected: Specialized processing by architecture-designer
 
-  - Expected: Specialized processing by code-generator
+- Step 2: QA
 
-- Step 3: Execute deployment-manager
+  Mode: parallel
 
-  - Input: $ARGUMENTS
+  - Agent: code-generator 
 
-  - Expected: Specialized processing by deployment-manager
+    - Input: $ARGUMENTS
+
+    - Expected: Specialized processing by code-generator
+
+  - Agent: quality-checker 
+
+    - Input: $ARGUMENTS
+
+    - Expected: Specialized processing by quality-checker
 
 **Stepwise Instructions:**
 
-- Step 1: Launch architecture-designer sub-agent
+- Step 1: Design
 
-  - Use Task tool with subagent_type: "architecture-designer"
+  Mode: sequential
 
-  - Pass user task: $ARGUMENTS
+  - Use Task tool with subagent_type: "architecture-designer" and pass user task: $ARGUMENTS
 
-  - Wait for completion before next step
+  Wait for completion before moving on.
 
-- Step 2: Launch code-generator sub-agent
+- Step 2: QA
 
-  - Use Task tool with subagent_type: "code-generator"
+  Mode: parallel
 
-  - Pass user task: $ARGUMENTS
+  - Use Task tool with subagent_type: "code-generator" and pass user task: $ARGUMENTS
 
-  - Wait for completion before next step
+  - Use Task tool with subagent_type: "quality-checker" and pass user task: $ARGUMENTS
 
-- Step 3: Launch deployment-manager sub-agent
-
-  - Use Task tool with subagent_type: "deployment-manager"
-
-  - Pass user task: $ARGUMENTS
-
-  - Wait for completion before next step
+  Execute these agents in parallel and gather all responses before moving on.
 
 - Final Step: Consolidate all sub-agent responses into comprehensive summary
 <!-- POML_GENERATED_INSTRUCTIONS_END -->

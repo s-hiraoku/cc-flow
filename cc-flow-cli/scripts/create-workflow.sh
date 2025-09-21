@@ -31,6 +31,49 @@ declare MODE=""
 declare AGENT_DIR=""
 declare ORDER_SPEC=""
 declare GENERATED_FILE_PATH=""
+declare WORKFLOW_STEPS_JSON="${WORKFLOW_STEPS_JSON:-}"
+
+if [[ -n "$WORKFLOW_STEPS_JSON" ]]; then
+    WORKFLOW_STEPS_JSON="$(normalize_steps_json "$WORKFLOW_STEPS_JSON")"
+fi
+
+# JSON正規化: 配列 or { WORKFLOW_STEPS_JSON: [...] } に対応
+normalize_steps_json() {
+    local raw_json="$1"
+
+    if [[ -z "$raw_json" ]]; then
+        echo "" && return 0
+    fi
+
+    local normalized
+    if ! normalized=$(NODE_RAW_JSON="$raw_json" node - <<'NODE'
+const raw = process.env.NODE_RAW_JSON;
+let parsed;
+try {
+  parsed = JSON.parse(raw);
+} catch (error) {
+  console.error('ステップ定義 JSON の解析に失敗しました');
+  process.exit(1);
+}
+
+let steps;
+if (Array.isArray(parsed)) {
+  steps = parsed;
+} else if (parsed && Array.isArray(parsed.WORKFLOW_STEPS_JSON)) {
+  steps = parsed.WORKFLOW_STEPS_JSON;
+} else {
+  console.error('ステップ定義は配列、もしくは {"WORKFLOW_STEPS_JSON": [...]} 形式で指定してください');
+  process.exit(1);
+}
+
+process.stdout.write(JSON.stringify(steps));
+NODE
+    ); then
+        error_exit "ステップ定義の読み込みに失敗しました"
+    fi
+
+    echo "$normalized"
+}
 
 # 簡潔な使用方法を表示
 show_usage() {
@@ -44,6 +87,8 @@ show_usage() {
     echo "オプション:"
     echo "  -o, --order ORDER       エージェント順序 (例: \"1 2 3\" または \"agent1,agent2\")"
     echo "  -p, --purpose PURPOSE   ワークフローの目的・説明"
+    echo "  --steps-file FILE       ワークフローステップ定義(JSONファイル)"
+    echo "  --steps-json JSON|PATH  ワークフローステップ定義(JSON文字列またはファイルパス)"
     echo "  -n, --name NAME         ワークフロー名"
     echo "  -i, --interactive       対話モード強制"
     echo "  --quick                 クイック作成 (全エージェント順番通り)"
@@ -71,6 +116,8 @@ show_detailed_help() {
     echo "                             • 数字: \"1 2 3\" (インデックス指定)"
     echo "                             • 名前: \"spec-init,spec-impl\" (名前指定)"
     echo "  -p, --purpose PURPOSE      ワークフローの目的・説明文"
+    echo "  --steps-file FILE          ワークフローステップ定義(JSONファイル)"
+    echo "  --steps-json JSON|PATH     ワークフローステップ定義(JSON文字列またはファイルパス)"
     echo "  -n, --name NAME            生成するワークフロー名"
     echo "  -i, --interactive          対話モード強制実行"
     echo "  --quick                    クイック作成 (推奨順序で全選択)"
@@ -136,6 +183,8 @@ parse_modern_arguments() {
     local order_spec=""
     local purpose=""
     local workflow_name=""
+    local steps_file=""
+    local steps_json=""
     local force_interactive=false
     local quick_mode=false
     local all_mode=false
@@ -163,6 +212,16 @@ parse_modern_arguments() {
             -p|--purpose)
                 purpose="$2"
                 export WORKFLOW_PURPOSE="$purpose"
+
+                shift 2
+                ;;
+            --steps-file)
+                steps_file="$2"
+
+                shift 2
+                ;;
+            --steps-json)
+                steps_json="$2"
 
                 shift 2
                 ;;
@@ -224,6 +283,23 @@ parse_modern_arguments() {
     
     ORDER_SPEC="$order_spec"
     info "🔧 最終設定: MODE=$MODE, ORDER_SPEC='$ORDER_SPEC'"
+
+    if [[ -n "$steps_file" ]]; then
+        if [[ ! -f "$steps_file" ]]; then
+            error_exit "ステップ定義ファイル '$steps_file' が見つかりません"
+        fi
+        WORKFLOW_STEPS_JSON="$(normalize_steps_json "$(cat "$steps_file")")"
+    elif [[ -n "$steps_json" ]]; then
+        if [[ -f "$steps_json" ]]; then
+            WORKFLOW_STEPS_JSON="$(normalize_steps_json "$(cat "$steps_json")")"
+        else
+            WORKFLOW_STEPS_JSON="$(normalize_steps_json "$steps_json")"
+        fi
+    fi
+
+    if [[ -n "$WORKFLOW_STEPS_JSON" ]]; then
+        MODE="steps"
+    fi
     
     # パス処理（既存のロジックを再利用）
     info "🔧 パス処理開始: $TARGET_PATH"
@@ -356,9 +432,16 @@ main() {
     
     # エージェント一覧を表示
     display_agent_list "$AGENT_DIR"
-    
+
+    if [[ -n "$WORKFLOW_STEPS_JSON" ]]; then
+        MODE="steps"
+    fi
+
     # 実行順序を決定
     case "$MODE" in
+        "steps")
+            process_steps_mode
+            ;;
         "item-names")
             # アイテム名指定モード
             process_item_names_specification
@@ -382,6 +465,10 @@ main() {
             ;;
     esac
     
+    if [[ -n "$WORKFLOW_STEPS_JSON" ]]; then
+        hydrate_selected_agents_from_steps "$WORKFLOW_STEPS_JSON"
+    fi
+
     # 確認メッセージ
     show_final_confirmation
     
@@ -394,6 +481,23 @@ main() {
     
     # 成功メッセージ表示
     show_success_message
+}
+
+# ステップ定義モード処理
+process_steps_mode() {
+    info "ステップ定義モード: JSON定義に基づきエージェントを設定"
+
+    if [[ -z "$WORKFLOW_STEPS_JSON" ]]; then
+        error_exit "WORKFLOW_STEPS_JSON が空です"
+    fi
+
+    hydrate_selected_agents_from_steps "$WORKFLOW_STEPS_JSON"
+
+    if [[ ${#SELECTED_AGENTS[@]} -eq 0 ]]; then
+        error_exit "ステップ定義にエージェントが含まれていません"
+    fi
+
+    info "✅ 選択されたエージェント: ${SELECTED_AGENTS[*]}"
 }
 
 # クイックモード処理

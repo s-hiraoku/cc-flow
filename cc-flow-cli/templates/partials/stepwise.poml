@@ -1,11 +1,15 @@
 <stepwiseInstructions captionStyle="bold">
   <section caption="Stepwise Instructions">
-    <list for="agent in workflowAgents">
+    <list for="step in workflowSteps">
       <item>
-        <paragraph>Step {{loop.index + 1}}: Launch {{agent}} sub-agent</paragraph>
-        <paragraph>- Use Task tool with subagent_type: "{{agent}}"</paragraph>
-        <paragraph>- Pass user task: $ARGUMENTS</paragraph>
-        <paragraph>- Wait for completion before next step</paragraph>
+        <paragraph>Step {{loop.index + 1}}: {{step.title || ('Workflow Step ' + (loop.index + 1))}}</paragraph>
+        <paragraph>Mode: {{step.mode || 'sequential'}}</paragraph>
+        <list for="agent in step.agents">
+          <item>
+            Use Task tool with subagent_type: "{{agent}}" and pass user task: $ARGUMENTS
+          </item>
+        </list>
+        <paragraph>{{(step.mode || 'sequential') === 'parallel' ? 'Execute these agents in parallel and gather all responses before moving on.' : 'Wait for completion before moving on.'}}</paragraph>
       </item>
     </list>
     <list>

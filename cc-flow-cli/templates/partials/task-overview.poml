@@ -18,6 +18,18 @@
     </list>
   </section>
 
+  <section caption="Workflow Steps">
+    <list for="step in workflowSteps">
+      <item>
+        <paragraph>Step {{loop.index + 1}}: {{step.title || ('Workflow Step ' + (loop.index + 1))}}</paragraph>
+        <paragraph>Mode: {{(step.mode || 'sequential') === 'parallel' ? 'Parallel (agents run concurrently)' : 'Sequential (agents run in order)'}}</paragraph>
+        <list for="agent in step.agents">
+          <item>{{agent}}</item>
+        </list>
+      </item>
+    </list>
+  </section>
+
   <section caption="Usage">
     <code language="bash">
       /{{workflowName}} "your task or requirement"
