@@ -143,44 +143,8 @@ convert_poml_to_markdown() {
     markdown_text="${markdown_text//\\n/$'\n'}"
     markdown_text="${markdown_text//\\\"/\"}"
 
-    # マークダウンコマンドファイル形式にラップ
-    local wf_name="$workflow_name"
-    local description="${WORKFLOW_PURPOSE:-${wf_name} workflow}"
-    local markdown_content="---
-description: ${description}
-argument-hint: [context]
-allowed-tools: [Read, Bash]
----
-
-# ${wf_name}
-
-Execute multiple sub-agents sequentially using POML workflow orchestration.
-
-## Usage
-
-\`\`\`bash
-/${wf_name} \"your task or requirement\"
-\`\`\`
-
-\`\`\`bash
-# Get user input
-ARGUMENTS=\"\$*\"
-
-# Execute workflow orchestrator
-claude subagent general-purpose \"\$(cat <<EOF
-$markdown_text
-EOF
-)\"
-\`\`\`
-
-## Workflow Details
-
-This workflow was generated from POML template with the following agents:
-$agent_list_space
-"
-
-    # Markdownを出力
-    echo "$markdown_content"
+    # シェル用ラッパーを付けずにPOMLで生成された指示のみ返す
+    printf '%s\n' "$markdown_text"
 }
 
 # ワークフロー用のコンテキスト変数を生成
