@@ -27,11 +27,15 @@ Purpose: Execute demo workflow
 
   Mode: Sequential (agents run in order)
 
+  Purpose: Design the architecture
+
   - architecture-designer
 
 - Step 2: QA
 
   Mode: Parallel (agents run concurrently)
+
+  Purpose: Code generation and quality check
 
   - code-generator
 
@@ -60,6 +64,8 @@ Output format:
 
   Mode: sequential
 
+  Purpose: Design the architecture
+
   - Agent: architecture-designer 
 
     - Input: $ARGUMENTS
@@ -69,6 +75,8 @@ Output format:
 - Step 2: QA
 
   Mode: parallel
+
+  Purpose: Code generation and quality check
 
   - Agent: code-generator 
 
@@ -88,6 +96,8 @@ Output format:
 
   Mode: sequential
 
+  Purpose: Design the architecture
+
   - Use Task tool with subagent_type: "architecture-designer" and pass user task: $ARGUMENTS
 
   Wait for completion before moving on.
@@ -95,6 +105,8 @@ Output format:
 - Step 2: QA
 
   Mode: parallel
+
+  Purpose: Code generation and quality check
 
   - Use Task tool with subagent_type: "code-generator" and pass user task: $ARGUMENTS
 

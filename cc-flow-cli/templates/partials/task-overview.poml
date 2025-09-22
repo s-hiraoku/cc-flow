@@ -23,7 +23,7 @@
       <item>
         <paragraph>Step {{loop.index + 1}}: {{step.title || ('Workflow Step ' + (loop.index + 1))}}</paragraph>
         <paragraph>Mode: {{(step.mode || 'sequential') === 'parallel' ? 'Parallel (agents run concurrently)' : 'Sequential (agents run in order)'}}</paragraph>
-        <paragraph for="_ in [step.purpose]" if="step.purpose">Purpose: {{step.purpose}}</paragraph>
+        <paragraph if="step.purpose">Purpose: {{step.purpose}}</paragraph>
         <list for="agent in step.agents">
           <item>{{agent}}</item>
         </list>
