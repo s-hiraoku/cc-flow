@@ -61,9 +61,9 @@ EOF
     local system_node
     system_node=$(command -v node || true)
     if [[ -n "$system_node" ]]; then
-        cat > "$TEST_DIR/mock_bin/node" <<'EOF'
+        cat > "$TEST_DIR/mock_bin/node" <<EOF
 #!/bin/bash
-"$system_node" "$@"
+"$system_node" "\$@"
 EOF
         chmod +x "$TEST_DIR/mock_bin/node"
     fi

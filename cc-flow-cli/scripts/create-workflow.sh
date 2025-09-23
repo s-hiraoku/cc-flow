@@ -35,16 +35,11 @@ parse_workflow_config() {
     local raw_json="$1"
 
     if [[ -z "$raw_json" ]]; then
-        # デフォルト値を返す（steps_json, name, purpose, model, argument_hint）
-        echo ""
-        echo ""
-        echo ""
-        echo ""
-        echo ""
+        # デフォルト値を設定（steps_json, name, purpose, model, argument_hint）
+        WORKFLOW_STEPS_JSON=""
         return 0
     fi
 
-    local steps_json meta_name meta_purpose meta_model meta_argument_hint
     local node_output
     if ! node_output=$(NODE_RAW_JSON="$raw_json" node - <<'NODE'
 const raw = process.env.NODE_RAW_JSON;
@@ -99,33 +94,24 @@ NODE
         error_exit "ワークフロー設定の読み込みに失敗しました"
     fi
 
-    # Node.js出力を解析
-    echo "$node_output" | {
-        read -r steps_json
-        read -r meta_name
-        read -r meta_purpose
-        read -r meta_model
-        read -r meta_argument_hint
+    # Node.js出力を配列に読み込み（サブシェルを使わずメモリ内で処理）
+    local -a lines
+    if command -v mapfile >/dev/null 2>&1; then
+        mapfile -t lines <<< "$node_output"
+    else
+        # mapfile/readarray非対応環境用のフォールバック
+        local IFS=$'\n'
+        read -rd '' -a lines <<< "$node_output" || true
+    fi
 
-        # グローバル変数を設定（パイプの外では使えないので回避策）
-        echo "$steps_json" > /tmp/workflow_steps_$$
-        echo "$meta_name" > /tmp/workflow_name_$$
-        echo "$meta_purpose" > /tmp/workflow_purpose_$$
-        echo "$meta_model" > /tmp/workflow_model_$$
-        echo "$meta_argument_hint" > /tmp/workflow_argument_hint_$$
-    }
+    # 配列から各変数を設定
+    local steps_json="${lines[0]:-}"
+    local meta_name="${lines[1]:-}"
+    local meta_purpose="${lines[2]:-}"
+    local meta_model="${lines[3]:-}"
+    local meta_argument_hint="${lines[4]:-}"
 
-    # 一時ファイルから読み込み
-    steps_json="$(cat /tmp/workflow_steps_$$ 2>/dev/null || echo '')"
-    meta_name="$(cat /tmp/workflow_name_$$ 2>/dev/null || echo '')"
-    meta_purpose="$(cat /tmp/workflow_purpose_$$ 2>/dev/null || echo '')"
-    meta_model="$(cat /tmp/workflow_model_$$ 2>/dev/null || echo '')"
-    meta_argument_hint="$(cat /tmp/workflow_argument_hint_$$ 2>/dev/null || echo '')"
-
-    # 一時ファイルをクリーンアップ
-    rm -f /tmp/workflow_steps_$$ /tmp/workflow_name_$$ /tmp/workflow_purpose_$$ /tmp/workflow_model_$$ /tmp/workflow_argument_hint_$$
-
-    # 戻り値を設定（グローバル変数経由）
+    # グローバル変数を設定
     WORKFLOW_STEPS_JSON="$steps_json"
 
     # 環境変数を設定（既存の値がある場合は上書きしない）
