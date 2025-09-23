@@ -1,138 +1,150 @@
-'use client';
-
 import Link from 'next/link';
-import LiquidGlass from 'liquid-glass-react';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,#3b82f6,transparent)] opacity-20"></div>
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-
-      <div className="max-w-6xl mx-auto relative z-10">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <LiquidGlass displacementScale={20} blurAmount={3} elasticity={0.8}>
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-12 mb-8">
-              <h1 className="text-6xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-6">
-                CC-Flow Web Editor
-              </h1>
-              <p className="text-2xl text-white/80 mb-8 leading-relaxed">
-                Visual Workflow Editor for CC-Flow CLI
-              </p>
-              <div className="flex justify-center gap-6">
-                <LiquidGlass displacementScale={15} blurAmount={2}>
-                  <Link
-                    href="/editor"
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105"
-                  >
-                    Open Workflow Editor
-                  </Link>
-                </LiquidGlass>
-                <LiquidGlass displacementScale={15} blurAmount={2}>
-                  <button className="backdrop-blur-xl bg-white/10 hover:bg-white/20 border border-white/30 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300">
-                    View Documentation
-                  </button>
-                </LiquidGlass>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <h1 className="text-2xl font-bold text-gray-900">CC-Flow</h1>
               </div>
             </div>
-          </LiquidGlass>
+            <nav className="flex space-x-8">
+              <Link href="/editor" className="text-gray-500 hover:text-gray-900">
+                Editor
+              </Link>
+              <a href="#" className="text-gray-500 hover:text-gray-900">
+                Documentation
+              </a>
+              <a href="#" className="text-gray-500 hover:text-gray-900">
+                GitHub
+              </a>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl">
+            Visual Workflow Editor
+          </h1>
+          <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+            Create complex CC-Flow workflows with an intuitive drag-and-drop interface.
+            Build, visualize, and export your agent workflows effortlessly.
+          </p>
+          <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+            <div className="rounded-md shadow">
+              <Link
+                href="/editor"
+                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10"
+              >
+                Open Editor
+              </Link>
+            </div>
+            <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
+              <a
+                href="#"
+                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10"
+              >
+                View Docs
+              </a>
+            </div>
+          </div>
         </div>
 
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <LiquidGlass displacementScale={12} blurAmount={2}>
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-8 h-full">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-xl border border-blue-300/30 rounded-2xl flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-semibold text-white mb-4">
-                Visual Editor
-              </h3>
-              <p className="text-white/70 text-lg leading-relaxed">
-                Drag and drop agents to create complex workflows with visual connections and real-time feedback
+        {/* Features */}
+        <div className="py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="lg:text-center">
+              <h2 className="text-base text-indigo-600 font-semibold tracking-wide uppercase">Features</h2>
+              <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                Everything you need to build workflows
               </p>
             </div>
-          </LiquidGlass>
 
-          <LiquidGlass displacementScale={12} blurAmount={2}>
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-8 h-full">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500/20 to-green-600/20 backdrop-blur-xl border border-green-300/30 rounded-2xl flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-semibold text-white mb-4">
-                Real-time Preview
-              </h3>
-              <p className="text-white/70 text-lg leading-relaxed">
-                See your workflow configuration in JSON format as you build with instant validation
-              </p>
-            </div>
-          </LiquidGlass>
+            <div className="mt-10">
+              <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
+                <div className="relative">
+                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Visual Editor</p>
+                  <p className="mt-2 ml-16 text-base text-gray-500">
+                    Drag and drop agents to create complex workflows with visual connections.
+                  </p>
+                </div>
 
-          <LiquidGlass displacementScale={12} blurAmount={2}>
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-8 h-full">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-xl border border-purple-300/30 rounded-2xl flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-                </svg>
+                <div className="relative">
+                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Real-time Preview</p>
+                  <p className="mt-2 ml-16 text-base text-gray-500">
+                    See your workflow configuration in JSON format as you build.
+                  </p>
+                </div>
+
+                <div className="relative">
+                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                    </svg>
+                  </div>
+                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">CLI Integration</p>
+                  <p className="mt-2 ml-16 text-base text-gray-500">
+                    Seamlessly integrate with existing cc-flow-cli workflows.
+                  </p>
+                </div>
               </div>
-              <h3 className="text-2xl font-semibold text-white mb-4">
-                CLI Integration
-              </h3>
-              <p className="text-white/70 text-lg leading-relaxed">
-                Seamlessly integrate with existing cc-flow-cli workflows and export configurations
-              </p>
             </div>
-          </LiquidGlass>
+          </div>
         </div>
 
         {/* Getting Started */}
-        <div className="text-center">
-          <h2 className="text-4xl font-semibold text-white mb-8">
-            Getting Started
-          </h2>
-          <LiquidGlass displacementScale={15} blurAmount={3}>
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-10 text-left max-w-3xl mx-auto">
-              <ol className="space-y-6 text-white/90">
-                <li className="flex items-start">
-                  <LiquidGlass displacementScale={8} blurAmount={1}>
-                    <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-6 mt-1">1</span>
-                  </LiquidGlass>
-                  <div className="flex-1">
-                    <span className="text-xl">Launch from CC-Flow CLI:</span>
-                    <LiquidGlass displacementScale={5} blurAmount={1}>
-                      <code className="block mt-2 bg-black/30 backdrop-blur-xl border border-white/20 px-4 py-2 rounded-xl text-lg font-mono text-blue-300">cc-flow web</code>
-                    </LiquidGlass>
+        <div className="bg-white">
+          <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:py-20 lg:px-8">
+            <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
+              <div>
+                <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                  Getting Started
+                </h2>
+                <p className="mt-3 max-w-3xl text-lg text-gray-500">
+                  Launch the web editor from your CC-Flow CLI and start building workflows visually.
+                </p>
+                <div className="mt-8 sm:flex">
+                  <div className="rounded-md shadow">
+                    <Link
+                      href="/editor"
+                      className="flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      Try the Editor
+                    </Link>
                   </div>
-                </li>
-                <li className="flex items-start">
-                  <LiquidGlass displacementScale={8} blurAmount={1}>
-                    <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-6 mt-1">2</span>
-                  </LiquidGlass>
-                  <span className="text-xl">Select agents from your .claude/agents directory</span>
-                </li>
-                <li className="flex items-start">
-                  <LiquidGlass displacementScale={8} blurAmount={1}>
-                    <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-6 mt-1">3</span>
-                  </LiquidGlass>
-                  <span className="text-xl">Design your workflow with drag & drop interface</span>
-                </li>
-                <li className="flex items-start">
-                  <LiquidGlass displacementScale={8} blurAmount={1}>
-                    <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-6 mt-1">4</span>
-                  </LiquidGlass>
-                  <span className="text-xl">Export as CC-Flow compatible JSON configuration</span>
-                </li>
-              </ol>
+                </div>
+              </div>
+              <div className="mt-8 lg:mt-0">
+                <div className="bg-gray-900 rounded-lg p-4">
+                  <div className="text-green-400 font-mono text-sm">
+                    <div className="mb-2">$ cc-flow web</div>
+                    <div className="text-gray-400 mb-2">🌐 Opening workflow editor at http://localhost:3000</div>
+                    <div className="text-gray-400 mb-2">✅ Server started successfully</div>
+                    <div className="text-gray-400">🚀 Ready to build workflows!</div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </LiquidGlass>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
