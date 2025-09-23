@@ -1,150 +1,202 @@
-# create-workflow.sh スクリプト仕様書
+# ワークフロー作成スクリプト仕様書
 
-## 概要
+## 📖 概要
 
-指定されたエージェントディレクトリから新しいワークフローコマンド（Claude Code のスラッシュコマンド .md）を自動生成するシェルスクリプトの仕様です。TUI（`npx @hiraoku/cc-flow-cli`）からも本スクリプトが呼び出されます。
+**create-workflow.sh** は、Claude Code のカスタムスラッシュコマンドを自動生成するスクリプトです。JSON設定ファイルを使って、複数のエージェントを組み合わせた強力なワークフローコマンドを作成できます。
 
-## 目的
+## 🚀 クイックスタート
 
-- テンプレートベースでワークフローコマンドを自動生成
-- エージェントディレクトリの構造を解析し、適切なワークフロー定義を作成
-- 手動でのコマンド作成作業を自動化
+### 1. 設定ファイルを作成
 
-## 使用方法
-
-### 前提条件
-- `templates/workflow.md`: Claude Codeスラッシュコマンドのテンプレート
-- `templates/workflow.poml`: POML形式のワークフロー定義テンプレート
-- `.claude/agents/<category>/`: エージェント（`.md`ファイル）が格納されたディレクトリ
-
-### 基本的な使用手順
 ```bash
-# 1. ワークフロー定義 JSON を用意
-cat > ./tmp/spec-workflow.json <<'JSON'
+cat > workflow-config.json <<'JSON'
 {
-  "workflowName": "spec-workflow",
-  "workflowPurpose": "Design review workflow",
+  "workflowName": "api-review",
+  "workflowPurpose": "API設計レビューワークフロー",
+  "workflowModel": "claude-3-5-haiku-20241022",
+  "workflowArgumentHint": "<api-spec-url>",
   "workflowSteps": [
     {
-      "title": "Planning",
+      "title": "設計分析",
       "mode": "sequential",
-      "purpose": "Collect requirements",
-      "agents": ["spec-init"]
+      "agents": ["api-analyzer", "spec-validator"]
     },
     {
-      "title": "Delivery",
+      "title": "品質チェック", 
       "mode": "parallel",
-      "purpose": "Draft solution and validate",
-      "agents": ["spec-design", "spec-impl"]
+      "agents": ["security-checker", "performance-reviewer"]
     }
   ]
 }
 JSON
-
-# 2. JSON ファイルを指定して生成
-scripts/create-workflow.sh ./agents/spec \
-  --steps-json ./tmp/spec-workflow.json
-
-# 3. 生成されたコマンドを使用
-/spec-workflow "要件整理から実装まで"
 ```
 
-## 入力仕様
+### 2. ワークフローを生成
 
-### コマンド構文
 ```bash
-scripts/create-workflow.sh <target_path> --steps-json <path>
+scripts/create-workflow.sh ./agents/api --steps-json workflow-config.json
 ```
 
-### 主なオプション
+### 3. ワークフローを実行
 
-| オプション | 説明 |
-| --- | --- |
-| `--steps-json <path>` | ワークフローステップ定義ファイル。トップレベル配列、`{ "workflowSteps": [...] }`、`{ "WORKFLOW_STEPS_JSON": [...] }` の各形式をサポート。オブジェクトに `workflowName` / `workflowPurpose` が含まれている場合は、未指定時のデフォルト値として利用される |
+```bash
+/api-review "https://api.example.com/spec.yaml"
+```
+
+## ⚙️ コマンド仕様
+
+### 基本構文
+
+```bash
+scripts/create-workflow.sh <target_path> --steps-json <config_file>
+```
+
 ### 引数
-- `<target_path>`: 対象パス
-  - `./agents/<dir>`（例: `./agents/spec`）
-  - `./agents`（全エージェント横断）
-  - 相対パス `../.claude/agents/...` なども指定可能
-  
 
-### モード
-- ステップ定義モードのみ: `--steps-json` で指定した JSON ファイルから `{ title, mode, agents[], purpose? }` を読み込み、テンプレートへ注入する。`mode` は `sequential` または `parallel` を想定。
+- **`<target_path>`**: エージェントディレクトリのパス
+  - `./agents/spec` - 特定カテゴリのエージェント
+  - `./agents` - 全エージェント
+  - `../.claude/agents/demo` - 相対パス指定も可能
 
-## テンプレート変数置換
+- **`--steps-json <config_file>`**: ワークフロー設定JSONファイル
 
-### workflow.mdテンプレート
-- `{DESCRIPTION}` → `"Execute <category> workflow"`
-- `{ARGUMENT_HINT}` → `"[context]"`
-- `{WORKFLOW_NAME}` → `"<category>-workflow"`
+## 📝 設定ファイル形式
 
--### workflow.pomlテンプレート
-- `workflowName` / `workflowPurpose` / `workflowSteps` / `workflowAgents` は `pomljs --context-file` で注入され、`partials/*.poml` から参照される。
-- `workflowSteps` は `{ title, mode, agents[], purpose? }` の配列。`purpose` は任意だが、指定すると各ステップの説明として出力される。`mode` に応じてシーケンシャル／パラレルの文言が切り替わる。
-- `workflowAgents` は一次元配列。`workflowSteps` が空の場合のフォールバックとして利用。
+### ワークフロー全体設定
 
-備考: `pomljs` の実行結果を Markdown として `.claude/commands/<workflow_name>.md` へ書き出し、テンポラリの `.poml` と `context.json` は後処理で削除される。
+| フィールド | 型 | デフォルト | 説明 |
+|-----------|----|-----------|----|
+| `workflowName` | string | `<category>-workflow` | スラッシュコマンド名 |
+| `workflowPurpose` | string | `Execute <category> workflow` | ワークフローの説明 |
+| `workflowModel` | string | 省略 | Claudeモデル指定 |
+| `workflowArgumentHint` | string | `[content]` | 引数のヒント |
 
-## 出力仕様
+### ステップ設定（必須）
 
-### ファイル生成プロセス
-1. **中間ファイル生成**:
-   - `.claude/commands/poml/<category>-workflow.poml`（一時ファイル）
-
-2. **最終ファイル出力**:
-   - `.claude/commands/<category>-workflow.md`（Claude Code スラッシュコマンド定義）
-
-3. **クリーンアップ**:
-   - 中間の `.poml` は削除されます（空の `poml` ディレクトリも削除）。
-
-### 成功時の出力メッセージ（例）
-```bash
-✅ ワークフローコマンドを作成しました: /spec-workflow
-📁 生成されたファイル:
-   - .claude/commands/spec-workflow.md
-
-エージェント実行順序: spec-init → spec-requirements → spec-design → spec-impl
-
-使用方法: /spec-workflow "<context>"
+```json
+{
+  "workflowSteps": [
+    {
+      "title": "ステップ名",                    // ステップの表示名
+      "mode": "sequential" | "parallel",      // 実行モード
+      "agents": ["agent1", "agent2"],        // 実行するエージェント（必須）
+      "purpose": "ステップの説明"              // ステップの目的（省略可）
+    }
+  ]
+}
 ```
 
-## エラーハンドリング
+#### ステップ設定の詳細
 
-### 想定されるエラー
-1. **引数不足**: `エラー: エージェントディレクトリ名が必要です`
-2. **ディレクトリ不存在**: `エラー: エージェントディレクトリ '...' が見つかりません`
-3. **エージェントなし**: `エラー: ディレクトリ '...' にエージェントが見つかりません`
-4. **テンプレート不存在**: `エラー: テンプレートファイルが見つかりません`
-5. **ファイル書き込み権限**: `エラー: コマンドディレクトリに書き込みできません`
-6. **POML処理失敗**: `エラー: pomljsの実行に失敗しました`
-7. **Node.js/npm不存在**: `エラー: Node.jsまたはnpmが見つかりません`
-8. **ステップ定義不正**: `エラー: ステップ定義にエージェントが含まれていません` / `エラー: ステップ定義の読み込みに失敗しました`
+- **`title`**: ステップの表示名
+- **`mode`**: 実行モード
+  - `"sequential"`: エージェントを順次実行
+  - `"parallel"`: エージェントを並列実行
+- **`agents`**: 実行するエージェント名の配列（必須）
+- **`purpose`**: ステップの説明（省略可、指定すると出力に含まれる）
 
-## 技術仕様
+### 設定ファイルの例
+
+```json
+{
+  "workflowName": "code-review",
+  "workflowPurpose": "コードレビューワークフロー",
+  "workflowModel": "claude-3-5-sonnet-20241022",
+  "workflowArgumentHint": "<pull-request-url>",
+  "workflowSteps": [
+    {
+      "title": "静的解析",
+      "mode": "parallel",
+      "purpose": "コード品質とセキュリティの並列チェック",
+      "agents": ["lint-checker", "security-scanner"]
+    },
+    {
+      "title": "レビュー",
+      "mode": "sequential",
+      "purpose": "順次レビューとフィードバック",
+      "agents": ["code-reviewer", "feedback-generator"]
+    }
+  ]
+}
+```
+
+## 📤 出力結果
+
+### 生成される frontmatter
+
+上記設定から生成される `.claude/commands/code-review.md`:
+
+```yaml
+---
+description: コードレビューワークフロー
+argument-hint: <pull-request-url>
+allowed-tools: [Read, Bash]
+model: claude-3-5-sonnet-20241022
+---
+```
+
+### 実行フロー
+
+1. **設定解析**: JSONファイルから各フィールドを抽出
+2. **テンプレート処理**: POML テンプレートでワークフロー生成
+3. **ファイル出力**: `.claude/commands/<workflow-name>.md` に出力
+4. **クリーンアップ**: 一時ファイルを削除
+
+## 🔧 前提条件
+
+### 必要なファイル
+
+- `templates/workflow.md` - Claude Code スラッシュコマンドテンプレート
+- `templates/workflow.poml` - POML ワークフロー定義テンプレート
+- `.claude/agents/<category>/` - エージェントファイル（`.md`）
+
+### 実行環境
+
+- Node.js 18以上
+- npm（pomljs パッケージ用）
+- `.claude/commands/` ディレクトリ（書き込み権限）
+
+## ❌ エラーハンドリング
+
+### 一般的なエラー
+
+| エラー | 原因 | 解決方法 |
+|--------|------|----------|
+| `ステップ定義の読み込みに失敗` | JSON構文エラー | JSON形式を確認 |
+| `エージェントが見つかりません` | 存在しないエージェント指定 | エージェント名を確認 |
+| `テンプレートファイルが見つかりません` | テンプレート不存在 | `templates/` ディレクトリを確認 |
+| `Node.jsが見つかりません` | Node.js未インストール | Node.js をインストール |
+
+### デバッグ方法
+
+```bash
+# 詳細ログ有効化
+VERBOSE=1 scripts/create-workflow.sh ./agents/spec --steps-json config.json
+
+# JSON設定の検証
+node -e "console.log(JSON.parse(require('fs').readFileSync('config.json')))"
+```
+
+## 🏗️ 技術仕様
 
 ### スクリプト構造
+
 ```
 scripts/
 ├── create-workflow.sh          # メインスクリプト
 ├── lib/
 │   ├── agent-discovery.sh      # エージェント検索
 │   ├── template-processor.sh   # テンプレート処理
-│   ├── user-interaction.sh     # 対話処理
-│   └── poml-processor.sh       # POML実行処理
+│   └── poml-processor.sh       # POML処理
 └── utils/
     └── common.sh               # 共通関数
 ```
 
-### 依存関係
-- `templates/workflow.md`, `templates/workflow.poml`, `templates/partials/*.poml`
-- `.claude/agents/` ディレクトリ構造（エージェントの `.md` ファイル）
-- `.claude/commands/` ディレクトリ（書き込み権限）
-- Node.js 18 以上 / npm
-- `pomljs`（`npm install` によりローカル解決できること。ネットワークアクセスが無い環境では事前インストール必須）
+### 処理の流れ
 
-### エージェント名抽出規則
-- ファイル名から `.md` 拡張子を除去してエージェント名とする
-- 例：`spec-init.md` → `spec-init`
-
-### 備考（将来拡張）
-- `poml-processor.sh` により POML→MD 変換を行う経路も用意されていますが、現状の `create-workflow.sh` デフォルトフローでは使用しません。
+1. JSON設定ファイルを Node.js でパース
+2. エージェントディレクトリをスキャン
+3. POML テンプレートに設定を注入
+4. `pomljs` でMarkdown生成
+5. frontmatter プレースホルダーを置換
+6. 最終ファイルを `.claude/commands/` に出力
