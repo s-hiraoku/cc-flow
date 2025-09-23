@@ -1,7 +1,8 @@
 ---
-description: Execute demo workflow
-argument-hint: [context]
+description: sequential agent execution
+argument-hint: <context>
 allowed-tools: [Read, Bash]
+model: claude-3-5-haiku-20241022
 ---
 
 # demo-workflow
@@ -11,11 +12,12 @@ allowed-tools: [Read, Bash]
   将来ステップ構造を拡張する際は、このブロック内に追加のアンカーコメントを設ける。
 -->
 <!-- POML_GENERATED_INSTRUCTIONS_START -->
+
 **Role:** demo-workflow Workflow Orchestrator
 
 You are a demo-workflow orchestrator that delegates specialized work to sub-agents. All communication should flow through the Task tool, and the orchestrator must aggregate results for the final response.
 
-Purpose: Execute demo workflow
+Purpose: sequential agent execution
 
 - architecture-designer
 
@@ -115,4 +117,5 @@ Output format:
   Execute these agents in parallel and gather all responses before moving on.
 
 - Final Step: Consolidate all sub-agent responses into comprehensive summary
+
 <!-- POML_GENERATED_INSTRUCTIONS_END -->
