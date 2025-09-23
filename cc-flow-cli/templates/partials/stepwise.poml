@@ -1,0 +1,22 @@
+<stepwiseInstructions captionStyle="bold">
+  <section caption="Stepwise Instructions">
+    <list for="step in workflowSteps">
+      <item>
+        <paragraph>Step {{loop.index + 1}}: {{step.title || ('Workflow Step ' + (loop.index + 1))}}</paragraph>
+        <paragraph>Mode: {{step.mode || 'sequential'}}</paragraph>
+        <paragraph for="_ in [step.purpose]" if="step.purpose">Purpose: {{step.purpose}}</paragraph>
+        <list for="agent in step.agents">
+          <item>
+            Use Task tool with subagent_type: "{{agent}}" and pass user task: $ARGUMENTS
+          </item>
+        </list>
+        <paragraph>{{(step.mode || 'sequential') === 'parallel' ? 'Execute these agents in parallel and gather all responses before moving on.' : 'Wait for completion before moving on.'}}</paragraph>
+      </item>
+    </list>
+    <list>
+      <item>
+        <paragraph>Final Step: Consolidate all sub-agent responses into comprehensive summary</paragraph>
+      </item>
+    </list>
+  </section>
+</stepwiseInstructions>

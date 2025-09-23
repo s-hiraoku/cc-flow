@@ -1,7 +1,8 @@
 ---
 description: { DESCRIPTION }
 argument-hint: { ARGUMENT_HINT }
-allowed-tools: [Read, Bash]
+allowed-tools: { ALLOWED_TOOLS }
+model: { MODEL }
 ---
 
 # {WORKFLOW_NAME}
@@ -11,5 +12,7 @@ allowed-tools: [Read, Bash]
   将来ステップ構造を拡張する際は、このブロック内に追加のアンカーコメントを設ける。
 -->
 <!-- POML_GENERATED_INSTRUCTIONS_START -->
+
 {POML_GENERATED_INSTRUCTIONS}
+
 <!-- POML_GENERATED_INSTRUCTIONS_END -->

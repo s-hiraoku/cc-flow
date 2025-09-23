@@ -43,52 +43,108 @@ replace_placeholder_variants() {
     printf '%s' "$content"
 }
 
+# 選択されたエージェントからデフォルトのステップJSONを生成
+build_default_workflow_steps_json() {
+    if [[ ${#SELECTED_AGENTS[@]} -eq 0 ]]; then
+        printf '[]'
+        return
+    fi
+
+    local agents_json
+    agents_json=$(create_agent_array_json)
+
+    NODE_SELECTED_AGENTS_JSON="$agents_json" node - <<'NODE'
+const agents = JSON.parse(process.env.NODE_SELECTED_AGENTS_JSON || '[]');
+const steps = agents.map((agent, index) => ({
+  title: `Step ${index + 1}: ${agent}`,
+  mode: 'sequential',
+  agents: [agent]
+}));
+process.stdout.write(JSON.stringify(steps));
+NODE
+}
+
+# ワークフローステップ定義から SELECTED_AGENTS を再構築
+hydrate_selected_agents_from_steps() {
+    local steps_json="$1"
+
+    SELECTED_AGENTS=()
+
+    if [[ -z "$steps_json" ]]; then
+        return 0
+    fi
+
+    while IFS= read -r agent_line; do
+        [[ -z "$agent_line" ]] && continue
+        SELECTED_AGENTS+=("$agent_line")
+    done < <(NODE_WORKFLOW_STEPS_JSON="$steps_json" node - <<'NODE'
+const steps = JSON.parse(process.env.NODE_WORKFLOW_STEPS_JSON || '[]');
+if (!Array.isArray(steps)) {
+  process.exit(0);
+}
+for (const step of steps) {
+  if (!step || !Array.isArray(step.agents)) {
+    continue;
+  }
+  for (const agent of step.agents) {
+    if (typeof agent === 'string' && agent.length > 0) {
+      console.log(agent);
+    }
+  }
+}
+NODE
+    )
+}
+
 # テンプレート変数を置換
 process_templates() {
     local agent_dir="$1"
     local workflow_name="${WORKFLOW_NAME:-${agent_dir}-workflow}"
     local description="${WORKFLOW_PURPOSE:-Execute $agent_dir workflow}"
-    local argument_hint="[context]"
-    local agent_array_json
+    local argument_hint="${WORKFLOW_ARGUMENT_HINT:-[context]}"
+    local steps_json="${WORKFLOW_STEPS_JSON:-}"
 
-    # エージェント配列JSONを唯一のソースとして生成
-    agent_array_json="$(create_agent_array_json)"
+    if [[ -z "$steps_json" ]]; then
+        steps_json=$(build_default_workflow_steps_json)
+    else
+        hydrate_selected_agents_from_steps "$steps_json"
+    fi
 
-    # POMLからMarkdown実行指示を生成
     local temp_instructions
     if ! temp_instructions=$(mktemp "${TMPDIR:-/tmp}/poml_instructions_XXXXXX.md"); then
         error_exit "一時指示ファイルの作成に失敗しました"
     fi
     trap "rm -f '$temp_instructions'" EXIT
     local poml_result
-    poml_result=$(convert_poml_to_markdown "$WORKFLOW_POML_TEMPLATE" "$workflow_name" "$description")
+    poml_result=$(convert_poml_to_markdown "$WORKFLOW_POML_TEMPLATE" "$workflow_name" "$description" "$steps_json")
 
-    # 結果をファイルに書き込み
     echo "$poml_result" > "$temp_instructions"
 
-    # workflow.mdテンプレートの変数置換
     WORKFLOW_MD_CONTENT="$WORKFLOW_MD_TEMPLATE"
     WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "DESCRIPTION" "$description")
     WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "ARGUMENT_HINT" "$argument_hint")
     WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "WORKFLOW_NAME" "$workflow_name")
+    
+    # Claude Code推奨設定のデフォルト値を設定
+    WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "ALLOWED_TOOLS" "[Read, Bash]")
+    
+    # model設定: 指定されていれば使用、なければフィールド自体を省略
+    if [[ -n "${WORKFLOW_MODEL:-}" ]]; then
+        WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "MODEL" "$WORKFLOW_MODEL")
+    else
+        # MODELフィールドを完全に削除（省略時の推奨動作）
+        WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "model: { MODEL }" "")
+    fi
 
-    # POMLで生成された実行指示を挿入（シンプルな文字列置換）
-    local poml_instructions=$(cat "$temp_instructions")
+    local poml_instructions
+    poml_instructions=$(cat "$temp_instructions")
     WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "POML_GENERATED_INSTRUCTIONS" "$poml_instructions")
 
-    # 一時ファイルをクリーンアップ
     rm -f "$temp_instructions"
-    
-    # workflow.pomlテンプレートの変数置換
+
     WORKFLOW_POML_CONTENT="$WORKFLOW_POML_TEMPLATE"
-    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_NAME" "$workflow_name")
-    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_AGENT_ARRAY" "$agent_array_json")
-    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_CONTEXT" "'sequential agent execution'")
-    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_TYPE_DEFINITIONS" "")
-    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "WORKFLOW_SPECIFIC_INSTRUCTIONS" "")
-    WORKFLOW_POML_CONTENT=$(replace_placeholder_variants "$WORKFLOW_POML_CONTENT" "ACCUMULATED_CONTEXT" "")
-    
-    # ワークフロー名をグローバル変数に設定
+    WORKFLOW_STEPS_JSON="$steps_json"
+
     WORKFLOW_NAME="$workflow_name"
 }
 

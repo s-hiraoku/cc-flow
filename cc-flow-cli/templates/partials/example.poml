@@ -1,0 +1,18 @@
+<example captionStyle="bold">
+  <section caption="Example Workflow Execution">
+    <list for="step in workflowSteps">
+      <item>
+        <paragraph>Step {{loop.index + 1}}: {{step.title || ('Workflow Step ' + (loop.index + 1))}}</paragraph>
+        <paragraph>Mode: {{step.mode || 'sequential'}}</paragraph>
+        <paragraph for="_ in [step.purpose]" if="step.purpose">Purpose: {{step.purpose}}</paragraph>
+        <list for="agent in step.agents">
+          <item>
+            Agent: {{agent}}
+            <paragraph>- Input: $ARGUMENTS</paragraph>
+            <paragraph>- Expected: Specialized processing by {{agent}}</paragraph>
+          </item>
+        </list>
+      </item>
+    </list>
+  </section>
+</example>

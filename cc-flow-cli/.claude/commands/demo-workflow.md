@@ -1,7 +1,8 @@
 ---
-description: デモ用のスラッシュコマンドです
-argument-hint: [context]
+description: sequential agent execution
+argument-hint: <context>
 allowed-tools: [Read, Bash]
+model: claude-3-5-haiku-20241022
 ---
 
 # demo-workflow
@@ -11,15 +12,36 @@ allowed-tools: [Read, Bash]
   将来ステップ構造を拡張する際は、このブロック内に追加のアンカーコメントを設ける。
 -->
 <!-- POML_GENERATED_INSTRUCTIONS_START -->
+
 **Role:** demo-workflow Workflow Orchestrator
 
 You are a demo-workflow orchestrator that delegates specialized work to sub-agents. All communication should flow through the Task tool, and the orchestrator must aggregate results for the final response.
 
-- code-generator
-
-- deployment-manager
+Purpose: sequential agent execution
 
 - architecture-designer
+
+- code-generator
+
+- quality-checker
+
+- Step 1: Design
+
+  Mode: Sequential (agents run in order)
+
+  Purpose: Design the architecture
+
+  - architecture-designer
+
+- Step 2: QA
+
+  Mode: Parallel (agents run concurrently)
+
+  Purpose: Code generation and quality check
+
+  - code-generator
+
+  - quality-checker
 
 `/demo-workflow "your task or requirement"`
 
@@ -40,49 +62,60 @@ Output format:
 
 **Example:**
 
-- Step 1: Execute code-generator
+- Step 1: Design
 
-  - Input: $ARGUMENTS
+  Mode: sequential
 
-  - Expected: Specialized processing by code-generator
+  Purpose: Design the architecture
 
-- Step 2: Execute deployment-manager
+  - Agent: architecture-designer 
 
-  - Input: $ARGUMENTS
+    - Input: $ARGUMENTS
 
-  - Expected: Specialized processing by deployment-manager
+    - Expected: Specialized processing by architecture-designer
 
-- Step 3: Execute architecture-designer
+- Step 2: QA
 
-  - Input: $ARGUMENTS
+  Mode: parallel
 
-  - Expected: Specialized processing by architecture-designer
+  Purpose: Code generation and quality check
+
+  - Agent: code-generator 
+
+    - Input: $ARGUMENTS
+
+    - Expected: Specialized processing by code-generator
+
+  - Agent: quality-checker 
+
+    - Input: $ARGUMENTS
+
+    - Expected: Specialized processing by quality-checker
 
 **Stepwise Instructions:**
 
-- Step 1: Launch code-generator sub-agent
+- Step 1: Design
 
-  - Use Task tool with subagent_type: "code-generator"
+  Mode: sequential
 
-  - Pass user task: $ARGUMENTS
+  Purpose: Design the architecture
 
-  - Wait for completion before next step
+  - Use Task tool with subagent_type: "architecture-designer" and pass user task: $ARGUMENTS
 
-- Step 2: Launch deployment-manager sub-agent
+  Wait for completion before moving on.
 
-  - Use Task tool with subagent_type: "deployment-manager"
+- Step 2: QA
 
-  - Pass user task: $ARGUMENTS
+  Mode: parallel
 
-  - Wait for completion before next step
+  Purpose: Code generation and quality check
 
-- Step 3: Launch architecture-designer sub-agent
+  - Use Task tool with subagent_type: "code-generator" and pass user task: $ARGUMENTS
 
-  - Use Task tool with subagent_type: "architecture-designer"
+  - Use Task tool with subagent_type: "quality-checker" and pass user task: $ARGUMENTS
 
-  - Pass user task: $ARGUMENTS
-
-  - Wait for completion before next step
+  Execute these agents in parallel and gather all responses before moving on.
 
 - Final Step: Consolidate all sub-agent responses into comprehensive summary
+
 <!-- POML_GENERATED_INSTRUCTIONS_END -->

@@ -44,7 +44,7 @@ create_agent_array_json() {
         else
             printf ', '
         fi
-        printf "'%s'" "$agent"
+        printf '"%s"' "$agent"
     done
     printf ']'
 }
@@ -53,59 +53,117 @@ create_agent_array_json() {
 convert_poml_to_markdown() {
     local poml_content="$1"
     local workflow_name="$2"
-    local user_context="$3"
+    local workflow_purpose="$3"
+    local workflow_steps_json="$4"
+
+    if [[ -z "$workflow_steps_json" ]]; then
+        workflow_steps_json="[]"
+    fi
 
     # Node.js環境をチェック（サイレント）
     check_nodejs_dependencies >/dev/null 2>&1
 
-    # エージェントリストを唯一のソースから生成
-    local agent_array
-    agent_array="$(create_agent_array_json)"
+    # workflowSteps をバリデート＆整形し、steps 由来のエージェント配列を抽出
+    local sanitized_steps_json agents_from_steps
+    if ! IFS=$'\n' read -r sanitized_steps_json agents_from_steps < <(
+        NODE_WORKFLOW_STEPS_JSON="$workflow_steps_json" node - <<'NODE'
+const input = process.env.NODE_WORKFLOW_STEPS_JSON || '[]';
+let steps;
+try {
+  const parsed = JSON.parse(input);
+  if (Array.isArray(parsed)) {
+    steps = parsed;
+  } else {
+    steps = [];
+  }
+} catch (error) {
+  steps = [];
+}
 
-    # ワークフローコンテキストは標準値を使用（必要に応じて拡張）
-    local workflow_context="'sequential agent execution'"
+const flattenAgents = [];
+for (const step of steps) {
+  if (step && Array.isArray(step.agents)) {
+    for (const agent of step.agents) {
+      if (typeof agent === 'string' && agent.length > 0) {
+        flattenAgents.push(agent);
+      }
+    }
+  }
+}
 
-    # 一時POMLファイルを安全に作成
-    local temp_poml
-    if ! temp_poml=$(mktemp "${TMPDIR:-/tmp}/workflow_${workflow_name}_XXXXXX.poml"); then
-        error_exit "一時POMLファイルの作成に失敗しました"
+process.stdout.write(JSON.stringify(steps));
+process.stdout.write('\n');
+process.stdout.write(JSON.stringify(flattenAgents));
+NODE
+    ); then
+        error_exit "workflowSteps JSON の解析に失敗しました"
     fi
 
-    # クリーンアップのためのtrap設定
-    trap "rm -f '$temp_poml'" EXIT
+    # Steps からエージェントが抽出できない場合は SELECTED_AGENTS から生成
+    local workflow_agents_json
+    if [[ "$agents_from_steps" != "[]" && -n "$agents_from_steps" ]]; then
+        workflow_agents_json="$agents_from_steps"
+    else
+        workflow_agents_json="$(create_agent_array_json)"
+    fi
 
-    # POMLテンプレートの変数置換を行う
-    local processed_poml="$poml_content"
-    processed_poml="${processed_poml//\{WORKFLOW_AGENT_ARRAY\}/$agent_array}"
-    processed_poml="${processed_poml//\{WORKFLOW_CONTEXT\}/$workflow_context}"
+    # 一時POMLファイルを安全に作成
+    local template_root="$LIB_SCRIPT_DIR/../../templates"
+    local temp_dir
+    if ! temp_dir=$(mktemp -d "${TMPDIR:-/tmp}/workflow_${workflow_name}_XXXXXX"); then
+        error_exit "一時ディレクトリの作成に失敗しました"
+    fi
 
-    local escaped_workflow_name
-    escaped_workflow_name="${workflow_name//\'/\\\'}"
-    processed_poml="${processed_poml//\{WORKFLOW_NAME\}/$escaped_workflow_name}"
+    local temp_poml="$temp_dir/workflow.poml"
 
     # 処理済みPOMLファイルを保存
-    echo "$processed_poml" > "$temp_poml"
+    echo "$poml_content" > "$temp_poml"
+
+    # include 参照を解決するため、partials ディレクトリをコピー
+    if [[ -d "$template_root/partials" ]]; then
+        cp -R "$template_root/partials" "$temp_dir/"
+    fi
+
+    # コンテキスト JSON を作成
+    local context_file="$temp_dir/context.json"
+    NODE_WORKFLOW_NAME="$workflow_name" \
+    NODE_WORKFLOW_PURPOSE="${workflow_purpose:-}" \
+    NODE_WORKFLOW_STEPS_JSON="$sanitized_steps_json" \
+    NODE_WORKFLOW_AGENTS_JSON="$workflow_agents_json" \
+    node - <<'NODE' > "$context_file"
+const workflowName = process.env.NODE_WORKFLOW_NAME || '';
+const workflowPurpose = process.env.NODE_WORKFLOW_PURPOSE || '';
+const steps = JSON.parse(process.env.NODE_WORKFLOW_STEPS_JSON || '[]');
+const agents = JSON.parse(process.env.NODE_WORKFLOW_AGENTS_JSON || '[]');
+
+const context = {
+  workflowName,
+  workflowPurpose,
+  workflowSteps: steps,
+  workflowAgents: agents
+};
+
+process.stdout.write(JSON.stringify(context));
+NODE
 
     # pomljsを使ってPOMLをマークダウンに変換
     local poml_output
-    local poml_error
+    local temp_error="$temp_dir/poml_error.log"
+    trap "rm -rf '$temp_dir'" EXIT
 
-    # pomljsでPOMLファイルを処理 (--format dict for stable JSON output)
-    local temp_dir
-    temp_dir="$(dirname "$temp_poml")"
-    local temp_error
-    if ! temp_error=$(mktemp "${TMPDIR:-/tmp}/poml_error_XXXXXX"); then
-        error_exit "一時エラーファイルの作成に失敗しました"
-    fi
-    trap "rm -f '$temp_poml' '$temp_error'" EXIT
-
-    if ! { poml_output=$(npx pomljs --file "$temp_poml" --cwd "$temp_dir" --format dict 2>"$temp_error") && poml_error=$(cat "$temp_error" 2>/dev/null || echo ""); }; then
-        local error_msg="$poml_output $poml_error"
-        error_exit "pomljsによるPOML変換に失敗しました: $error_msg"
+    if ! poml_output=$(npx pomljs \
+        --file "$temp_poml" \
+        --cwd "$temp_dir" \
+        --format dict \
+        --context-file "$context_file" 2>"$temp_error"); then
+        local poml_error
+        poml_error=$(cat "$temp_error" 2>/dev/null || echo "")
+        error_exit "pomljsによるPOML変換に失敗しました: $poml_error"
     fi
 
     # 一時ファイルをクリーンアップ
-    rm -f "$temp_poml"
+    rm -rf "$temp_dir"
+    trap - EXIT
 
     # pomljsのJSON出力からマークダウンコンテンツを抽出
     local markdown_text
@@ -141,7 +199,10 @@ convert_poml_file_to_markdown() {
 
     validate_args "$poml_file" "POMLファイルパス"
     validate_args "$output_file" "出力ファイルパス"
-    check_file "$poml_file" "POMLファイル"
+
+    if [[ ! -f "$poml_file" ]]; then
+        error_exit "ファイルが見つかりません: $poml_file"
+    fi
 
     info "POMLファイルを変換しています: $poml_file"
 
@@ -156,7 +217,7 @@ convert_poml_file_to_markdown() {
     fi
 
     local markdown_output
-    if ! markdown_output=$(convert_poml_to_markdown "$poml_content" "$effective_workflow_name" "$user_context"); then
+    if ! markdown_output=$(convert_poml_to_markdown "$poml_content" "$effective_workflow_name" "" "[]"); then
         error_exit "POMLからMarkdownへの変換に失敗しました"
     fi
 
@@ -267,7 +328,9 @@ process_multiple_poml_files() {
     local output_dir="$2"
     
     # ディレクトリの存在確認
-    check_directory "$poml_dir" "POMLディレクトリ"
+    if [[ ! -d "$poml_dir" ]]; then
+        error_exit "ディレクトリが見つかりません: $poml_dir"
+    fi
     safe_mkdir "$output_dir"
     
     # POMLファイルを検索
