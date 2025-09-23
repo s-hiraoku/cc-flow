@@ -101,7 +101,7 @@ process_templates() {
     local agent_dir="$1"
     local workflow_name="${WORKFLOW_NAME:-${agent_dir}-workflow}"
     local description="${WORKFLOW_PURPOSE:-Execute $agent_dir workflow}"
-    local argument_hint="[context]"
+    local argument_hint="${WORKFLOW_ARGUMENT_HINT:-[context]}"
     local steps_json="${WORKFLOW_STEPS_JSON:-}"
 
     if [[ -z "$steps_json" ]]; then
@@ -124,6 +124,17 @@ process_templates() {
     WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "DESCRIPTION" "$description")
     WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "ARGUMENT_HINT" "$argument_hint")
     WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "WORKFLOW_NAME" "$workflow_name")
+    
+    # Claude Code推奨設定のデフォルト値を設定
+    WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "ALLOWED_TOOLS" "[Read, Bash]")
+    
+    # model設定: 指定されていれば使用、なければフィールド自体を省略
+    if [[ -n "${WORKFLOW_MODEL:-}" ]]; then
+        WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "MODEL" "$WORKFLOW_MODEL")
+    else
+        # MODELフィールドを完全に削除（省略時の推奨動作）
+        WORKFLOW_MD_CONTENT=$(replace_placeholder_variants "$WORKFLOW_MD_CONTENT" "model: { MODEL }" "")
+    fi
 
     local poml_instructions
     poml_instructions=$(cat "$temp_instructions")

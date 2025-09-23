@@ -30,38 +30,61 @@ declare AGENT_DIR=""
 declare GENERATED_FILE_PATH=""
 declare WORKFLOW_STEPS_JSON="${WORKFLOW_STEPS_JSON:-}"
 
-# JSON正規化: 配列 or { WORKFLOW_STEPS_JSON: [...] } に対応
-normalize_steps_json() {
+# ワークフロー設定を一括解析（効率的な1回実行）
+parse_workflow_config() {
     local raw_json="$1"
 
     if [[ -z "$raw_json" ]]; then
-        echo "" && return 0
+        # デフォルト値を返す（steps_json, name, purpose, model, argument_hint）
+        echo ""
+        echo ""
+        echo ""
+        echo ""
+        echo ""
+        return 0
     fi
 
-    local steps_json meta_name meta_purpose
-    if ! IFS=$'\n' read -r steps_json meta_name meta_purpose < <(NODE_RAW_JSON="$raw_json" node - <<'NODE'
+    local steps_json meta_name meta_purpose meta_model meta_argument_hint
+    {
+        read -r steps_json
+        read -r meta_name
+        read -r meta_purpose
+        read -r meta_model
+        read -r meta_argument_hint
+    } < <(NODE_RAW_JSON="$raw_json" node - <<'NODE'
 const raw = process.env.NODE_RAW_JSON;
 let parsed;
 try {
   parsed = JSON.parse(raw);
 } catch (error) {
-  console.error('ステップ定義 JSON の解析に失敗しました');
+  console.error('ワークフロー設定ファイルの解析に失敗しました');
   process.exit(1);
 }
 
 let steps = [];
 let name = '';
 let purpose = '';
+let model = '';
+let argumentHint = '';
 
+// ステップ配列の抽出
 if (Array.isArray(parsed)) {
   steps = parsed;
 } else if (parsed && Array.isArray(parsed.workflowSteps)) {
   steps = parsed.workflowSteps;
+
+  // メタデータの抽出（workflowSteps形式の場合のみ）
   if (typeof parsed.workflowName === 'string') {
     name = parsed.workflowName;
   }
   if (typeof parsed.workflowPurpose === 'string') {
     purpose = parsed.workflowPurpose;
+  }
+  if (typeof parsed.workflowModel === 'string') {
+    model = parsed.workflowModel;
+  }
+  if (typeof parsed.workflowArgumentHint === 'string') {
+    argumentHint = parsed.workflowArgumentHint;
   }
 } else if (parsed && Array.isArray(parsed.WORKFLOW_STEPS_JSON)) {
   steps = parsed.WORKFLOW_STEPS_JSON;
@@ -70,25 +93,27 @@ if (Array.isArray(parsed)) {
   process.exit(1);
 }
 
-process.stdout.write(JSON.stringify(steps));
-process.stdout.write('\n');
-process.stdout.write(name || '');
-process.stdout.write('\n');
-process.stdout.write(purpose || '');
+// 出力: steps_json, name, purpose, model, argument_hint
+console.log(JSON.stringify(steps));
+console.log(name || '');
+console.log(purpose || '');
+console.log(model || '');
+console.log(argumentHint || '');
 NODE
-    ); then
-        error_exit "ステップ定義の読み込みに失敗しました"
+    )
+
+    if [[ $? -ne 0 ]]; then
+        error_exit "ワークフロー設定の読み込みに失敗しました"
     fi
 
-    if [[ -z "${WORKFLOW_NAME:-}" && -n "$meta_name" ]]; then
-        WORKFLOW_NAME="$meta_name"
-    fi
+    # 戻り値を設定（グローバル変数経由）
+    WORKFLOW_STEPS_JSON="$steps_json"
 
-    if [[ -z "${WORKFLOW_PURPOSE:-}" && -n "$meta_purpose" ]]; then
-        WORKFLOW_PURPOSE="$meta_purpose"
-    fi
-
-    echo "$steps_json"
+    # 環境変数を設定（既存の値がある場合は上書きしない）
+    [[ -z "${WORKFLOW_NAME:-}" && -n "$meta_name" ]] && export WORKFLOW_NAME="$meta_name"
+    [[ -z "${WORKFLOW_PURPOSE:-}" && -n "$meta_purpose" ]] && export WORKFLOW_PURPOSE="$meta_purpose"
+    [[ -z "${WORKFLOW_MODEL:-}" && -n "$meta_model" ]] && export WORKFLOW_MODEL="$meta_model"
+    [[ -z "${WORKFLOW_ARGUMENT_HINT:-}" && -n "$meta_argument_hint" ]] && export WORKFLOW_ARGUMENT_HINT="$meta_argument_hint"
 }
 
 # 簡潔な使用方法を表示
@@ -201,7 +226,8 @@ parse_modern_arguments() {
         error_exit "ステップ定義ファイル '$steps_source' が見つかりません"
     fi
 
-    WORKFLOW_STEPS_JSON="$(normalize_steps_json "$(cat "$steps_source")")"
+    # ワークフロー設定を一括解析
+    parse_workflow_config "$(cat "$steps_source")"
 
     info "🔧 パス処理開始: $TARGET_PATH"
     parse_target_path "$TARGET_PATH"
