@@ -83,19 +83,22 @@ cc-flow-web/
 
 ## Documentation
 
-### 📚 Comprehensive Specifications
-For detailed project information, refer to the complete documentation suite:
+### 📚 Complete Documentation Suite
+Comprehensive documentation is available in the `/docs` directory:
 
-- **[Project Specification](./docs/specifications/PROJECT_SPECIFICATION.md)** - Master project overview and specifications
-- **[Technical Design](./docs/specifications/TECHNICAL_DESIGN_SPEC.md)** - Comprehensive technical architecture
-- **[Implementation Roadmap](./docs/specifications/IMPLEMENTATION_SPEC.md)** - Current development status and tasks
-- **[Documentation Index](./docs/specifications/DOCUMENTATION_INDEX.md)** - Complete documentation navigation
+- **[Documentation Index](./docs/README.md)** - Complete documentation navigation
+- **[Development Guide](./docs/development/DEVELOPMENT_GUIDE.md)** - Setup and development workflow  
+- **[User Guide](./docs/guides/USER_GUIDE.md)** - End-user documentation
+- **[Technical Architecture](./docs/architecture/TECHNICAL_ARCHITECTURE.md)** - System design and components
+- **[Testing Guide](./docs/testing/TESTING_GUIDE.md)** - Testing strategy and implementation
+- **[Code Standards](./docs/development/CODE_STANDARDS.md)** - Coding conventions and best practices
 
 ### 🎯 Quick Navigation by Role
-- **Project Managers**: [Project Specification](./docs/specifications/PROJECT_SPECIFICATION.md)
-- **Developers**: [Implementation Roadmap](./docs/specifications/IMPLEMENTATION_SPEC.md)
-- **Architects**: [Technical Design](./docs/specifications/TECHNICAL_DESIGN_SPEC.md)
-- **New Contributors**: [Documentation Index](./docs/specifications/DOCUMENTATION_INDEX.md)
+- **New Users**: [User Guide](./docs/guides/USER_GUIDE.md)
+- **Developers**: [Development Guide](./docs/development/DEVELOPMENT_GUIDE.md)
+- **Architects**: [Technical Architecture](./docs/architecture/TECHNICAL_ARCHITECTURE.md)
+- **Testers**: [Testing Guide](./docs/testing/TESTING_GUIDE.md)
+- **Contributors**: [Code Standards](./docs/development/CODE_STANDARDS.md)
 
 ## Integration with CC-Flow CLI
 
@@ -109,10 +112,10 @@ This web editor is designed to work seamlessly with the existing cc-flow CLI eco
 ## Contributing
 
 ### Development Workflow
-1. Review [Implementation Roadmap](./docs/specifications/IMPLEMENTATION_SPEC.md) for current tasks
-2. Check [Technical Design](./docs/specifications/TECHNICAL_DESIGN_SPEC.md) for architecture details
-3. Follow TypeScript and React best practices
-4. Ensure accessibility compliance
+1. Review [Development Guide](./docs/development/DEVELOPMENT_GUIDE.md) for setup and workflow
+2. Check [Technical Architecture](./docs/architecture/TECHNICAL_ARCHITECTURE.md) for system design
+3. Follow [Code Standards](./docs/development/CODE_STANDARDS.md) for consistency
+4. Use [Testing Guide](./docs/testing/TESTING_GUIDE.md) for quality assurance
 5. Maintain compatibility with cc-flow CLI ecosystem
 
 ### Code Standards

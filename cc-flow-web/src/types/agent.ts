@@ -4,12 +4,15 @@ export interface Agent {
   name: string;
   path: string;
   description: string;
-  metadata?: Record<string, any>;
+  category?: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AgentCategory {
+  name: string;
   path: string;
   agents: Agent[];
+  description?: string;
 }
 
 export interface AgentsResponse {
@@ -17,3 +20,4 @@ export interface AgentsResponse {
     [category: string]: AgentCategory;
   };
 }
+

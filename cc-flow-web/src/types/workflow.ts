@@ -19,14 +19,14 @@ export interface WorkflowConfig extends WorkflowMetadata {
 }
 
 // ReactFlow Node Types
-export interface AgentNodeData {
+export interface AgentNodeData extends Record<string, unknown> {
   agentName: string;
   agentPath?: string;
   label: string;
   description?: string;
 }
 
-export interface StepGroupNodeData {
+export interface StepGroupNodeData extends Record<string, unknown> {
   title: string;
   mode: 'sequential' | 'parallel';
   purpose?: string;
@@ -36,6 +36,15 @@ export interface StepGroupNodeData {
 }
 
 export type WorkflowNodeData = AgentNodeData | StepGroupNodeData;
+
+// Type guards for better type safety
+export function isAgentNodeData(data: WorkflowNodeData): data is AgentNodeData {
+  return 'agentName' in data;
+}
+
+export function isStepGroupNodeData(data: WorkflowNodeData): data is StepGroupNodeData {
+  return 'title' in data && 'mode' in data;
+}
 
 export interface WorkflowNode {
   id: string;
