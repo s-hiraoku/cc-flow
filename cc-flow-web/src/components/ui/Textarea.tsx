@@ -25,7 +25,8 @@ export function Textarea({
 
   const textareaClasses = `
     ${baseClasses}
-    border border-gray-300 shadow-sm
+    border border-gray-300 shadow-sm bg-white text-gray-900
+    placeholder:text-gray-500
     focus:ring-indigo-500 focus:border-indigo-500
     ${className}
   `.trim();
