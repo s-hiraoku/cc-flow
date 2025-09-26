@@ -35,7 +35,23 @@ export interface StepGroupNodeData extends Record<string, unknown> {
   description?: string;
 }
 
-export type WorkflowNodeData = AgentNodeData | StepGroupNodeData;
+export interface StartNodeData extends Record<string, unknown> {
+  kind: 'start';
+  label: string;
+  description?: string;
+}
+
+export interface EndNodeData extends Record<string, unknown> {
+  kind: 'end';
+  label: string;
+  description?: string;
+}
+
+export type WorkflowNodeData =
+  | AgentNodeData
+  | StepGroupNodeData
+  | StartNodeData
+  | EndNodeData;
 
 // Type guards for better type safety
 export function isAgentNodeData(data: WorkflowNodeData): data is AgentNodeData {
@@ -44,6 +60,14 @@ export function isAgentNodeData(data: WorkflowNodeData): data is AgentNodeData {
 
 export function isStepGroupNodeData(data: WorkflowNodeData): data is StepGroupNodeData {
   return 'title' in data && 'mode' in data;
+}
+
+export function isStartNodeData(data: WorkflowNodeData): data is StartNodeData {
+  return 'kind' in data && (data as StartNodeData).kind === 'start';
+}
+
+export function isEndNodeData(data: WorkflowNodeData): data is EndNodeData {
+  return 'kind' in data && (data as EndNodeData).kind === 'end';
 }
 
 export interface WorkflowNode {

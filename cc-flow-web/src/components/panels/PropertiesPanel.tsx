@@ -37,12 +37,8 @@ export default function PropertiesPanel({
             mode: "sequential" as const,
             purpose: metadata.workflowPurpose || "Sample workflow step",
             agents: nodes
-              .map((node) => {
-                if (isAgentNodeData(node.data)) {
-                  return node.data.agentName || node.data.label;
-                }
-                return node.data.label;
-              })
+              .filter((node) => isAgentNodeData(node.data))
+              .map((node) => node.data.agentName || node.data.label)
               .filter(Boolean),
           },
         ],

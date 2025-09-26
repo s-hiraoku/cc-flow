@@ -82,6 +82,8 @@ describe('Drag and Drop Integration', () => {
 
     expect(screen.getByText('Test Agent 1')).toBeInTheDocument();
     expect(screen.getByText('Test Agent 2')).toBeInTheDocument();
+    expect(screen.getByText('Start Node')).toBeInTheDocument();
+    expect(screen.getByText('End Node')).toBeInTheDocument();
     expect(screen.getByTestId('react-flow')).toBeInTheDocument();
   });
 
@@ -110,6 +112,15 @@ describe('Drag and Drop Integration', () => {
 
     expect(mockDataTransfer.setData).toHaveBeenCalledWith('application/reactflow', 'agent');
     expect(mockDataTransfer.setData).toHaveBeenCalledWith(
+      'application/palette-node',
+      JSON.stringify({
+        type: 'agent',
+        name: mockAgents[0].name,
+        description: mockAgents[0].description,
+        path: mockAgents[0].path,
+      })
+    );
+    expect(mockDataTransfer.setData).toHaveBeenCalledWith(
       'application/agent',
       JSON.stringify(mockAgents[0])
     );
@@ -120,6 +131,14 @@ describe('Drag and Drop Integration', () => {
       getData: vi.fn((type: string) => {
         if (type === 'application/reactflow') return 'agent';
         if (type === 'application/agent') return JSON.stringify(mockAgents[0]);
+        if (type === 'application/palette-node') {
+          return JSON.stringify({
+            type: 'agent',
+            name: mockAgents[0].name,
+            description: mockAgents[0].description,
+            path: mockAgents[0].path,
+          });
+        }
         return '';
       }),
     };
@@ -141,6 +160,38 @@ describe('Drag and Drop Integration', () => {
       // For now, we verify that the drop event was handled without errors
       expect(mockDataTransfer.getData).toHaveBeenCalledWith('application/reactflow');
       expect(mockDataTransfer.getData).toHaveBeenCalledWith('application/agent');
+      expect(mockDataTransfer.getData).toHaveBeenCalledWith('application/palette-node');
+    });
+  });
+
+  it('should handle dropping workflow primitives', async () => {
+    const mockDataTransfer = {
+      getData: vi.fn((type: string) => {
+        if (type === 'application/reactflow') return 'start';
+        if (type === 'application/palette-node') {
+          return JSON.stringify({
+            type: 'start',
+            name: 'Start',
+            description: 'Workflow entry point. Use exactly one per workflow.',
+          });
+        }
+        return '';
+      }),
+    };
+
+    render(<DragDropTestWrapper />);
+
+    const canvas = screen.getByTestId('react-flow');
+
+    fireEvent.drop(canvas, {
+      dataTransfer: mockDataTransfer,
+      clientX: 320,
+      clientY: 180,
+    });
+
+    await waitFor(() => {
+      expect(mockDataTransfer.getData).toHaveBeenCalledWith('application/reactflow');
+      expect(mockDataTransfer.getData).toHaveBeenCalledWith('application/palette-node');
     });
   });
 

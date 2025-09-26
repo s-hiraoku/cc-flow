@@ -48,6 +48,7 @@ export function useWorkflowEditor(): UseWorkflowEditorReturn {
             mode: "sequential" as const,
             purpose: metadata.workflowPurpose || "Sample workflow step",
             agents: nodes
+              .filter((node) => node.type === 'agent')
               .map((node) => node.data.agentName || node.data.label)
               .filter(Boolean),
           },

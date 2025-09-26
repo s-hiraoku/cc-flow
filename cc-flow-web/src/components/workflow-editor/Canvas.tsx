@@ -9,10 +9,7 @@ import {
   MiniMap,
   Node,
   Edge,
-  addEdge,
   Connection,
-  useNodesState,
-  useEdgesState,
   useReactFlow,
   NodeChange,
   EdgeChange,
@@ -22,11 +19,30 @@ import '@xyflow/react/dist/style.css';
 import { WorkflowNode, WorkflowEdge } from '@/types/workflow';
 import AgentNode from './AgentNode';
 import StepGroupNode from './StepGroupNode';
+import StartNode from './StartNode';
+import EndNode from './EndNode';
+import CustomEdge from './CustomEdge';
+
+type PaletteNodeType = 'agent' | 'start' | 'end' | 'step-group';
+
+interface PaletteNodePayload {
+  type: PaletteNodeType;
+  name: string;
+  description?: string;
+  path?: string;
+}
 
 // カスタムノードタイプを定義
 const nodeTypes = {
   agent: AgentNode,
   'step-group': StepGroupNode,
+  start: StartNode,
+  end: EndNode,
+};
+
+// カスタムエッジタイプを定義
+const edgeTypes = {
+  default: CustomEdge,
 };
 
 interface CanvasProps {
@@ -44,42 +60,79 @@ function CanvasInner({
   onEdgesChange,
   onConnect,
 }: CanvasProps) {
-  const [reactFlowNodes, setNodes, onReactFlowNodesChange] = useNodesState(nodes as Node[]);
-  const [reactFlowEdges, setEdges, onReactFlowEdgesChange] = useEdgesState(edges as Edge[]);
   const { screenToFlowPosition } = useReactFlow();
 
-  // Sync props to ReactFlow state
-  React.useEffect(() => {
-    setNodes(nodes as Node[]);
-  }, [nodes, setNodes]);
-
-  React.useEffect(() => {
-    setEdges(edges as Edge[]);
-  }, [edges, setEdges]);
-
-  // Optimized change handlers
+  // Direct change handlers without intermediate state
   const handleNodesChange = useCallback((changes: NodeChange[]) => {
-    onReactFlowNodesChange(changes);
-    // Use requestAnimationFrame for better performance
-    requestAnimationFrame(() => {
-      onNodesChange(reactFlowNodes as WorkflowNode[]);
+    let updated = false;
+    const newNodes = nodes.map(node => {
+      const nodeChange = changes.find(change => change.id === node.id);
+      if (nodeChange) {
+        updated = true;
+        if (nodeChange.type === 'position' && nodeChange.position) {
+          return { ...node, position: nodeChange.position };
+        }
+        if (nodeChange.type === 'select') {
+          return { ...node, selected: nodeChange.selected };
+        }
+      }
+      return node;
     });
-  }, [onReactFlowNodesChange, onNodesChange, reactFlowNodes]);
+
+    // Handle node removal
+    const removeChanges = changes.filter(change => change.type === 'remove');
+    let filteredNodes = newNodes;
+    if (removeChanges.length > 0) {
+      const removeIds = new Set(removeChanges.map(change => change.id));
+      filteredNodes = newNodes.filter(node => !removeIds.has(node.id));
+      updated = true;
+    }
+
+    if (updated) {
+      onNodesChange(filteredNodes);
+    }
+  }, [nodes, onNodesChange]);
 
   const handleEdgesChange = useCallback((changes: EdgeChange[]) => {
-    onReactFlowEdgesChange(changes);
-    // Use requestAnimationFrame for better performance
-    requestAnimationFrame(() => {
-      onEdgesChange(reactFlowEdges as WorkflowEdge[]);
+    let updated = false;
+    let newEdges = edges.slice();
+
+    changes.forEach(change => {
+      if (change.type === 'remove') {
+        const index = newEdges.findIndex(edge => edge.id === change.id);
+        if (index !== -1) {
+          newEdges.splice(index, 1);
+          updated = true;
+        }
+      }
+      if (change.type === 'select') {
+        const index = newEdges.findIndex(edge => edge.id === change.id);
+        if (index !== -1) {
+          newEdges[index] = { ...newEdges[index], selected: change.selected };
+          updated = true;
+        }
+      }
     });
-  }, [onReactFlowEdgesChange, onEdgesChange, reactFlowEdges]);
+
+    if (updated) {
+      onEdgesChange(newEdges);
+    }
+  }, [edges, onEdgesChange]);
 
   // 接続時のハンドラ
   const handleConnect = useCallback((params: Connection) => {
-    const newEdges = addEdge(params, reactFlowEdges);
-    setEdges(newEdges);
-    onConnect(params);
-  }, [reactFlowEdges, setEdges, onConnect]);
+    if (params.source && params.target) {
+      const newEdge: WorkflowEdge = {
+        id: `edge-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        source: params.source,
+        target: params.target,
+        sourceHandle: params.sourceHandle,
+        targetHandle: params.targetHandle,
+      };
+      onEdgesChange([...edges, newEdge]);
+      onConnect(params);
+    }
+  }, [edges, onEdgesChange, onConnect]);
 
   // ドラッグオーバー処理
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -92,48 +145,100 @@ function CanvasInner({
     event.preventDefault();
     event.stopPropagation();
 
-    const nodeType = event.dataTransfer.getData('application/reactflow');
-    const agentDataStr = event.dataTransfer.getData('application/agent');
+    const nodeType = event.dataTransfer.getData('application/reactflow') as PaletteNodeType | '';
+    let paletteDataStr = event.dataTransfer.getData('application/palette-node');
 
-    if (!nodeType || !agentDataStr) {
+    if (!nodeType) {
       return;
     }
 
     try {
-      const agentData = JSON.parse(agentDataStr);
-      
+      if (!paletteDataStr && nodeType === 'agent') {
+        // Fallback for legacy drag payloads
+        paletteDataStr = event.dataTransfer.getData('application/agent');
+      }
+
+      if (!paletteDataStr) {
+        console.warn('No palette data found for drop event');
+        return;
+      }
+
+      const paletteData = JSON.parse(paletteDataStr) as PaletteNodePayload;
+
       // ReactFlow公式パターン: screenToFlowPositionを使用
       const position = screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
       });
 
-      const newNode: WorkflowNode = {
-        id: `agent-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        type: 'agent',
-        position,
-        data: {
-          label: agentData.name,
-          agentName: agentData.name,
-          agentPath: agentData.path,
-          description: agentData.description,
-        },
-      };
+      const createNodeId = (base: string) => `${base}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-      // Add new node
-      setNodes((nds) => {
-        const updatedNodes = nds.concat(newNode as Node);
-        // Notify parent asynchronously
-        requestAnimationFrame(() => {
-          onNodesChange(updatedNodes as WorkflowNode[]);
-        });
-        return updatedNodes;
-      });
+      let newNode: WorkflowNode | null = null;
+
+      if (nodeType === 'agent') {
+        newNode = {
+          id: createNodeId('agent'),
+          type: 'agent',
+          position,
+          data: {
+            label: paletteData.name,
+            agentName: paletteData.name,
+            agentPath: paletteData.path,
+            description: paletteData.description,
+          },
+        };
+      }
+
+      if (nodeType === 'start') {
+        const hasStart = nodes.some((node) => node.type === 'start');
+        if (hasStart) {
+          console.warn('Start node already exists. Skipping additional start node.');
+          return;
+        }
+        newNode = {
+          id: createNodeId('start'),
+          type: 'start',
+          position,
+          data: {
+            kind: 'start',
+            label: paletteData.name,
+            description: paletteData.description,
+          },
+        };
+      }
+
+      if (nodeType === 'end') {
+        const hasEnd = nodes.some((node) => node.type === 'end');
+        if (hasEnd) {
+          console.warn('End node already exists. Skipping additional end node.');
+          return;
+        }
+        newNode = {
+          id: createNodeId('end'),
+          type: 'end',
+          position,
+          data: {
+            kind: 'end',
+            label: paletteData.name,
+            description: paletteData.description,
+          },
+        };
+      }
+
+
+
+      if (!newNode) {
+        console.warn('Unsupported node type dropped:', nodeType);
+        return;
+      }
+
+      // Add new node directly to parent state
+      onNodesChange([...nodes, newNode]);
 
     } catch (error) {
       console.error('Failed to parse dropped agent data:', error);
     }
-  }, [screenToFlowPosition, setNodes, onNodesChange]);
+  }, [screenToFlowPosition, onNodesChange, nodes]);
 
   return (
     <div 
@@ -142,12 +247,14 @@ function CanvasInner({
       onDragOver={onDragOver}
     >
       <ReactFlow
-        nodes={reactFlowNodes}
-        edges={reactFlowEdges}
+        nodes={nodes as Node[]}
+        edges={edges as Edge[]}
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
         onConnect={handleConnect}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        deleteKeyCode={['Backspace', 'Delete']}
         fitView
         className="bg-gray-50"
       >
