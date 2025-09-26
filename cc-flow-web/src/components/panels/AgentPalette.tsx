@@ -242,9 +242,9 @@ export default function AgentPalette({
         </div>
 
         {/* Search Field */}
-        <div>
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
-            Workflow Nodes
+        <div className="flex flex-col gap-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Agent Nodes
           </h3>
           <div>
             <input
