@@ -247,17 +247,17 @@ cc-flow-web/
 │   │       └── health/
 │   │           └── route.ts     # ヘルスチェック
 │   ├── components/
-│   │   ├── WorkflowEditor/
+│   │   ├── workflow-editor/
 │   │   │   ├── Canvas.tsx          # ReactFlowキャンバス
 │   │   │   ├── AgentNode.tsx       # エージェントノード
 │   │   │   ├── StepGroupNode.tsx   # ステップグループノード
 │   │   │   └── ConnectionEdge.tsx  # 接続エッジ
-│   │   ├── Panels/
+│   │   ├── panels/
 │   │   │   ├── AgentPalette.tsx    # エージェントパレット
 │   │   │   ├── PropertyPanel.tsx   # プロパティ設定パネル
 │   │   │   ├── MetadataPanel.tsx   # ワークフローメタデータ
 │   │   │   └── PreviewPanel.tsx    # JSON出力プレビュー
-│   │   └── UI/
+│   │   └── ui/
 │   │       ├── Button.tsx          # 基本UIコンポーネント
 │   │       ├── Input.tsx
 │   │       └── Modal.tsx
