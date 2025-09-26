@@ -186,14 +186,16 @@ You can run the TUI via npx or install globally. The TUI ultimately invokes a lo
 
 Important: If you are using the CLI outside this repository, make sure your project has the CC-Flow helper files that the TUI calls:
 
-- `scripts/` (contains `create-workflow.sh` and libraries)
-- `templates/` (workflow templates)
+- `scripts/workflow/` (contains `create-workflow.sh` and supporting libraries)
+- `scripts/create-workflow.sh` (wrapper that invokes the shared script)
+- `cc-flow-cli/templates/` (workflow templates)
 
-If you need to copy them manually from this repo, use the package folder paths:
+If you need to copy them manually from this repo, use:
 
 ```bash
 # from repo root
-cp -r cc-flow-cli/scripts cc-flow-cli/templates /path/to/your-project/
+cp -r scripts/workflow scripts/create-workflow.sh cc-flow-cli/templates /path/to/your-project/
+chmod +x /path/to/your-project/scripts/create-workflow.sh
 ```
 
 Repository: https://github.com/s-hiraoku/cc-flow
