@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CC-Flow Web Editor
 
-## Getting Started
+A comprehensive Next.js 15 web application that provides a visual interface for designing and managing complex workflow configurations. Built as a complement to the existing cc-flow CLI ecosystem.
 
-First, run the development server:
+## Project Overview
 
+The CC-Flow Web Editor leverages ReactFlow for visual editing, shadcn/ui for design consistency, and seamless integration with the command-line interface. Currently running on localhost:3002 with functional drag-and-drop workflow creation, agent palette, properties panel, and API integration.
+
+**Current Status**: Phase 1 Complete - Functional web editor with core workflow creation capabilities.
+
+## Quick Start
+
+### Prerequisites
+- Node.js >= 18.0.0
+- npm >= 9.0.0
+
+### Development Setup
 ```bash
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3002](http://localhost:3002) with your browser to access the workflow editor.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Available Scripts
+```bash
+npm run dev         # Development server with hot reload
+npm run build       # Production build
+npm run start       # Production server
+npm run lint        # ESLint code checking
+npm run type-check  # TypeScript type checking
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Features
 
-## Learn More
+### ✅ Implemented (Phase 1)
+- **Visual Workflow Editor**: ReactFlow-based drag-and-drop interface
+- **Agent Management**: Automatic discovery and categorization of agents
+- **Real-time Preview**: Live JSON output with immediate validation
+- **Properties Panel**: Workflow metadata and configuration editing
+- **API Integration**: Backend services for agent discovery and workflow operations
 
-To learn more about Next.js, take a look at the following resources:
+### 🚧 In Development (Phase 2)
+- Enhanced validation system with real-time error highlighting
+- Step group management for sequential/parallel execution
+- Improved user experience with keyboard shortcuts
+- Advanced drag-and-drop with visual indicators
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 📋 Planned (Phase 3)
+- Workflow templates and presets
+- Advanced graph analysis and optimization
+- Collaboration features and version control
+- Integration with external CI/CD systems
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Technology Stack
 
-## Deploy on Vercel
+- **Frontend**: Next.js 15 with App Router
+- **Visual Editor**: ReactFlow (XyFlow) v12.8.5
+- **UI Framework**: shadcn/ui + Radix UI + Tailwind CSS
+- **Type System**: TypeScript 5.6
+- **State Management**: React 19 built-in state + Custom hooks
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+cc-flow-web/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   ├── components/             # React components
+│   │   ├── workflow-editor/    # Core editor components
+│   │   ├── panels/             # UI panels and sections
+│   │   └── ui/                 # shadcn/ui components
+│   ├── lib/                    # Business logic and utilities
+│   ├── types/                  # TypeScript type definitions
+│   └── hooks/                  # Custom React hooks
+├── docs/                       # Project documentation
+│   └── specifications/         # Technical specifications
+└── public/                     # Static assets
+```
+
+## Documentation
+
+### 📚 Comprehensive Specifications
+For detailed project information, refer to the complete documentation suite:
+
+- **[Project Specification](./docs/specifications/PROJECT_SPECIFICATION.md)** - Master project overview and specifications
+- **[Technical Design](./docs/specifications/TECHNICAL_DESIGN_SPEC.md)** - Comprehensive technical architecture
+- **[Implementation Roadmap](./docs/specifications/IMPLEMENTATION_SPEC.md)** - Current development status and tasks
+- **[Documentation Index](./docs/specifications/DOCUMENTATION_INDEX.md)** - Complete documentation navigation
+
+### 🎯 Quick Navigation by Role
+- **Project Managers**: [Project Specification](./docs/specifications/PROJECT_SPECIFICATION.md)
+- **Developers**: [Implementation Roadmap](./docs/specifications/IMPLEMENTATION_SPEC.md)
+- **Architects**: [Technical Design](./docs/specifications/TECHNICAL_DESIGN_SPEC.md)
+- **New Contributors**: [Documentation Index](./docs/specifications/DOCUMENTATION_INDEX.md)
+
+## Integration with CC-Flow CLI
+
+This web editor is designed to work seamlessly with the existing cc-flow CLI ecosystem:
+
+- **Agent Discovery**: Automatically scans `.claude/agents/` directory
+- **Workflow Compatibility**: Generates JSON compatible with cc-flow CLI execution
+- **Launch Integration**: Can be launched directly from cc-flow CLI
+- **Bidirectional Sync**: Workflows work seamlessly between web and CLI interfaces
+
+## Contributing
+
+### Development Workflow
+1. Review [Implementation Roadmap](./docs/specifications/IMPLEMENTATION_SPEC.md) for current tasks
+2. Check [Technical Design](./docs/specifications/TECHNICAL_DESIGN_SPEC.md) for architecture details
+3. Follow TypeScript and React best practices
+4. Ensure accessibility compliance
+5. Maintain compatibility with cc-flow CLI ecosystem
+
+### Code Standards
+- **TypeScript**: Strict mode enabled, no `any` types in production
+- **ESLint**: Configured for React and TypeScript best practices
+- **Prettier**: Consistent code formatting
+- **Accessibility**: WCAG 2.1 AA compliance for interactive elements
+
+## License
+
+This project is part of the CC-Flow ecosystem. Please refer to the main repository for licensing information.
+
+---
+
+**Project Status**: Phase 1 Complete, Phase 2 In Progress
+**Latest Version**: 1.0
+**Maintained by**: CC-Flow Development Team
