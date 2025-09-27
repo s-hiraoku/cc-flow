@@ -92,12 +92,19 @@ export class ScriptExecutor {
     // First try to find script in user's project (for development)
     // Check if we're in cc-flow-cli directory structure
     const userProjectScript1 = join(this.basePath, 'scripts/create-workflow.sh');
+    const userProjectScriptShared = join(this.basePath, 'scripts/workflow/create-workflow.sh');
     const userProjectScript2 = join(this.basePath, 'cc-flow-cli/scripts/create-workflow.sh');
 
     console.log(`🔍 Debug: Checking user project: ${userProjectScript1}`);
     if (existsSync(userProjectScript1)) {
       console.log('✅ Debug: Found in user project (scripts/)');
       return userProjectScript1;
+    }
+
+    console.log(`🔍 Debug: Checking user project shared dir: ${userProjectScriptShared}`);
+    if (existsSync(userProjectScriptShared)) {
+      console.log('✅ Debug: Found in user project (scripts/workflow/)');
+      return userProjectScriptShared;
     }
 
     console.log(`🔍 Debug: Checking user project: ${userProjectScript2}`);
@@ -113,10 +120,16 @@ export class ScriptExecutor {
       const packagePath = require.resolve('@hiraoku/cc-flow-cli/package.json');
       const packageRoot = dirname(packagePath);
       const packageScript1 = join(packageRoot, 'scripts/create-workflow.sh');
+      const packageScriptShared = join(packageRoot, 'scripts/workflow/create-workflow.sh');
       console.log(`🔍 Debug: Package method 1: ${packageScript1}`);
       if (existsSync(packageScript1)) {
         console.log('✅ Debug: Found via package resolution');
         return packageScript1;
+      }
+      console.log(`🔍 Debug: Package method 1 shared: ${packageScriptShared}`);
+      if (existsSync(packageScriptShared)) {
+        console.log('✅ Debug: Found shared workflow script via package resolution');
+        return packageScriptShared;
       }
     } catch (error) {
       console.log(`❌ Debug: Package resolution failed: ${error}`);
@@ -132,8 +145,11 @@ export class ScriptExecutor {
       // Try different possible paths
       const possiblePaths = [
         join(currentDir, '../../scripts/create-workflow.sh'),  // dist/services -> root
+        join(currentDir, '../../scripts/workflow/create-workflow.sh'),
         join(currentDir, '../../../scripts/create-workflow.sh'), // node_modules case
+        join(currentDir, '../../../scripts/workflow/create-workflow.sh'),
         join(currentDir, '../../../../scripts/create-workflow.sh'), // deeper nesting
+        join(currentDir, '../../../../scripts/workflow/create-workflow.sh'),
       ];
       
       for (const packageScript of possiblePaths) {

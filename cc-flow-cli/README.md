@@ -95,7 +95,7 @@ For a detailed design, see `docs/cc-flow-tui-design.md` (sections 4, 14–22).
 ## Troubleshooting
 - “Script not found or not executable”
   - Ensure `scripts/create-workflow.sh` exists and is executable.
-  - If your project doesn’t have it, the CLI uses the packaged fallback. If both are missing, copy from this repo: `cc-flow-cli/scripts` and `cc-flow-cli/templates` into your project root.
+  - If your project doesn’t have it, copy from this repo: `scripts/workflow/`, `scripts/create-workflow.sh`, and `cc-flow-cli/templates/` into your project root.
 - “No agents found”
   - Ensure `.claude/agents/<dir>/*.md` exist.
 - “POML file is expected in tests”
@@ -124,7 +124,7 @@ Project layout
 ```
 cc-flow-cli/
 ├─ bin/cc-flow.js            # Entry for npx / global
-├─ scripts/                  # Bash helpers (create-workflow.sh etc.)
+├─ scripts/                  # Wrapper scripts (delegates to ../scripts/workflow)
 ├─ templates/                # workflow.md / workflow.poml
 ├─ src/
 │  ├─ cli/main.ts            # TUI entry
@@ -136,4 +136,6 @@ cc-flow-cli/
 ## License
 
 MIT
-
+scripts/
+├─ create-workflow.sh        # Shared entry point (executes workflow/create-workflow.sh)
+└─ workflow/                 # Canonical workflow automation scripts
