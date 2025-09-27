@@ -287,6 +287,56 @@ export async function GET(request: NextRequest) {
 }
 ```
 
+### Workflow Serialization Schema
+The workflow persistence endpoint produces a structured JSON document that mirrors the canvas topology:
+
+```json
+{
+  "workflowName": "sample-workflow",
+  "workflowPurpose": "Draft specification",
+  "workflowModel": "claude-3-sonnet",
+  "workflowArgumentHint": "<context>",
+  "startNode": {
+    "id": "start-node",
+    "label": "Start",
+    "description": "Entry point"
+  },
+  "endNode": {
+    "id": "end-node",
+    "label": "End",
+    "description": "Exit summary"
+  },
+  "agents": [
+    {
+      "id": "agent-1",
+      "label": "Spec Agent",
+      "agentName": "spec-agent",
+      "agentPath": "./agents/spec/spec-agent.md"
+    }
+  ],
+  "stepGroups": [
+    {
+      "id": "group-1",
+      "title": "Draft",
+      "mode": "sequential",
+      "agents": ["spec-agent"]
+    }
+  ],
+  "nodes": [/* full ReactFlow node payload */],
+  "edges": [
+    {
+      "id": "edge-start-agent",
+      "source": "start-node",
+      "target": "agent-1",
+      "type": "default"
+    }
+  ]
+}
+```
+
+Validation rules enforce exactly one start node, exactly one end node, and at least one agent node before the workflow is written to disk. Additional node metadata remains embedded in the `nodes` array for round-trip fidelity.
+
+
 ## 🎨 UI Architecture
 
 ### Design System
