@@ -1,36 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Handle, Position, useReactFlow, NodeProps } from "@xyflow/react";
 import { Card } from "@/components/ui";
 import { AgentNodeData } from "@/types/workflow";
+import { getCategoryColors, getCategoryIcon } from "@/utils/categoryStyles";
 
-export default function AgentNode({ id, data, selected }: NodeProps<AgentNodeData>) {
-  const [isHovered, setIsHovered] = useState(false);
+export default function AgentNode({ id, data, selected }: NodeProps) {
   const { deleteElements } = useReactFlow();
+
+  // Get dynamic colors and icon based on category
+  const agentData = data as AgentNodeData;
+  const category = agentData?.category || "default";
+  const colors = getCategoryColors(category);
+  const icon = getCategoryIcon(category);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     deleteElements({ nodes: [{ id }] });
   };
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
 
   return (
-    <div
-      className="relative group"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className="relative group">
       <Card
-        className={`min-w-[200px] p-4 cursor-pointer transition-all duration-200 ${
-          selected ? "ring-2 ring-indigo-500 shadow-lg" : "hover:shadow-md"
+        className={`min-w-[200px] p-4 cursor-pointer transition-all duration-200 border-2 ${colors.solidBorder} ${colors.solidBg} ${
+          selected ? `ring-2 ${colors.ring} shadow-lg` : "hover:shadow-md"
         }`}
       >
         {/* Delete button */}
@@ -48,14 +43,14 @@ export default function AgentNode({ id, data, selected }: NodeProps<AgentNodeDat
         <Handle
           type="target"
           position={Position.Top}
-          className="w-3 h-3 bg-indigo-500 border-2 border-white"
+          className={`w-3 h-3 ${colors.handle} border-2 border-white`}
         />
 
         <div className="flex items-start">
           <div className="flex-shrink-0">
-            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${colors.icon}`}>
               <svg
-                className="w-4 h-4 text-indigo-600"
+                className="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -64,30 +59,32 @@ export default function AgentNode({ id, data, selected }: NodeProps<AgentNodeDat
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  d={icon}
                 />
               </svg>
             </div>
           </div>
           <div className="ml-3 flex-1">
-            <h3 className="text-sm font-semibold text-gray-900">{data.label}</h3>
-            {data.description && (
+            <h3 className="text-sm font-semibold text-gray-900">{agentData.label}</h3>
+            {agentData.description && (
               <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                {data.description}
+                {agentData.description}
               </p>
             )}
-            <div className="mt-2">
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                Agent
-              </span>
-            </div>
+            {category && category !== "default" && (
+              <div className="mt-2">
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colors.icon}`}>
+                  {category}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
         <Handle
           type="source"
           position={Position.Bottom}
-          className="w-3 h-3 bg-indigo-500 border-2 border-white"
+          className={`w-3 h-3 ${colors.handle} border-2 border-white`}
         />
       </Card>
     </div>

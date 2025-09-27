@@ -1,4 +1,5 @@
 // CC-Flow Workflow Types
+import React from 'react';
 
 export interface WorkflowMetadata {
   workflowName: string;
@@ -75,13 +76,19 @@ export interface WorkflowNode {
   type: 'agent' | 'step-group' | 'start' | 'end';
   data: WorkflowNodeData;
   position: { x: number; y: number };
+  style?: React.CSSProperties;
+  selected?: boolean;
+  measured?: { width?: number; height?: number };
 }
 
 export interface WorkflowEdge {
   id: string;
   source: string;
   target: string;
-  type?: 'default' | 'step';
+  sourceHandle?: string | null;
+  targetHandle?: string | null;
+  type?: 'default' | 'step' | 'custom';
+  selected?: boolean;
   data?: {
     condition?: string;
   };

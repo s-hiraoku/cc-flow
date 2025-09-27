@@ -1,43 +1,36 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Handle, Position, useReactFlow, NodeProps } from "@xyflow/react";
 import { Card } from "@/components/ui";
 import { StartNodeData } from "@/types/workflow";
 
-export default function StartNode({ id, data, selected }: NodeProps<StartNodeData>) {
-  const [isHovered, setIsHovered] = useState(false);
+export default function StartNode({ id, data, selected }: NodeProps) {
   const { deleteElements } = useReactFlow();
+  const startData = data as StartNodeData;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     deleteElements({ nodes: [{ id }] });
   };
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
-
   return (
-    <div
-      className="relative group"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+    <div className="relative group"
+      style={{
+        width: 320,
+        height: 'auto',
+        minWidth: 320
+      }}
     >
       <Card
-        className={`min-w-[180px] p-3 border-l-4 border-l-emerald-500 bg-emerald-50/60 shadow-sm transition-all ${
+        className={`w-full h-full p-4 border-l-4 border-l-emerald-500 bg-emerald-50/60 shadow-sm transition-all relative ${
           selected ? "ring-2 ring-emerald-500" : "hover:shadow-md"
         }`}
       >
         {/* Delete button */}
         <button
           onClick={handleDelete}
-          className="absolute top-1 right-1 w-5 h-5 bg-gray-500 hover:bg-gray-600 text-white rounded-full flex items-center justify-center shadow-sm transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
-          style={{ zIndex: 1000 }}
+          className="absolute top-2 right-2 w-5 h-5 bg-gray-500 hover:bg-gray-600 text-white rounded-full flex items-center justify-center shadow-sm transition-all opacity-0 group-hover:opacity-100 cursor-pointer z-10"
           title="Delete node"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,9 +55,9 @@ export default function StartNode({ id, data, selected }: NodeProps<StartNodeDat
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-semibold text-emerald-900">{data.label}</h3>
-            {data.description && (
-              <p className="text-xs text-emerald-700/80 mt-1">{data.description}</p>
+            <h3 className="text-sm font-semibold text-emerald-900">{startData.label}</h3>
+            {startData.description && (
+              <p className="text-xs text-emerald-700/80 mt-1">{startData.description}</p>
             )}
           </div>
         </div>

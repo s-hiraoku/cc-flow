@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { BaseEdge, EdgeProps, getBezierPath, useReactFlow } from "@xyflow/react";
 
 export default function CustomEdge({

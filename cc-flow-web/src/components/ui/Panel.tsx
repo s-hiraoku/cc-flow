@@ -55,9 +55,7 @@ export function Panel({
           )}
         </div>
       )}
-      <div className="flex-1 overflow-hidden">
-        {children}
-      </div>
+      {children}
     </div>
   );
 }
