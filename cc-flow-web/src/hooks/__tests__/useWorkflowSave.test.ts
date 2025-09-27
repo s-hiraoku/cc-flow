@@ -46,6 +46,7 @@ describe('useWorkflowSave', () => {
 
     expect(result.current.saving).toBe(false);
     expect(result.current.error).toBeNull();
+    expect(result.current.lastSaved).toBeNull();
     expect(result.current.saveWorkflow).toBeInstanceOf(Function);
   });
 
@@ -83,6 +84,11 @@ describe('useWorkflowSave', () => {
     expect(saveResult!).toBe(true);
     expect(result.current.saving).toBe(false);
     expect(result.current.error).toBeNull();
+    expect(result.current.lastSaved).toEqual({
+      workflowName: mockMetadata.workflowName,
+      filename: undefined,
+      path: undefined,
+    });
   });
 
   it('should handle save workflow error', async () => {
@@ -103,6 +109,7 @@ describe('useWorkflowSave', () => {
     expect(saveResult!).toBe(false);
     expect(result.current.saving).toBe(false);
     expect(result.current.error).toBe('Failed to save workflow');
+    expect(result.current.lastSaved).toBeNull();
   });
 
   it('should handle network error', async () => {
@@ -118,6 +125,7 @@ describe('useWorkflowSave', () => {
     expect(saveResult!).toBe(false);
     expect(result.current.saving).toBe(false);
     expect(result.current.error).toBe('Network error');
+    expect(result.current.lastSaved).toBeNull();
   });
 
   it('should validate workflow name is required', async () => {
@@ -136,6 +144,7 @@ describe('useWorkflowSave', () => {
     expect(saveResult!).toBe(false);
     expect(result.current.error).toBe('Workflow name is required');
     expect(fetch).not.toHaveBeenCalled();
+    expect(result.current.lastSaved).toBeNull();
   });
 
   it('should validate workflow name is not just whitespace', async () => {
@@ -154,6 +163,7 @@ describe('useWorkflowSave', () => {
     expect(saveResult!).toBe(false);
     expect(result.current.error).toBe('Workflow name is required');
     expect(fetch).not.toHaveBeenCalled();
+    expect(result.current.lastSaved).toBeNull();
   });
 
   it('should set saving state during save operation', async () => {
@@ -203,6 +213,7 @@ describe('useWorkflowSave', () => {
 
     expect(saveResult!).toBe(false);
     expect(result.current.error).toBe('HTTP 404: Not Found');
+    expect(result.current.lastSaved).toBeNull();
   });
 
   it('should clear error on successful save after previous error', async () => {
@@ -228,5 +239,10 @@ describe('useWorkflowSave', () => {
     });
 
     expect(result.current.error).toBeNull();
+    expect(result.current.lastSaved).toEqual({
+      workflowName: mockMetadata.workflowName,
+      filename: undefined,
+      path: undefined,
+    });
   });
 });

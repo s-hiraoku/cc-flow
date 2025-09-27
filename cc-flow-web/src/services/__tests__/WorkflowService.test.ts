@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { WorkflowService, WorkflowSaveRequest } from '../WorkflowService';
+import {
+  WorkflowService,
+  WorkflowSaveRequest,
+  SerializedWorkflow,
+} from '../WorkflowService';
 import type { WorkflowNode, WorkflowEdge, WorkflowMetadata } from '@/types/workflow';
 
 // Mock fetch
@@ -12,38 +16,58 @@ const mockMetadata: WorkflowMetadata = {
   workflowArgumentHint: '<test>',
 };
 
-const mockNodes: WorkflowNode[] = [
-  {
-    id: 'node-1',
-    type: 'agent',
-    position: { x: 100, y: 100 },
-    data: {
-      label: 'Test Agent 1',
-      agentName: 'test-agent-1',
-      agentPath: './agents/test-agent-1.md',
-      description: 'First test agent',
-    },
+const startNode: WorkflowNode = {
+  id: 'start-node',
+  type: 'start',
+  position: { x: 0, y: 0 },
+  data: {
+    kind: 'start',
+    label: 'Start',
+    description: 'Workflow starts here',
   },
-  {
-    id: 'node-2',
-    type: 'agent',
-    position: { x: 200, y: 200 },
-    data: {
-      label: 'Test Agent 2',
-      agentName: 'test-agent-2',
-      agentPath: './agents/test-agent-2.md',
-      description: 'Second test agent',
-    },
+};
+
+const agentNodeOne: WorkflowNode = {
+  id: 'node-1',
+  type: 'agent',
+  position: { x: 150, y: 120 },
+  data: {
+    label: 'Test Agent 1',
+    agentName: 'test-agent-1',
+    agentPath: './agents/test-agent-1.md',
+    description: 'First test agent',
   },
-];
+};
+
+const agentNodeTwo: WorkflowNode = {
+  id: 'node-2',
+  type: 'agent',
+  position: { x: 320, y: 200 },
+  data: {
+    label: 'Test Agent 2',
+    agentName: 'test-agent-2',
+    agentPath: './agents/test-agent-2.md',
+    description: 'Second test agent',
+  },
+};
+
+const endNode: WorkflowNode = {
+  id: 'end-node',
+  type: 'end',
+  position: { x: 480, y: 260 },
+  data: {
+    kind: 'end',
+    label: 'End',
+    description: 'Workflow ends here',
+  },
+};
+
+const baseNodes: WorkflowNode[] = [startNode, agentNodeOne, agentNodeTwo, endNode];
 
 const mockEdges: WorkflowEdge[] = [
-  {
-    id: 'edge-1',
-    source: 'node-1',
-    target: 'node-2',
-    type: 'default',
-  },
+  { id: 'edge-start-1', source: 'start-node', target: 'node-1', type: 'default' },
+  { id: 'edge-1-2', source: 'node-1', target: 'node-2', type: 'default' },
+  { id: 'edge-2-end', source: 'node-2', target: 'end-node', type: 'default' },
 ];
 
 describe('WorkflowService', () => {
@@ -53,12 +77,12 @@ describe('WorkflowService', () => {
 
   describe('saveWorkflow', () => {
     it('should save workflow successfully', async () => {
-      const mockResponse = { 
-        success: true, 
+      const mockResponse = {
+        success: true,
         message: 'Workflow saved successfully',
-        workflowId: 'workflow-123' 
+        workflowId: 'workflow-123',
       };
-      
+
       vi.mocked(fetch).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
@@ -66,7 +90,7 @@ describe('WorkflowService', () => {
 
       const request: WorkflowSaveRequest = {
         metadata: mockMetadata,
-        nodes: mockNodes,
+        nodes: baseNodes,
         edges: mockEdges,
       };
 
@@ -85,7 +109,7 @@ describe('WorkflowService', () => {
 
     it('should handle save workflow error with error message', async () => {
       const errorData = { error: 'Validation failed' };
-      
+
       vi.mocked(fetch).mockResolvedValue({
         ok: false,
         status: 400,
@@ -95,7 +119,7 @@ describe('WorkflowService', () => {
 
       const request: WorkflowSaveRequest = {
         metadata: mockMetadata,
-        nodes: mockNodes,
+        nodes: baseNodes,
         edges: mockEdges,
       };
 
@@ -112,7 +136,7 @@ describe('WorkflowService', () => {
 
       const request: WorkflowSaveRequest = {
         metadata: mockMetadata,
-        nodes: mockNodes,
+        nodes: baseNodes,
         edges: mockEdges,
       };
 
@@ -124,7 +148,7 @@ describe('WorkflowService', () => {
 
       const request: WorkflowSaveRequest = {
         metadata: mockMetadata,
-        nodes: mockNodes,
+        nodes: baseNodes,
         edges: mockEdges,
       };
 
@@ -136,12 +160,14 @@ describe('WorkflowService', () => {
         ok: false,
         status: 400,
         statusText: 'Bad Request',
-        json: async () => { throw new Error('Invalid JSON'); },
+        json: async () => {
+          throw new Error('Invalid JSON');
+        },
       } as unknown as Response);
 
       const request: WorkflowSaveRequest = {
         metadata: mockMetadata,
-        nodes: mockNodes,
+        nodes: baseNodes,
         edges: mockEdges,
       };
 
@@ -150,93 +176,97 @@ describe('WorkflowService', () => {
   });
 
   describe('generateWorkflowJSON', () => {
-    it('should generate workflow JSON correctly', () => {
-      const result = WorkflowService.generateWorkflowJSON(mockMetadata, mockNodes);
-      const parsed = JSON.parse(result);
+    it('should generate enriched workflow JSON correctly', () => {
+      const result = WorkflowService.generateWorkflowJSON(mockMetadata, baseNodes, mockEdges);
+      const parsed = JSON.parse(result) as SerializedWorkflow;
 
-      expect(parsed).toEqual({
-        workflowName: 'Test Workflow',
-        workflowPurpose: 'Test workflow description',
-        workflowModel: 'claude-3-sonnet',
-        workflowArgumentHint: '<test>',
-        workflowSteps: [
-          {
-            title: 'Generated Step',
-            mode: 'sequential',
-            purpose: 'Test workflow description',
-            agents: ['test-agent-1', 'test-agent-2'],
+      expect(parsed.workflowName).toBe('Test Workflow');
+      expect(parsed.workflowPurpose).toBe('Test workflow description');
+      expect(parsed.workflowModel).toBe('claude-3-sonnet');
+      expect(parsed.workflowArgumentHint).toBe('<test>');
+      expect(parsed.startNode).toEqual({
+        id: 'start-node',
+        label: 'Start',
+        description: 'Workflow starts here',
+      });
+      expect(parsed.endNode).toEqual({
+        id: 'end-node',
+        label: 'End',
+        description: 'Workflow ends here',
+      });
+      expect(parsed.agents.map((agent) => agent.agentName)).toEqual([
+        'test-agent-1',
+        'test-agent-2',
+      ]);
+      expect(parsed.nodes).toHaveLength(4);
+      expect(parsed.edges).toEqual(mockEdges);
+    });
+
+    it('should fallback to label when agentName is missing', () => {
+      const nodes: WorkflowNode[] = [
+        startNode,
+        {
+          id: 'node-without-agent-name',
+          type: 'agent',
+          position: { x: 100, y: 120 },
+          data: {
+            label: 'Fallback Agent',
+            agentName: '',
+            description: 'Agent without explicit name',
+            agentPath: './agents/fallback.md',
           },
-        ],
+        },
+        endNode,
+      ];
+
+      const result = WorkflowService.generateWorkflowJSON(mockMetadata, nodes);
+      const parsed = JSON.parse(result) as SerializedWorkflow;
+
+      expect(parsed.agents).toHaveLength(1);
+      expect(parsed.agents[0]).toMatchObject({
+        agentName: 'Fallback Agent',
+        agentPath: './agents/fallback.md',
       });
     });
 
-    it('should use fallback purpose when workflowPurpose is empty', () => {
-      const metadataWithoutPurpose = {
-        ...mockMetadata,
-        workflowPurpose: '',
-      };
-
-      const result = WorkflowService.generateWorkflowJSON(metadataWithoutPurpose, mockNodes);
-      const parsed = JSON.parse(result);
-
-      expect(parsed.workflowSteps[0].purpose).toBe('Sample workflow step');
-    });
-
-    it('should handle nodes without agentName', () => {
-      const nodesWithoutAgentName: WorkflowNode[] = [
+    it('should exclude agents without label and agentName', () => {
+      const nodes: WorkflowNode[] = [
+        ...baseNodes,
         {
-          id: 'node-1',
+          id: 'empty-agent',
           type: 'agent',
-          position: { x: 100, y: 100 },
-          data: {
-            label: 'Test Agent Without AgentName',
-            agentName: 'test-agent-fallback',
-            agentPath: './agents/test-agent.md',
-            description: 'Test description',
-          },
-        },
-      ];
-
-      const result = WorkflowService.generateWorkflowJSON(mockMetadata, nodesWithoutAgentName);
-      const parsed = JSON.parse(result);
-
-      expect(parsed.workflowSteps[0].agents).toEqual(['test-agent-fallback']);
-    });
-
-    it('should filter out nodes without label or agentName', () => {
-      const nodesWithEmpty: WorkflowNode[] = [
-        ...mockNodes,
-        {
-          id: 'node-3',
-          type: 'agent',
-          position: { x: 300, y: 300 },
+          position: { x: 200, y: 240 },
           data: {
             label: '',
             agentName: '',
-            agentPath: './agents/empty-agent.md',
-            description: 'Empty agent',
+            description: 'Should be excluded',
           },
         },
       ];
 
-      const result = WorkflowService.generateWorkflowJSON(mockMetadata, nodesWithEmpty);
-      const parsed = JSON.parse(result);
+      const result = WorkflowService.generateWorkflowJSON(mockMetadata, nodes);
+      const parsed = JSON.parse(result) as SerializedWorkflow;
 
-      // Should only include nodes with agentName or label
-      expect(parsed.workflowSteps[0].agents).toEqual(['test-agent-1', 'test-agent-2']);
+      expect(parsed.agents.map((agent) => agent.agentName)).toEqual([
+        'test-agent-1',
+        'test-agent-2',
+      ]);
     });
 
-    it('should handle empty nodes array', () => {
+    it('should handle empty node list gracefully', () => {
       const result = WorkflowService.generateWorkflowJSON(mockMetadata, []);
-      const parsed = JSON.parse(result);
+      const parsed = JSON.parse(result) as SerializedWorkflow;
 
-      expect(parsed.workflowSteps[0].agents).toEqual([]);
+      expect(parsed.startNode).toBeNull();
+      expect(parsed.endNode).toBeNull();
+      expect(parsed.agents).toEqual([]);
+      expect(parsed.nodes).toEqual([]);
     });
   });
 
   describe('validateWorkflowData', () => {
     it('should return null for valid workflow data', () => {
-      const result = WorkflowService.validateWorkflowData(mockMetadata, mockNodes);
+      const result = WorkflowService.validateWorkflowData(mockMetadata, baseNodes);
       expect(result).toBeNull();
     });
 
@@ -246,33 +276,48 @@ describe('WorkflowService', () => {
         workflowName: '',
       };
 
-      const result = WorkflowService.validateWorkflowData(invalidMetadata, mockNodes);
+      const result = WorkflowService.validateWorkflowData(invalidMetadata, baseNodes);
       expect(result).toBe('Workflow name is required');
     });
 
-    it('should return error for whitespace-only workflow name', () => {
-      const invalidMetadata = {
-        ...mockMetadata,
-        workflowName: '   ',
-      };
-
-      const result = WorkflowService.validateWorkflowData(invalidMetadata, mockNodes);
-      expect(result).toBe('Workflow name is required');
+    it('should return error when start node is missing', () => {
+      const nodes = baseNodes.filter((node) => node.id !== 'start-node');
+      const result = WorkflowService.validateWorkflowData(mockMetadata, nodes);
+      expect(result).toBe('Start node is required');
     });
 
-    it('should return error for empty nodes array', () => {
-      const result = WorkflowService.validateWorkflowData(mockMetadata, []);
-      expect(result).toBe('At least one node is required');
+    it('should return error when end node is missing', () => {
+      const nodes = baseNodes.filter((node) => node.id !== 'end-node');
+      const result = WorkflowService.validateWorkflowData(mockMetadata, nodes);
+      expect(result).toBe('End node is required');
     });
 
-    it('should handle undefined workflow name', () => {
-      const invalidMetadata = {
-        ...mockMetadata,
-        workflowName: undefined as any,
-      };
+    it('should return error when agent nodes are missing', () => {
+      const nodes: WorkflowNode[] = [startNode, endNode];
+      const result = WorkflowService.validateWorkflowData(mockMetadata, nodes);
+      expect(result).toBe('At least one agent node is required');
+    });
 
-      const result = WorkflowService.validateWorkflowData(invalidMetadata, mockNodes);
-      expect(result).toBe('Workflow name is required');
+    it('should flag multiple start nodes', () => {
+      const nodes: WorkflowNode[] = [
+        { ...startNode, id: 'start-1' },
+        { ...startNode, id: 'start-2' },
+        agentNodeOne,
+        endNode,
+      ];
+      const result = WorkflowService.validateWorkflowData(mockMetadata, nodes);
+      expect(result).toBe('Only one start node is allowed');
+    });
+
+    it('should flag multiple end nodes', () => {
+      const nodes: WorkflowNode[] = [
+        startNode,
+        agentNodeOne,
+        { ...endNode, id: 'end-1' },
+        { ...endNode, id: 'end-2' },
+      ];
+      const result = WorkflowService.validateWorkflowData(mockMetadata, nodes);
+      expect(result).toBe('Only one end node is allowed');
     });
   });
 });
