@@ -25,7 +25,7 @@ export default function EditorPage() {
   } = useWorkflowEditor();
 
   const { agents, loading: agentsLoading, error: agentsError } = useAgents();
-  const { saving, error: saveError, saveWorkflow } = useWorkflowSave();
+  const { saving, error: saveError, lastSaved, saveWorkflow } = useWorkflowSave();
 
   // Event handlers
   const handleAgentDragStart = useCallback((agent: Agent) => {
@@ -33,13 +33,8 @@ export default function EditorPage() {
   }, []);
 
   const handleSaveWorkflow = useCallback(async () => {
-    const success = await saveWorkflow(metadata, nodes, edges);
-    if (success) {
-      alert(`Workflow "${metadata.workflowName}" saved successfully!`);
-    } else if (saveError) {
-      alert(`Failed to save workflow: ${saveError}`);
-    }
-  }, [saveWorkflow, metadata, nodes, edges, saveError]);
+    await saveWorkflow(metadata, nodes, edges);
+  }, [saveWorkflow, metadata, nodes, edges]);
 
   const handlePreviewJSON = useCallback(() => {
     console.log("Preview JSON:", generatePreviewJSON());
@@ -100,6 +95,30 @@ export default function EditorPage() {
             </Button>
           </div>
         </div>
+
+        {(lastSaved || saveError) && (
+          <div className="px-6 pt-4 bg-white border-b border-gray-200">
+            {lastSaved && (
+              <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-sm">
+                <p className="font-medium">Workflow saved successfully.</p>
+                <p className="mt-1">{lastSaved.workflowName}</p>
+                {(lastSaved.filename || lastSaved.path) && (
+                  <p className="mt-1 text-emerald-700/80">
+                    {lastSaved.filename && <span>File: {lastSaved.filename}</span>}
+                    {lastSaved.filename && lastSaved.path && <span> · </span>}
+                    {lastSaved.path && <span>Path: {lastSaved.path}</span>}
+                  </p>
+                )}
+              </div>
+            )}
+            {saveError && (
+              <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm">
+                <p className="font-medium">Failed to save workflow.</p>
+                <p className="mt-1">{saveError}</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ReactFlow Canvas */}
         <div className="flex-1">
