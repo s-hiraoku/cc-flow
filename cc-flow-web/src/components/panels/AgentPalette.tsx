@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import { Panel, Button } from "@/components/ui";
+import { Panel } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common";
 import { Agent } from "@/types/agent";
 import { AgentService } from "@/services";
@@ -10,7 +10,6 @@ import {
   getCategoryIcon,
   getCategoryIconColor
 } from "@/utils/agentPaletteUtils";
-import { PanelLeftOpen, PanelLeftClose } from "lucide-react";
 
 type PrimitiveNodeType = "start" | "end" | "group" | "step-group";
 
@@ -53,7 +52,7 @@ export default function AgentPalette({
 }: AgentPaletteProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed] = useState(false);
 
   // Memoized categories
   const categories = useMemo(
@@ -141,32 +140,10 @@ export default function AgentPalette({
 
   return (
     <Panel
-      title={collapsed ? (
-        <div className="flex items-center justify-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label="Expand agent palette"
-            onClick={() => setCollapsed(false)}
-            className="p-1"
-          >
-            <PanelLeftOpen className="h-4 w-4" />
-          </Button>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between">
-          <span>Agent Palette</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label="Collapse agent palette"
-            onClick={() => setCollapsed(true)}
-            className="p-1"
-          >
-            <PanelLeftClose className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
+      title={collapsed ? 
+        "Collapsed" : 
+        "Agent Palette"
+      }
       subtitle={collapsed ? undefined : "Drag agents to the canvas"}
       className={`relative transition-all duration-200 ${collapsed ? 'w-12 shadow-lg' : 'w-80'}`}
     >

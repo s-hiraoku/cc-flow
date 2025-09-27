@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { readdir, readFile, stat } from 'fs/promises';
 import { join, extname } from 'path';
 import { Agent, AgentsResponse } from '@/types/agent';
@@ -57,7 +57,7 @@ async function scanAgentsDirectory(dirPath: string, category: string = ''): Prom
   return agents;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const agentsPath = join(process.cwd(), AGENTS_BASE_PATH);
     const allAgents = await scanAgentsDirectory(agentsPath);

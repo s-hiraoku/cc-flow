@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   // Future implementation: Return list of saved workflows
   return NextResponse.json({
     message: 'Workflow listing not yet implemented'

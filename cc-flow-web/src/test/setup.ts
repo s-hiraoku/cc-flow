@@ -32,30 +32,58 @@ vi.mock('next/navigation', () => ({
 
 // Mock React DnD
 vi.mock('react-dnd', () => ({
-  useDrag: () => [{ isDragging: false }, vi.fn(), vi.fn()],
-  useDrop: () => [{ isOver: false }, vi.fn()],
+  useDrag: () => [
+    { isDragging: false },
+    vi.fn<() => void>(),
+    vi.fn<() => void>(),
+  ],
+  useDrop: () => [
+    { isOver: false },
+    vi.fn<() => void>(),
+  ],
   DndProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 // Mock ReactFlow
 vi.mock('@xyflow/react', () => ({
-  ReactFlow: ({ children, ...props }: any) => React.createElement('div', { 'data-testid': 'react-flow', ...props }, children),
+  ReactFlow: ({ children, ...props }: Record<string, unknown> & { children?: React.ReactNode }) =>
+    React.createElement('div', { 'data-testid': 'react-flow', ...props }, children),
   Background: () => React.createElement('div', { 'data-testid': 'react-flow-background' }),
-  Controls: () => React.createElement('div', { 'data-testid': 'react-flow-controls' }),
   MiniMap: () => React.createElement('div', { 'data-testid': 'react-flow-minimap' }),
-  Handle: ({ type, position, ...props }: any) => React.createElement('div', { 'data-testid': `handle-${type}-${position}`, ...props }),
+  Panel: ({
+    children,
+    position,
+    className,
+    style,
+  }: {
+    children?: React.ReactNode;
+    position?: string;
+    className?: string;
+    style?: React.CSSProperties;
+  }) =>
+    React.createElement(
+      'div',
+      {
+        'data-testid': `react-flow-panel-${position ?? 'default'}`,
+        className,
+        style,
+      },
+      children,
+    ),
+  Handle: ({ type, position, ...props }: { type: string; position: string; [key: string]: unknown }) =>
+    React.createElement('div', { 'data-testid': `handle-${type}-${position}`, ...props }),
   Position: {
     Top: 'top',
     Right: 'right',
     Bottom: 'bottom',
     Left: 'left',
   },
-  useNodesState: (initialNodes: any[]) => [
+  useNodesState: <T,>(initialNodes: T[]) => [
     initialNodes,
     vi.fn(),
     vi.fn(),
   ],
-  useEdgesState: (initialEdges: any[]) => [
+  useEdgesState: <T,>(initialEdges: T[]) => [
     initialEdges,
     vi.fn(),
     vi.fn(),
@@ -67,6 +95,26 @@ vi.mock('@xyflow/react', () => ({
   useReactFlow: () => ({
     screenToFlowPosition: vi.fn((pos) => pos),
     flowToScreenPosition: vi.fn((pos) => pos),
+    zoomIn: vi.fn(),
+    zoomOut: vi.fn(),
+    fitView: vi.fn(),
+  }),
+  useStore: (
+    selector: (
+      state: {
+        nodesDraggable: boolean;
+        nodesConnectable: boolean;
+        elementsSelectable: boolean;
+      },
+    ) => boolean,
+  ) =>
+    selector({
+      nodesDraggable: true,
+      nodesConnectable: true,
+      elementsSelectable: true,
+    }),
+  useStoreApi: () => ({
+    setState: vi.fn(),
   }),
 }));
 

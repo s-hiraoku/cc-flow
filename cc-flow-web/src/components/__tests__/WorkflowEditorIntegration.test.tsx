@@ -3,7 +3,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ReactFlowProvider } from '@xyflow/react';
 import Canvas from '../workflow-editor/Canvas';
-import AgentNode from '../workflow-editor/AgentNode';
 import PropertiesPanel from '../panels/PropertiesPanel';
 import type { WorkflowNode, WorkflowEdge } from '@/types/workflow';
 
@@ -54,7 +53,6 @@ const mockEdges: WorkflowEdge[] = [
 const WorkflowEditorTestWrapper = () => {
   const [nodes, setNodes] = React.useState<WorkflowNode[]>(mockNodes);
   const [edges, setEdges] = React.useState<WorkflowEdge[]>(mockEdges);
-  const [selectedNode, setSelectedNode] = React.useState<WorkflowNode | null>(null);
 
   const handleNodesChange = (newNodes: WorkflowNode[]) => {
     setNodes(newNodes);
@@ -62,25 +60,6 @@ const WorkflowEditorTestWrapper = () => {
 
   const handleEdgesChange = (newEdges: WorkflowEdge[]) => {
     setEdges(newEdges);
-  };
-
-  const handleNodeSelect = (nodeId: string | null) => {
-    if (nodeId) {
-      const node = nodes.find(n => n.id === nodeId);
-      setSelectedNode(node || null);
-    } else {
-      setSelectedNode(null);
-    }
-  };
-
-  const handleNodeUpdate = (nodeId: string, updates: Partial<WorkflowNode['data']>) => {
-    setNodes(prevNodes => 
-      prevNodes.map(node => 
-        node.id === nodeId 
-          ? { ...node, data: { ...node.data, ...updates } }
-          : node
-      )
-    );
   };
 
   return (

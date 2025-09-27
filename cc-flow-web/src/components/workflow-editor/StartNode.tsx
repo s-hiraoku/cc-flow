@@ -17,9 +17,9 @@ export default function StartNode({ id, data, selected }: NodeProps) {
   return (
     <div className="relative group"
       style={{
-        width: 320,
+        width: 400,
         height: 'auto',
-        minWidth: 320
+        minWidth: 400
       }}
     >
       <Card
@@ -61,7 +61,6 @@ export default function StartNode({ id, data, selected }: NodeProps) {
             )}
           </div>
         </div>
-
         <Handle
           type="source"
           position={Position.Bottom}

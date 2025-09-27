@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useMemo, useCallback, useState } from "react";
-import { Panel, Input, Textarea, SelectField, Card, Button } from "@/components/ui";
-import { PanelRightOpen, PanelRightClose } from "lucide-react";
+import { Panel, Input, Textarea, SelectField, Card } from "@/components/ui";
 import { WorkflowMetadata, WorkflowNode, WorkflowEdge, isAgentNodeData } from "@/types/workflow";
 import { WORKFLOW_MODELS } from "@/constants/workflow";
 import { WorkflowService } from "@/services/WorkflowService";
@@ -21,7 +20,7 @@ export default function PropertiesPanel({
   nodes,
   edges,
 }: PropertiesPanelProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed] = useState(false);
 
   // Metadata update handler
   const updateMetadata = useCallback((field: keyof WorkflowMetadata, value: string) => {
@@ -61,32 +60,10 @@ export default function PropertiesPanel({
 
   return (
     <Panel
-      title={collapsed ? (
-        <div className="flex items-center justify-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label="Expand properties"
-            onClick={() => setCollapsed(false)}
-            className="p-1"
-          >
-            <PanelRightOpen className="h-4 w-4" />
-          </Button>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between">
-          <span>Properties</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label="Collapse properties"
-            onClick={() => setCollapsed(true)}
-            className="p-1"
-          >
-            <PanelRightClose className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
+      title={collapsed ? 
+        "Collapsed" : 
+        "Properties"
+      }
       subtitle={collapsed ? undefined : "Configure workflow settings"}
       className={`relative transition-all duration-200 ${collapsed ? 'w-12 shadow-lg' : 'w-80'}`}
     >

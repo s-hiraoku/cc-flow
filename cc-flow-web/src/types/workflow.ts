@@ -25,6 +25,7 @@ export interface AgentNodeData extends Record<string, unknown> {
   agentPath?: string;
   label: string;
   description?: string;
+  category?: string;
 }
 
 export interface StepGroupNodeData extends Record<string, unknown> {
@@ -89,6 +90,7 @@ export interface WorkflowEdge {
   targetHandle?: string | null;
   type?: 'default' | 'step' | 'custom';
   selected?: boolean;
+  reconnectable?: boolean | 'source' | 'target';
   data?: {
     condition?: string;
   };

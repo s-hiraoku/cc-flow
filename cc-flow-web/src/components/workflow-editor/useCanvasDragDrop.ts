@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { WorkflowNode } from '@/types/workflow';
+import { WorkflowNode, AgentNodeData } from '@/types/workflow';
 
 type PaletteNodeType = 'agent' | 'start' | 'end' | 'step-group';
 
@@ -143,8 +143,10 @@ export function useCanvasDragDrop({
           data: {
             title: paletteData.name,
             purpose: paletteData.description,
-            mode: 'parallel',
+            mode: 'parallel' as const,
             agents: [],
+            label: paletteData.name,
+            description: paletteData.description,
           },
           style: {
             width: 300,
@@ -188,8 +190,8 @@ export function useCanvasDragDrop({
         // Only update the container's agents list, don't create a new node
         const updatedNodes = nodes.map(node => {
           if (node.id === containerNode.id && node.type === 'step-group') {
-            const currentAgents = node.data.agents || [];
-            const newAgentName = newNode.data.agentName || newNode.data.label;
+            const currentAgents = (node.data.agents as string[]) || [];
+            const newAgentName = (newNode.data as AgentNodeData).agentName || (newNode.data as AgentNodeData).label;
 
             // Check if agent already exists in the container
             if (currentAgents.includes(newAgentName)) {

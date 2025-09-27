@@ -154,7 +154,7 @@ export class WorkflowService {
       .filter((node): node is WorkflowNode & { type: 'step-group' } => node.type === 'step-group')
       .map((node) => {
         const data = node.data;
-        const groupData = isStepGroupNodeData(data) ? data : (data as StepGroupNodeData);
+        const groupData = isStepGroupNodeData(data) ? data : (data as unknown as StepGroupNodeData);
         return {
           id: node.id,
           title: groupData.title,

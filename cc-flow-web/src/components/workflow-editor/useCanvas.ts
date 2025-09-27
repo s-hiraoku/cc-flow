@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   useReactFlow,
   NodeChange,
@@ -23,7 +23,8 @@ export function useCanvas({
   onEdgesChange,
   onConnect,
 }: UseCanvasProps) {
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, updateEdge: updateEdgeInstance } = useReactFlow();
+  const isReconnectingRef = useRef(false);
 
   // Create a function to update node data that can be accessed by child components
   const updateNodeData = useCallback((nodeId: string, newData: Record<string, unknown>) => {
@@ -97,40 +98,110 @@ export function useCanvas({
     }
   }, [edges, onEdgesChange]);
 
+  const handleReconnectStart = useCallback(() => {
+    isReconnectingRef.current = true;
+  }, []);
+
+  const applyEdgeUpdate = useCallback((edgeToUpdate: WorkflowEdge, connection: Connection) => {
+    if (!connection.source || !connection.target) {
+      return;
+    }
+
+    const normalizedSourceHandle = connection.sourceHandle ?? null;
+    const normalizedTargetHandle = connection.targetHandle ?? null;
+
+    const updatedEdge: WorkflowEdge = {
+      ...edgeToUpdate,
+      source: connection.source,
+      target: connection.target,
+      sourceHandle: normalizedSourceHandle,
+      targetHandle: normalizedTargetHandle,
+      type: edgeToUpdate.type ?? 'custom',
+      reconnectable: edgeToUpdate.reconnectable ?? true,
+    };
+
+    updateEdgeInstance?.(edgeToUpdate.id, () => updatedEdge, { replace: true });
+
+    const withoutUpdated = edges.filter(edge => edge.id !== edgeToUpdate.id);
+    const cleanedEdges = withoutUpdated.filter(edge => {
+      const sameSourceHandle =
+        edge.source === connection.source && (edge.sourceHandle ?? null) === normalizedSourceHandle;
+      const sameTargetHandle =
+        edge.target === connection.target && (edge.targetHandle ?? null) === normalizedTargetHandle;
+      return !(sameSourceHandle || sameTargetHandle);
+    });
+
+    onEdgesChange([...cleanedEdges, updatedEdge]);
+    onConnect(connection);
+  }, [edges, onConnect, onEdgesChange, updateEdgeInstance]);
+
+  const handleReconnect = useCallback((oldEdge: Edge, connection: Connection) => {
+    const existingEdge = edges.find(edge => edge.id === oldEdge.id);
+    if (!existingEdge) {
+      return;
+    }
+
+    applyEdgeUpdate(existingEdge, connection);
+  }, [edges, applyEdgeUpdate]);
+
+  const handleReconnectEnd = useCallback(() => {
+    isReconnectingRef.current = false;
+  }, []);
+
   // 接続時のハンドラ
   const handleConnect = useCallback((params: Connection) => {
-    if (params.source && params.target) {
-      // 競合するエッジをすべて識別
-      const conflictingEdges = edges.filter(edge => {
-        // 同じソースハンドルからの競合
-        const sourceConflict = edge.source === params.source && edge.sourceHandle === params.sourceHandle;
-        // 同じターゲットハンドルへの競合
-        const targetConflict = edge.target === params.target && edge.targetHandle === params.targetHandle;
-        return sourceConflict || targetConflict;
-      });
-
-      // 競合するエッジを除いたエッジリスト
-      const cleanEdges = edges.filter(edge => !conflictingEdges.includes(edge));
-
-      const newEdge: WorkflowEdge = {
-        id: `edge-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        source: params.source,
-        target: params.target,
-        sourceHandle: params.sourceHandle,
-        targetHandle: params.targetHandle,
-        type: 'custom',
-      };
-
-      onEdgesChange([...cleanEdges, newEdge]);
+    if (isReconnectingRef.current) {
       onConnect(params);
+      return;
     }
-  }, [edges, onEdgesChange, onConnect]);
+
+    if (!params.source || !params.target) {
+      return;
+    }
+
+    const normalizedSourceHandle = params.sourceHandle ?? null;
+    const normalizedTargetHandle = params.targetHandle ?? null;
+
+    const sourceConflict = edges.find(edge =>
+      edge.source === params.source && (edge.sourceHandle ?? null) === normalizedSourceHandle
+    );
+
+    if (sourceConflict) {
+      applyEdgeUpdate(sourceConflict, params);
+      return;
+    }
+
+    const targetConflict = edges.find(edge =>
+      edge.target === params.target && (edge.targetHandle ?? null) === normalizedTargetHandle
+    );
+
+    if (targetConflict) {
+      applyEdgeUpdate(targetConflict, params);
+      return;
+    }
+
+    const newEdge: WorkflowEdge = {
+      id: `edge-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      source: params.source,
+      target: params.target,
+      sourceHandle: normalizedSourceHandle,
+      targetHandle: normalizedTargetHandle,
+      type: 'custom',
+      reconnectable: true,
+    };
+
+    onEdgesChange([...edges, newEdge]);
+    onConnect(params);
+  }, [edges, applyEdgeUpdate, onEdgesChange, onConnect]);
 
 
   return {
     screenToFlowPosition,
     handleNodesChange,
     handleEdgesChange,
+    handleReconnectStart,
+    handleReconnect,
+    handleReconnectEnd,
     handleConnect,
   };
 }

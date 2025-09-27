@@ -110,7 +110,7 @@ export function getIndexFromFirstLetter(str: string): number {
 }
 
 // Get category colors based on category name
-export function getCategoryColors(category: string) {
+export function getCategoryColors(category?: string) {
   if (!category) {
     return {
       border: "border-gray-300",
@@ -129,14 +129,14 @@ export function getCategoryColors(category: string) {
 }
 
 // Get category icon based on category name
-export function getCategoryIcon(category: string): string {
+export function getCategoryIcon(category?: string): string {
   if (!category) return ICON_PALETTE[0]; // Default icon
   const iconIndex = getIndexFromFirstLetter(category);
   return ICON_PALETTE[iconIndex];
 }
 
 // Get category border and background for palette
-export function getCategoryBorderAndBg(category: string): string {
+export function getCategoryBorderAndBg(category?: string): string {
   const colors = getCategoryColors(category);
   return `${colors.border} ${colors.bg} ${colors.hover}`;
 }

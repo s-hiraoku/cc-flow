@@ -17,9 +17,9 @@ export default function EndNode({ id, data, selected }: NodeProps) {
   return (
     <div className="relative group"
       style={{
-        width: 320,
+        width: 400,
         height: 'auto',
-        minWidth: 320
+        minWidth: 400
       }}
     >
       <Card
@@ -27,6 +27,11 @@ export default function EndNode({ id, data, selected }: NodeProps) {
           selected ? "ring-2 ring-orange-500" : "hover:shadow-md"
         }`}
       >
+        <Handle
+          type="target"
+          position={Position.Top}
+          className="w-3 h-3 bg-orange-500 border-2 border-white"
+        />
         {/* Delete button */}
         <button
           onClick={handleDelete}
@@ -38,11 +43,7 @@ export default function EndNode({ id, data, selected }: NodeProps) {
           </svg>
         </button>
 
-        <Handle
-          type="target"
-          position={Position.Top}
-          className="w-3 h-3 bg-orange-500 border-2 border-white"
-        />
+
 
         <div className="flex items-start">
           <div className="w-8 h-8 flex items-center justify-center bg-orange-200 rounded-full text-orange-700">

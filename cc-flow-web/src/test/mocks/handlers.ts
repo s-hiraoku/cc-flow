@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { Agent } from '@/types/agent';
-import { WorkflowSaveResponse } from '@/services/WorkflowService';
+import { WorkflowSaveResponse, WorkflowSaveRequest } from '@/services/WorkflowService';
 
 // Mock data
 const mockAgents: Agent[] = [
@@ -53,7 +53,7 @@ export const handlers = [
 
   // Workflows API
   http.post('/api/workflows', async ({ request }) => {
-    const body = await request.json() as any;
+    const body = (await request.json()) as WorkflowSaveRequest;
     
     // Simulate validation
     if (!body.metadata?.workflowName) {
