@@ -5,7 +5,7 @@
 setup() {
     # テスト用の一時ディレクトリとファイル
     export TEST_DIR="$(mktemp -d)"
-    export SCRIPT_DIR="$BATS_TEST_DIRNAME/../cc-flow-cli/scripts"
+    export SCRIPT_DIR="$BATS_TEST_DIRNAME/../scripts/workflow"
     export ORIGINAL_PWD="$PWD"
     
     # slash-command-discovery.shをテスト環境にコピー

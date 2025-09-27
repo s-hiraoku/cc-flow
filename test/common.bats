@@ -3,7 +3,7 @@
 # Test for common.sh utility functions
 
 setup() {
-    export SCRIPT_DIR="$BATS_TEST_DIRNAME/../cc-flow-cli/scripts"
+    export SCRIPT_DIR="$BATS_TEST_DIRNAME/../scripts/workflow"
     export TEST_DIR="$(mktemp -d)"
     export ORIGINAL_PWD="$PWD"
     

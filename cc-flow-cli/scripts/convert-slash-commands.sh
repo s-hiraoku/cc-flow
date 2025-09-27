@@ -6,11 +6,23 @@ set -euo pipefail
 
 # スクリプトのディレクトリを取得
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+LOCAL_WORKFLOW_DIR="$SCRIPT_DIR/workflow"
+SHARED_WORKFLOW_DIR="$REPO_ROOT/../scripts/workflow"
 
-# ライブラリを読み込み
-source "$SCRIPT_DIR/utils/common.sh"
-source "$SCRIPT_DIR/lib/slash-command-discovery.sh"
-source "$SCRIPT_DIR/lib/conversion-processor.sh"
+if [ -d "$LOCAL_WORKFLOW_DIR" ]; then
+  source "$LOCAL_WORKFLOW_DIR/utils/common.sh"
+  source "$LOCAL_WORKFLOW_DIR/lib/slash-command-discovery.sh"
+  source "$LOCAL_WORKFLOW_DIR/lib/conversion-processor.sh"
+elif [ -d "$SHARED_WORKFLOW_DIR" ]; then
+  source "$SHARED_WORKFLOW_DIR/utils/common.sh"
+  source "$SHARED_WORKFLOW_DIR/lib/slash-command-discovery.sh"
+  source "$SHARED_WORKFLOW_DIR/lib/conversion-processor.sh"
+else
+  echo "❌ shared workflow scripts not found (checked $LOCAL_WORKFLOW_DIR and $SHARED_WORKFLOW_DIR)" >&2
+  echo "Please ensure scripts/workflow exists in the repository root." >&2
+  exit 1
+fi
 
 # 使用方法を表示
 show_usage() {
