@@ -41,10 +41,8 @@ npm install -g @hiraoku/cc-flow-cli
 cc-flow
 
 # Non-interactive script mode (for automation)
-scripts/create-workflow.sh ./agents/spec "3 4 1 6 2"
-
-# With custom purpose
-scripts/create-workflow.sh ./agents/spec "3 4 1 6 2" "API仕様書作成"
+# JSONファイルを使用してワークフロー作成
+scripts/create-workflow.sh ./agents/spec --steps-json ./workflow.json
 
 # Execute generated workflow
 /spec-workflow "Your task context"
