@@ -1,23 +1,23 @@
 "use client";
 
-import React, { useMemo, useCallback, useState } from "react";
-import { Panel, Input, Textarea, SelectField, Card, Button } from "@/components/ui";
+import React, { useState } from "react";
+import { Panel, Card, Button } from "@/components/ui";
 import { PanelRightOpen, PanelRightClose } from "lucide-react";
 import {
   WorkflowMetadata,
   WorkflowNode,
   WorkflowEdge,
-  isAgentNodeData,
 } from "@/types/workflow";
-import { WORKFLOW_MODELS } from "@/constants/workflow";
-import { WorkflowService } from "@/services/WorkflowService";
-import { createWorkflowJSON } from "@/utils/workflowUtils";
+import { usePropertiesPanel } from "./usePropertiesPanel";
+import { useNodeSettings } from "./useNodeSettings";
+import { useSelectionInfo } from "./useSelectionInfo";
 
 interface PropertiesPanelProps {
   metadata: WorkflowMetadata;
   onMetadataChange: (metadata: WorkflowMetadata) => void;
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
+  selectedNodeIds?: string[];
 }
 
 export default function PropertiesPanel({
@@ -25,47 +25,37 @@ export default function PropertiesPanel({
   onMetadataChange,
   nodes,
   edges,
+  selectedNodeIds = [],
 }: PropertiesPanelProps) {
   const [collapsed, setCollapsed] = useState(false);
 
-  // Metadata update handler
-  const updateMetadata = useCallback(
-    (field: keyof WorkflowMetadata, value: string) => {
-      onMetadataChange({
-        ...metadata,
-        [field]: value,
-      });
-    },
-    [metadata, onMetadataChange]
-  );
+  // Custom hooks for logic separation
+  const {
+    selectedNodes,
+    primarySelectedNode,
+    updateMetadata,
+    getSettingsTitle,
+    serializedWorkflowJSON,
+    createWorkflowJSONString,
+    workflowSummary,
+  } = usePropertiesPanel({
+    metadata,
+    onMetadataChange,
+    nodes,
+    edges,
+    selectedNodeIds,
+  });
 
-  const serializedWorkflowJSON = useMemo(() => {
-    try {
-      return WorkflowService.generateWorkflowJSON(metadata, nodes, edges);
-    } catch (error) {
-      console.error("Failed to generate workflow preview JSON", error);
-      return JSON.stringify({ error: "Unable to generate preview" }, null, 2);
-    }
-  }, [metadata, nodes, edges]);
+  const { renderNodeSettings } = useNodeSettings({
+    primarySelectedNode,
+    metadata,
+    updateMetadata,
+  });
 
-  const createWorkflowJSONString = useMemo(() => {
-    return createWorkflowJSON(metadata, nodes);
-  }, [metadata, nodes]);
-
-  const summary = useMemo(() => {
-    const startNode = nodes.find((node) => node.type === "start");
-    const endNode = nodes.find((node) => node.type === "end");
-    const agentNodes = nodes.filter((node) => isAgentNodeData(node.data));
-    const stepGroupNodes = nodes.filter((node) => node.type === "step-group");
-
-    return {
-      startLabel: startNode?.data.label ?? null,
-      endLabel: endNode?.data.label ?? null,
-      agentCount: agentNodes.length,
-      stepGroupCount: stepGroupNodes.length,
-      edgeCount: edges.length,
-    };
-  }, [nodes, edges]);
+  const { renderSelectionInfo } = useSelectionInfo({
+    selectedNodes,
+    primarySelectedNode,
+  });
 
   return (
     <Panel
@@ -104,52 +94,20 @@ export default function PropertiesPanel({
         <div className="flex flex-col h-full min-h-0">
           <div className="flex-1 overflow-y-auto overflow-x-hidden">
             <div className="p-4 space-y-6">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                Settings
-              </h3>
-              <Input
-                label="Workflow Name"
-                placeholder="my-workflow"
-                value={metadata.workflowName}
-                onChange={(e) => updateMetadata("workflowName", e.target.value)}
-                id="workflow-name"
-                required
-              />
+              {/* Settings Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  {getSettingsTitle()}
+                </h3>
+                
+                {renderSelectionInfo()}
+                
+                <div className="mt-4">
+                  {renderNodeSettings()}
+                </div>
+              </div>
 
-              <Textarea
-                label="Purpose"
-                placeholder="Describe workflow purpose..."
-                value={metadata.workflowPurpose}
-                onChange={(e) =>
-                  updateMetadata("workflowPurpose", e.target.value)
-                }
-                id="workflow-purpose"
-                rows={3}
-                required
-              />
-
-              <SelectField
-                label="Model"
-                placeholder="Select a model"
-                value={metadata.workflowModel}
-                onValueChange={(value) =>
-                  updateMetadata("workflowModel", value)
-                }
-                id="workflow-model"
-                options={[...WORKFLOW_MODELS]}
-              />
-
-              <Input
-                label="Argument Hint"
-                placeholder="<context>"
-                value={metadata.workflowArgumentHint}
-                onChange={(e) =>
-                  updateMetadata("workflowArgumentHint", e.target.value)
-                }
-                id="argument-hint"
-              />
-
-              {/* ワークフロー統計 */}
+              {/* Workflow Stats */}
               <div className="border-t border-gray-200 pt-6">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
                   Workflow Stats
@@ -157,31 +115,31 @@ export default function PropertiesPanel({
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-500">Nodes:</span>
-                    <span className="ml-2 font-medium">{nodes.length}</span>
+                    <span className="ml-2 font-medium">{workflowSummary.nodeCount}</span>
                   </div>
                   <div>
                     <span className="text-gray-500">Connections:</span>
-                    <span className="ml-2 font-medium">{edges.length}</span>
+                    <span className="ml-2 font-medium">{workflowSummary.edgeCount}</span>
                   </div>
                 </div>
                 <div className="mt-4 space-y-2 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-500">Start Node</span>
                     <span className="font-medium text-gray-900">
-                      {summary.startLabel ?? "Not configured"}
+                      {workflowSummary.startLabel ?? "Not configured"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-500">End Node</span>
                     <span className="font-medium text-gray-900">
-                      {summary.endLabel ?? "Not configured"}
+                      {workflowSummary.endLabel ?? "Not configured"}
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-md bg-indigo-50 px-3 py-2 text-indigo-700">
                       <p className="text-xs uppercase tracking-wide">Agents</p>
                       <p className="text-lg font-semibold">
-                        {summary.agentCount}
+                        {workflowSummary.agentCount}
                       </p>
                     </div>
                     <div className="rounded-md bg-slate-50 px-3 py-2 text-slate-700">
@@ -189,13 +147,13 @@ export default function PropertiesPanel({
                         Step Groups
                       </p>
                       <p className="text-lg font-semibold">
-                        {summary.stepGroupCount}
+                        {workflowSummary.stepGroupCount}
                       </p>
                     </div>
                   </div>
                   <div className="rounded-md bg-emerald-50 px-3 py-2 text-emerald-700">
                     <p className="text-xs uppercase tracking-wide">Edges</p>
-                    <p className="text-lg font-semibold">{summary.edgeCount}</p>
+                    <p className="text-lg font-semibold">{workflowSummary.edgeCount}</p>
                   </div>
                 </div>
               </div>

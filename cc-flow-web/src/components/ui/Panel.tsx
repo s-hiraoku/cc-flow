@@ -2,7 +2,7 @@ import React from 'react';
 
 interface PanelProps {
   children: React.ReactNode;
-  title?: string;
+  title?: React.ReactNode;
   subtitle?: string;
   className?: string;
   variant?: 'default' | 'dark';

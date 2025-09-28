@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui";
 import Canvas from "@/components/workflow-editor/Canvas";
@@ -9,8 +9,11 @@ import PropertiesPanel from "@/components/panels/PropertiesPanel";
 import { ErrorBoundary } from "@/components/common";
 import { useWorkflowEditor, useAgents, useWorkflowSave } from "@/hooks";
 import { Agent } from "@/types/agent";
+import { WorkflowNode } from "@/types/workflow";
 
 export default function EditorPage() {
+  const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
+
   // Custom hooks for state management
   const {
     nodes,
@@ -28,6 +31,13 @@ export default function EditorPage() {
   const { saving, error: saveError, lastSaved, saveWorkflow } = useWorkflowSave();
 
   // Event handlers
+  const handleNodesChangeWithSelection = useCallback((newNodes: WorkflowNode[]) => {
+    handleNodesChange(newNodes);
+    // Update selected nodes based on ReactFlow's selection
+    const selectedNodes = newNodes.filter(node => node.selected);
+    setSelectedNodeIds(selectedNodes.map(node => node.id));
+  }, [handleNodesChange]);
+
   const handleAgentDragStart = useCallback((agent: Agent) => {
     console.log("Dragging agent:", agent);
   }, []);
@@ -125,7 +135,7 @@ export default function EditorPage() {
           <Canvas
             nodes={nodes}
             edges={edges}
-            onNodesChange={handleNodesChange}
+            onNodesChange={handleNodesChangeWithSelection}
             onEdgesChange={handleEdgesChange}
             onConnect={handleConnect}
           />
@@ -138,6 +148,7 @@ export default function EditorPage() {
         onMetadataChange={setMetadata}
         nodes={nodes}
         edges={edges}
+        selectedNodeIds={selectedNodeIds}
       />
       </div>
     </ErrorBoundary>
