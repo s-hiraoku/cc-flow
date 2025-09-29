@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from "react";
-import { WorkflowMetadata, WorkflowNode, WorkflowEdge, isAgentNodeData } from "@/types/workflow";
+import { WorkflowMetadata, WorkflowNode, WorkflowEdge, isAgentNodeData, AgentNodeData } from "@/types/workflow";
 import { WorkflowService } from "@/services/WorkflowService";
 import { createWorkflowJSON } from "@/utils/workflowUtils";
 
@@ -9,6 +9,7 @@ interface UsePropertiesPanelProps {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
   selectedNodeIds: string[];
+  onNodesChange?: (nodes: WorkflowNode[]) => void;
 }
 
 export function usePropertiesPanel({
@@ -17,6 +18,7 @@ export function usePropertiesPanel({
   nodes,
   edges,
   selectedNodeIds,
+  onNodesChange,
 }: UsePropertiesPanelProps) {
   // Get selected nodes
   const selectedNodes = useMemo(() => {
@@ -37,6 +39,29 @@ export function usePropertiesPanel({
       });
     },
     [metadata, onMetadataChange]
+  );
+
+  // Node data update handler
+  const onNodeUpdate = useCallback(
+    (nodeId: string, updates: Partial<AgentNodeData>) => {
+      if (!onNodesChange) return;
+
+      const updatedNodes = nodes.map((node) => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              ...updates,
+            },
+          };
+        }
+        return node;
+      });
+
+      onNodesChange(updatedNodes);
+    },
+    [nodes, onNodesChange]
   );
 
   // Get settings section title based on selected node
@@ -90,6 +115,7 @@ export function usePropertiesPanel({
     selectedNodes,
     primarySelectedNode,
     updateMetadata,
+    onNodeUpdate,
     getSettingsTitle,
     serializedWorkflowJSON,
     createWorkflowJSONString,

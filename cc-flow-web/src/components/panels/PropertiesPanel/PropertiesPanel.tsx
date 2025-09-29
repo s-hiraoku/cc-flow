@@ -18,6 +18,7 @@ interface PropertiesPanelProps {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
   selectedNodeIds?: string[];
+  onNodesChange?: (nodes: WorkflowNode[]) => void;
 }
 
 export default function PropertiesPanel({
@@ -26,6 +27,7 @@ export default function PropertiesPanel({
   nodes,
   edges,
   selectedNodeIds = [],
+  onNodesChange,
 }: PropertiesPanelProps) {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -34,6 +36,7 @@ export default function PropertiesPanel({
     selectedNodes,
     primarySelectedNode,
     updateMetadata,
+    onNodeUpdate,
     getSettingsTitle,
     serializedWorkflowJSON,
     createWorkflowJSONString,
@@ -44,12 +47,14 @@ export default function PropertiesPanel({
     nodes,
     edges,
     selectedNodeIds,
+    onNodesChange,
   });
 
   const { renderNodeSettings } = useNodeSettings({
     primarySelectedNode,
     metadata,
     updateMetadata,
+    onNodeUpdate,
   });
 
   const { renderSelectionInfo } = useSelectionInfo({

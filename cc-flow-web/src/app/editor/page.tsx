@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui";
 import Canvas from "@/components/workflow-editor/Canvas";
 import AgentPalette from "@/components/panels/AgentPalette";
-import PropertiesPanel from "@/components/panels/PropertiesPanel";
+import PropertiesPanel from "@/components/panels/PropertiesPanel/PropertiesPanel";
 import { ErrorBoundary } from "@/components/common";
 import { useWorkflowEditor, useAgents, useWorkflowSave } from "@/hooks";
 import { Agent } from "@/types/agent";
@@ -149,6 +149,7 @@ export default function EditorPage() {
         nodes={nodes}
         edges={edges}
         selectedNodeIds={selectedNodeIds}
+        onNodesChange={handleNodesChange}
       />
       </div>
     </ErrorBoundary>

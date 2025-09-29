@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ReactFlowProvider } from '@xyflow/react';
 import Canvas from '../workflow-editor/Canvas';
-import PropertiesPanel from '../panels/PropertiesPanel';
+import PropertiesPanel from '../panels/PropertiesPanel/PropertiesPanel';
 import type { WorkflowNode, WorkflowEdge } from '@/types/workflow';
 
 // Mock the services

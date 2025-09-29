@@ -26,6 +26,10 @@ export interface AgentNodeData extends Record<string, unknown> {
   label: string;
   description?: string;
   category?: string;
+  // Workflow step properties
+  stepTitle?: string;
+  stepMode?: 'sequential' | 'parallel';
+  stepPurpose?: string;
 }
 
 export interface StepGroupNodeData extends Record<string, unknown> {
@@ -72,15 +76,38 @@ export function isEndNodeData(data: WorkflowNodeData): data is EndNodeData {
   return 'kind' in data && (data as EndNodeData).kind === 'end';
 }
 
-export interface WorkflowNode {
+// Node type guards for generic WorkflowNode
+export function isAgentNode(node: WorkflowNode): node is AgentNode {
+  return isAgentNodeData(node.data);
+}
+
+export function isStepGroupNode(node: WorkflowNode): node is StepGroupNode {
+  return isStepGroupNodeData(node.data);
+}
+
+export function isStartNode(node: WorkflowNode): node is StartNode {
+  return isStartNodeData(node.data);
+}
+
+export function isEndNode(node: WorkflowNode): node is EndNode {
+  return isEndNodeData(node.data);
+}
+
+export interface WorkflowNode<T extends WorkflowNodeData = WorkflowNodeData> {
   id: string;
   type: 'agent' | 'step-group' | 'start' | 'end';
-  data: WorkflowNodeData;
+  data: T;
   position: { x: number; y: number };
   style?: React.CSSProperties;
   selected?: boolean;
   measured?: { width?: number; height?: number };
 }
+
+// Specific node types for better type safety
+export type AgentNode = WorkflowNode<AgentNodeData>;
+export type StepGroupNode = WorkflowNode<StepGroupNodeData>;
+export type StartNode = WorkflowNode<StartNodeData>;
+export type EndNode = WorkflowNode<EndNodeData>;
 
 export interface WorkflowEdge {
   id: string;
