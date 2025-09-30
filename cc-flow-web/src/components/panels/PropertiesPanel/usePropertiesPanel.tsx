@@ -91,8 +91,13 @@ export function usePropertiesPanel({
   }, [metadata, nodes, edges]);
 
   const createWorkflowJSONString = useMemo(() => {
-    return createWorkflowJSON(metadata, nodes);
-  }, [metadata, nodes]);
+    try {
+      return createWorkflowJSON(metadata, nodes, edges);
+    } catch (error) {
+      console.warn("Unable to generate workflow JSON:", error);
+      return JSON.stringify({ error: "Invalid workflow structure" }, null, 2);
+    }
+  }, [metadata, nodes, edges]);
 
   // Generate workflow summary statistics
   const workflowSummary = useMemo(() => {

@@ -38,7 +38,7 @@ export function useWorkflowSave(): UseWorkflowSaveReturn {
       setLastSaved(null);
 
       // Generate create-workflow.sh compatible JSON
-      const workflowJSON = createWorkflowJSON(metadata, nodes);
+      const workflowJSON = createWorkflowJSON(metadata, nodes, edges);
 
       // Download the JSON file using file picker modal
       const downloaded = await downloadWorkflowConfig(metadata.workflowName, workflowJSON);
