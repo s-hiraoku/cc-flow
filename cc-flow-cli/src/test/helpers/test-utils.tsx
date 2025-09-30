@@ -94,12 +94,12 @@ export const mockStdin = () => {
 /**
  * Simulate key presses for testing
  */
-export const simulateKeyPress = (key: string, stdin: any) => {
+export const simulateKeyPress = (key: string, stdin: ReturnType<typeof createMockStdin>) => {
   const listeners = stdin.on.mock.calls
     .filter(([event]: [string]) => event === 'data')
-    .map(([, callback]: [string, Function]) => callback);
+    .map(([, callback]: [string, (data: string) => void]) => callback);
 
-  listeners.forEach((listener: Function) => {
+  listeners.forEach((listener: (data: string) => void) => {
     listener(key);
   });
 };

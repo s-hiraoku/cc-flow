@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Box, Text, useInput, useApp } from 'ink';
+import { Box, Text, useInput, useApp, type Key } from 'ink';
 import { UnifiedScreen, ScreenDescription, MenuSection, FeatureHighlights, HintBox } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { Section, Flex } from '../components/Layout.js';
@@ -36,7 +36,7 @@ export const ConversionCompleteScreen: React.FC<ConversionCompleteScreenProps> =
   ];
 
   // Handle keyboard shortcuts
-  useInput(useCallback((input: string, key: any) => {
+  useInput(useCallback((input: string, key: Key) => {
     if (input === 'q' || input === 'Q') {
       exit();
     } else if (input === 'w' || input === 'W') {

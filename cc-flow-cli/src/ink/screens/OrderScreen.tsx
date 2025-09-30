@@ -1,17 +1,11 @@
 import React, { useState, useCallback } from 'react';
-import { Box, Text, useInput, useApp } from 'ink';
+import { Box, Text, useInput, useApp, type Key } from 'ink';
 import { UnifiedScreen, ScreenDescription, HintBox } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { StatusBar } from '../components/Interactive.js';
 import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
-
-interface Agent {
-  id: string;
-  name: string;
-  description: string;
-  path: string;
-}
+import type { Agent } from '../utils/directoryUtils.js';
 
 interface OrderScreenProps {
   selectedAgents: Agent[];
@@ -31,7 +25,7 @@ export const OrderScreen: React.FC<OrderScreenProps> = ({
   const { contentWidth } = useScreenDimensions();
 
   // Memoized input handler for better performance
-  const handleInput = useCallback((input: string, key: any) => {
+  const handleInput = useCallback((input: string, key: Key) => {
     // Debug: log key presses to understand what's being detected
     console.log('Key pressed:', { input, key, ctrl: key.ctrl, upArrow: key.upArrow, downArrow: key.downArrow });
     

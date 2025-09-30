@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Text, useInput, useApp } from 'ink';
+import { Box, Text, useInput, useApp, type Key } from 'ink';
 import Spinner from 'ink-spinner';
 import { UnifiedScreen, ScreenDescription, FeatureHighlights } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
@@ -31,7 +31,7 @@ export const EnvironmentScreen: React.FC<EnvironmentScreenProps> = ({ onNext, on
   const { contentWidth } = useScreenDimensions();
 
   // Handle keyboard input
-  useInput(useCallback((input: string, key: any) => {
+  useInput(useCallback((input: string, key: Key) => {
     if (key.escape) {
       onBack();
     } else if (input === 'q' || input === 'Q') {

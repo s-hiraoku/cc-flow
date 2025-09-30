@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Box, Text, useApp, useInput } from 'ink';
+import { Box, Text, useApp, useInput, type Key } from 'ink';
 import { UnifiedScreen, ScreenDescription } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { CheckboxList, StatusBar } from '../components/Interactive.js';
@@ -73,7 +73,7 @@ export const CommandSelectionScreen: React.FC<CommandSelectionScreenProps> = ({
   }, [availableCommands, selectedCommands, onNext]);
 
   // Keyboard shortcuts
-  useInput(useCallback((input: string, key: any) => {
+  useInput(useCallback((input: string, key: Key) => {
     if (key.escape) {
       onBack();
     } else if (input === 'q' || input === 'Q') {
@@ -85,14 +85,13 @@ export const CommandSelectionScreen: React.FC<CommandSelectionScreenProps> = ({
     }
   }, [onBack, exit, handleSelectAll, selectedCommands.size, handleNext]));
 
-  const checkboxItems = useMemo(() => 
+  const checkboxItems = useMemo(() =>
     availableCommands.map(command => ({
       id: command.id,
       label: command.name,
-      checked: selectedCommands.has(command.id),
       description: command.description
     })),
-    [availableCommands, selectedCommands]
+    [availableCommands]
   );
 
   const hasValidSelection = selectedCommands.size > 0;

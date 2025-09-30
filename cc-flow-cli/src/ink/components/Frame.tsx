@@ -27,7 +27,7 @@ export const ContentLine: React.FC<ContentLineProps> = ({
     if (typeof node === 'string') return node;
     if (typeof node === 'number') return String(node);
     if (React.isValidElement(node)) {
-      const props = node.props as any;
+      const props = node.props as { children?: React.ReactNode };
       if (props && typeof props === 'object' && 'children' in props) {
         return getTextContent(props.children);
       }

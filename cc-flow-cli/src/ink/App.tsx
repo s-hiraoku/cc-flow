@@ -13,7 +13,7 @@ import { ConversionCompleteScreen } from './screens/ConversionCompleteScreen.js'
 import { WorkflowNameScreen } from './screens/WorkflowNameScreen.js';
 import { EnvironmentScreen } from './screens/EnvironmentScreen.js';
 import { ScriptExecutor } from '../services/ScriptExecutor.js';
-import type { WorkflowConfig } from '../models/Agent.js';
+import type { WorkflowConfig, Agent, Command } from '../models/Agent.js';
 import type { ConversionResult } from '../types/conversion.js';
 
 export type ScreenType = 
@@ -145,7 +145,7 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
         return (
           <CommandSelectionScreen
             targetPath={workflowConfig.targetPath || '.claude/commands'}
-            onNext={(selectedCommands: any[]) => {
+            onNext={(selectedCommands: Command[]) => {
               setWorkflowConfig((prev: Partial<WorkflowConfig>) => ({ ...prev, selectedCommands }));
               navigateTo('conversion');
             }}
@@ -157,19 +157,19 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
         return (
           <AgentSelectionScreen
             targetPath={workflowConfig.targetPath || './agents'}
-            onNext={(selectedAgents: any[]) => {
+            onNext={(selectedAgents: Agent[]) => {
               setWorkflowConfig((prev: Partial<WorkflowConfig>) => ({ ...prev, selectedAgents }));
               navigateTo('order');
             }}
             onBack={goBack}
           />
         );
-      
+
       case 'order':
         return (
           <OrderScreen
-            selectedAgents={workflowConfig.selectedAgents as any[] || []}
-            onNext={(orderedAgents: any[]) => {
+            selectedAgents={workflowConfig.selectedAgents || []}
+            onNext={(orderedAgents: Agent[]) => {
               setWorkflowConfig((prev: Partial<WorkflowConfig>) => ({ ...prev, selectedAgents: orderedAgents }));
               navigateTo('workflow-name');
             }}
@@ -203,18 +203,18 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
       case 'preview':
         return (
           <PreviewScreen
-            config={workflowConfig as any}
+            config={workflowConfig as WorkflowConfig}
             onGenerate={handleWorkflowGeneration}
             isProcessing={isProcessing}
             processingError={processingError}
             onBack={goBack}
           />
         );
-      
+
       case 'complete':
         return (
           <CompleteScreen
-            config={workflowConfig as any}
+            config={workflowConfig as WorkflowConfig}
             onAnother={() => {
               setWorkflowConfig({});
               navigateTo('menu');
@@ -222,12 +222,12 @@ export const App: React.FC<AppProps> = ({ onExit }) => {
             onExit={handleExit}
           />
         );
-      
+
       case 'conversion':
         return (
           <ConversionScreen
             targetPath={workflowConfig.targetPath}
-            selectedCommands={workflowConfig.selectedCommands as any[] || []}
+            selectedCommands={workflowConfig.selectedCommands || []}
             onComplete={(result: ConversionResult) => {
               setConversionResult(result);
               navigateTo('conversion-complete');

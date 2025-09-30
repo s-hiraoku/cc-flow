@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Text, useInput, useApp } from 'ink';
+import { Box, Text, useInput, useApp, type Key } from 'ink';
 import Spinner from 'ink-spinner';
 import { UnifiedScreen } from '../design-system/index.js';
 import { createScreenLayout } from '../design-system/ScreenPatterns.js';
@@ -8,6 +8,7 @@ import { useTheme } from '../themes/theme.js';
 import { execSync } from 'child_process';
 import { join } from 'path';
 import type { ConversionResult } from '../../types/conversion.js';
+import type { Command } from '../../models/Agent.js';
 
 interface ConversionStep {
   name: string;
@@ -18,7 +19,7 @@ interface ConversionStep {
 
 interface ConversionScreenProps {
   targetPath?: string | undefined;
-  selectedCommands?: any[];
+  selectedCommands?: Command[];
   onComplete: (result: ConversionResult) => void;
   onBack: () => void;
 }
@@ -35,7 +36,7 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
   const theme = useTheme();
 
   // Handle keyboard input
-  useInput(useCallback((input: string, key: any) => {
+  useInput(useCallback((input: string, key: Key) => {
     if (key.escape && !isComplete) {
       onBack();
     } else if (input === 'q' || input === 'Q') {
@@ -80,7 +81,7 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
         for (const command of selectedCommands) {
           try {
             // Convert absolute paths to relative paths
-            const sourcePath = command.path.replace(process.cwd() + '/', '');
+            const sourcePath = command.filePath.replace(process.cwd() + '/', '');
             const targetDirectory = outputDir;
             
             // Use relative path for script
@@ -128,7 +129,7 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
             message: 'スラッシュコマンドの変換が完了しました',
             convertedCount: convertedCount,
             targetDirectory: outputDir,
-            convertedCommands: selectedCommands.map((cmd: any) => cmd.name || cmd.id)
+            convertedCommands: selectedCommands.map((cmd) => cmd.name || cmd.id)
           });
         }, 1000);
 

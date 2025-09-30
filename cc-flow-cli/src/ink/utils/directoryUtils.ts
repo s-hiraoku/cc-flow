@@ -22,8 +22,8 @@ export interface CommandStats {
 export interface Command {
   id: string;
   name: string;
-  description: string;
-  path: string;
+  filePath: string;
+  description?: string;
   category?: string;
 }
 
@@ -185,7 +185,9 @@ export interface Agent {
   id: string;
   name: string;
   description: string;
-  path: string;
+  filePath: string;
+  directory: string;
+  category: string;
   icon?: string;
 }
 
@@ -236,12 +238,19 @@ function collectAgentsRecursively(dirPath: string, agents: Agent[]): void {
           const agentName = item.replace('.md', '');
           const description = extractAgentDescription(itemPath, agentName);
           const icon = getAgentIcon(agentName);
-          
+
+          // Extract directory and category from path
+          const pathParts = itemPath.split('/');
+          const directory = pathParts[pathParts.length - 2] || '';
+          const category = 'agents';
+
           agents.push({
             id: agentName,
             name: agentName,
             description,
-            path: itemPath,
+            filePath: itemPath,
+            directory,
+            category,
             icon
           });
         }
@@ -270,12 +279,19 @@ function collectAgentsFromDirectory(dirPath: string, agents: Agent[]): void {
           const agentName = file.replace('.md', '');
           const description = extractAgentDescription(filePath, agentName);
           const icon = getAgentIcon(agentName);
-          
+
+          // Extract directory and category from path
+          const pathParts = filePath.split('/');
+          const directory = pathParts[pathParts.length - 2] || '';
+          const category = 'agents';
+
           agents.push({
             id: agentName,
             name: agentName,
             description,
-            path: filePath,
+            filePath: filePath,
+            directory,
+            category,
             icon
           });
         }
@@ -529,8 +545,8 @@ export function getCommandsFromPath(targetPath: string): Command[] {
           commands.push({
             id: commandName,
             name: commandName,
+            filePath: filePath,
             description,
-            path: filePath,
             category: extractCategoryFromPath(targetPath)
           });
         } catch (error) {
@@ -539,8 +555,8 @@ export function getCommandsFromPath(targetPath: string): Command[] {
           commands.push({
             id: commandName,
             name: commandName,
+            filePath: filePath,
             description: 'スラッシュコマンド',
-            path: filePath,
             category: extractCategoryFromPath(targetPath)
           });
         }

@@ -207,7 +207,7 @@ interface CheckboxListProps {
   items: Array<{
     id: string;
     label: string;
-    description?: string;
+    description?: string | undefined;
     icon?: string;
     disabled?: boolean;
   }>;

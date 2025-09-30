@@ -1,26 +1,12 @@
 import React, { useCallback } from 'react';
-import { Box, Text, useInput, useApp } from 'ink';
+import { Box, Text, useInput, useApp, type Key } from 'ink';
 import SelectInput from 'ink-select-input';
 import { UnifiedScreen, ScreenDescription, MenuSection } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
 import type { MenuItem } from '../components/Interactive.js';
-
-interface Agent {
-  id: string;
-  name: string;
-  description: string;
-  path: string;
-}
-
-interface WorkflowConfig {
-  workflowName?: string;
-  selectedAgents?: Agent[];
-  purpose?: string;
-  targetPath?: string;
-  environment?: string;
-}
+import type { WorkflowConfig } from '../../models/Agent.js';
 
 interface PreviewScreenProps {
   config: WorkflowConfig;
@@ -44,7 +30,7 @@ export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate
   ];
 
   // Handle keyboard shortcuts
-  useInput(useCallback((input: string, key: any) => {
+  useInput(useCallback((input: string, key: Key) => {
     if (key.escape) {
       onBack();
     } else if (input === 'q' || input === 'Q') {

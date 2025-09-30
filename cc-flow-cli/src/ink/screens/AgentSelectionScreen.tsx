@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Box, Text, useApp, useInput } from 'ink';
+import { Box, Text, useApp, useInput, type Key } from 'ink';
 import { UnifiedScreen, ScreenDescription } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { CheckboxList, StatusBar } from '../components/Interactive.js';
@@ -66,7 +66,7 @@ export const AgentSelectionScreen: React.FC<AgentSelectionScreenProps> = ({
     }
   }, [availableAgents, onNext, selectedAgents]);
 
-  useInput(useCallback((input: string, key: any) => {
+  useInput(useCallback((input: string, key: Key) => {
     if (key.return && selectedAgents.size > 0) {
       handleNext();
     } else if (key.escape) {

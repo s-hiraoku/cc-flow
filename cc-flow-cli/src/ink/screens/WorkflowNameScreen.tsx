@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Box, Text, useInput, useApp } from 'ink';
+import { Box, Text, useInput, useApp, type Key } from 'ink';
 import TextInput from 'ink-text-input';
 import { UnifiedScreen, ScreenDescription, HintBox } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
@@ -25,7 +25,7 @@ export const WorkflowNameScreen: React.FC<WorkflowNameScreenProps> = ({
   const { contentWidth } = useScreenDimensions();
 
   // Handle global keyboard shortcuts
-  useInput(useCallback((input: string, key: any) => {
+  useInput(useCallback((input: string, key: Key) => {
     if (key.escape) {
       onBack();
     } else if (input === 'q' || input === 'Q') {

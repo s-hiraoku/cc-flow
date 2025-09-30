@@ -246,9 +246,10 @@ export class ScriptExecutor {
     try {
       const output = execSync(`"${scriptPath}"`, execOptions);
       return output.toString();
-    } catch (error: any) {
+    } catch (error) {
       // The script may return usage info in stderr when called without arguments
-      const output = error.stdout || error.stderr;
+      const execError = error as { stdout?: Buffer; stderr?: Buffer; message?: string };
+      const output = execError.stdout || execError.stderr;
       if (output) {
         return output.toString();
       }

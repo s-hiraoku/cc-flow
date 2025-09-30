@@ -1,25 +1,12 @@
 import React, { useCallback } from 'react';
-import { Box, Text, useInput, useApp } from 'ink';
+import { Box, Text, useInput, useApp, type Key } from 'ink';
 import { UnifiedScreen, ScreenDescription, MenuSection, FeatureHighlights, HintBox } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
 import type { MenuItem } from '../components/Interactive.js';
 import { getVersion } from '../../utils/package.js';
-
-interface Agent {
-  id: string;
-  name: string;
-  description: string;
-  path: string;
-}
-
-interface WorkflowConfig {
-  workflowName?: string;
-  selectedAgents?: Agent[];
-  purpose?: string;
-  targetPath?: string;
-}
+import type { WorkflowConfig } from '../../models/Agent.js';
 
 interface CompleteScreenProps {
   config: WorkflowConfig;
@@ -41,7 +28,7 @@ export const CompleteScreen: React.FC<CompleteScreenProps> = ({ config, onAnothe
   ];
 
   // Handle keyboard shortcuts
-  useInput(useCallback((input: string, key: any) => {
+  useInput(useCallback((input: string, key: Key) => {
     if (input === 'q' || input === 'Q') {
       exit();
     } else if (input === 'n' || input === 'N') {
