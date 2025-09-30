@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
 import { WorkflowMetadata, WorkflowNode, WorkflowEdge } from '@/types/workflow';
+import { createWorkflowJSON } from '@/utils/workflowUtils';
+import { downloadWorkflowConfig } from '@/utils/fileDownload';
 
 interface SaveSuccessSummary {
   workflowName: string;
@@ -35,36 +37,31 @@ export function useWorkflowSave(): UseWorkflowSaveReturn {
       setError(null);
       setLastSaved(null);
 
-      const response = await fetch("/api/workflows", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          metadata,
-          nodes,
-          edges,
-        }),
-      });
+      // Generate create-workflow.sh compatible JSON
+      const workflowJSON = createWorkflowJSON(metadata, nodes);
 
-      const result = await response.json();
+      // Download the JSON file using file picker modal
+      const downloaded = await downloadWorkflowConfig(metadata.workflowName, workflowJSON);
 
-      if (!response.ok) {
-        throw new Error(result.error || `HTTP ${response.status}: ${response.statusText}`);
+      if (!downloaded) {
+        // User cancelled the save operation
+        console.log("Workflow save cancelled by user");
+        setError(null);
+        setLastSaved(null);
+        return false;
       }
 
-      console.log("Workflow saved:", result);
+      console.log("Workflow JSON downloaded:", metadata.workflowName);
       setLastSaved({
         workflowName: metadata.workflowName,
-        filename: result.filename,
-        path: result.path,
+        filename: `${metadata.workflowName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`,
       });
       return true;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to download workflow file';
       setError(errorMessage);
       setLastSaved(null);
-      console.error("Error saving workflow:", err);
+      console.error("Error downloading workflow:", err);
       return false;
     } finally {
       setSaving(false);

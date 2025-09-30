@@ -1,6 +1,7 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Connection } from '@xyflow/react';
 import { WorkflowNode, WorkflowEdge, WorkflowMetadata } from '@/types/workflow';
+import { autoSaveWorkflow, loadAutoSavedWorkflow } from '@/utils/autoSave';
 
 interface UseWorkflowEditorReturn {
   nodes: WorkflowNode[];
@@ -25,6 +26,22 @@ export function useWorkflowEditor(): UseWorkflowEditorReturn {
   const [nodes, setNodes] = useState<WorkflowNode[]>([]);
   const [edges, setEdges] = useState<WorkflowEdge[]>([]);
   const [metadata, setMetadata] = useState<WorkflowMetadata>(DEFAULT_METADATA);
+
+  // Load auto-saved data on mount
+  useEffect(() => {
+    const autoSaved = loadAutoSavedWorkflow();
+    if (autoSaved) {
+      console.log('Loaded auto-saved workflow data');
+      setNodes(autoSaved.nodes);
+      setEdges(autoSaved.edges);
+      setMetadata(autoSaved.metadata);
+    }
+  }, []);
+
+  // Auto-save whenever data changes
+  useEffect(() => {
+    autoSaveWorkflow(metadata, nodes, edges);
+  }, [metadata, nodes, edges]);
 
   const handleNodesChange = useCallback((newNodes: WorkflowNode[]) => {
     setNodes(newNodes);
