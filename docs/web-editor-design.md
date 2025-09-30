@@ -67,6 +67,11 @@ interface WorkflowNode {
 }
 ```
 
+**StepGroupNode制限:**
+- 最大エージェント数: 10
+- 理由: UI可読性とパフォーマンスの最適化
+- 10以上のエージェントが必要な場合は、複数のStepGroupNodeに分割すること
+
 #### 1.2 エッジ（接続線）
 
 ```typescript

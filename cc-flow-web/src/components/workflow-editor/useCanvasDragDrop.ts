@@ -164,13 +164,26 @@ export function useCanvasDragDrop({
       }
 
       // Check if the new node is dropped inside a container
-      const containerNode = nodes.find(node => {
+      const containerNode = nodeType === 'agent' ? nodes.find(node => {
         if (node.type === 'step-group') {
+          // Calculate dynamic height based on agent count
+          const agentCount = (node.data.agents as Array<string | { name: string; category?: string }>)?.length || 0;
+          const headerHeight = 64;
+          const dropZoneHeight = 150;
+          const agentItemHeight = 44;
+          const padding = 24;
+          const reservedSlots = 3;
+          
+          // Always reserve space for at least 3 agents, expand if more
+          const visibleAgentCount = Math.max(reservedSlots, agentCount);
+          const agentListHeight = visibleAgentCount * agentItemHeight + 8;
+          const dynamicHeight = headerHeight + agentListHeight + dropZoneHeight + padding;
+
           const containerBounds = {
             x: node.position.x,
             y: node.position.y,
-            width: 300, // Container width
-            height: 200, // Container height
+            width: 360,
+            height: dynamicHeight,
           };
 
           const isInside = (
@@ -183,22 +196,38 @@ export function useCanvasDragDrop({
           return isInside;
         }
         return false;
-      });
+      }) : null;
 
       // If dropped inside a container, only update the container's agents list
-      if (containerNode) {
+      if (containerNode && nodeType === 'agent') {
         // Only update the container's agents list, don't create a new node
         const updatedNodes = nodes.map(node => {
           if (node.id === containerNode.id && node.type === 'step-group') {
-            const currentAgents = (node.data.agents as string[]) || [];
-            const newAgentName = (newNode.data as AgentNodeData).agentName || (newNode.data as AgentNodeData).label;
+            const currentAgents = (node.data.agents as Array<string | { name: string; category?: string }>) || [];
+            const newAgentData = newNode.data as AgentNodeData;
+            const newAgentName = newAgentData.agentName || newAgentData.label;
+            const newAgentCategory = newAgentData.category;
 
             // Check if agent already exists in the container
-            if (currentAgents.includes(newAgentName)) {
+            const agentExists = currentAgents.some(agent => 
+              typeof agent === 'string' ? agent === newAgentName : agent.name === newAgentName
+            );
+            if (agentExists) {
               return node; // Return unchanged node
             }
 
-            const updatedAgents = [...currentAgents, newAgentName];
+            // Check max limit (10 agents)
+            if (currentAgents.length >= 10) {
+              console.warn('StepGroupNode can hold maximum 10 agents');
+              return node;
+            }
+
+            // Add agent with category information
+            const newAgent = newAgentCategory 
+              ? { name: newAgentName, category: newAgentCategory }
+              : newAgentName;
+            const updatedAgents = [...currentAgents, newAgent];
+            
             return {
               ...node,
               data: {

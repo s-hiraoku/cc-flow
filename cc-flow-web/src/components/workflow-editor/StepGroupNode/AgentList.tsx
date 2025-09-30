@@ -1,38 +1,50 @@
 import React from 'react';
+import { getCategoryColors } from '@/utils/categoryStyles';
+
+type AgentItem = string | { name: string; category?: string };
 
 interface AgentListProps {
-  agents: string[];
+  agents: AgentItem[];
   onRemoveAgent: (agentName: string) => void;
 }
 
 export default function AgentList({ agents, onRemoveAgent }: AgentListProps) {
   if (agents.length === 0) {
-    return (
-      <div className="flex-1 flex items-center justify-center text-purple-400 text-sm">
-        Drop agents here
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="flex-1 p-2 space-y-1 overflow-y-auto">
-      {agents.map((agentName) => (
-        <div
-          key={agentName}
-          className="bg-white/80 border border-purple-200 rounded px-2 py-1 text-xs flex items-center justify-between group/agent"
-        >
-          <span className="font-medium text-purple-700">{agentName}</span>
-          <button
-            onClick={() => onRemoveAgent(agentName)}
-            className="w-4 h-4 text-gray-400 hover:text-red-500 opacity-0 group-hover/agent:opacity-100 transition-opacity"
-            title="Remove agent"
+    <div className="space-y-2 max-h-80 overflow-y-auto">
+      {agents.map((agent, index) => {
+        const agentName = typeof agent === 'string' ? agent : agent.name;
+        const category = typeof agent === 'string' ? 'default' : (agent.category || 'default');
+        const colors = getCategoryColors(category);
+
+        return (
+          <div
+            key={`${agentName}-${index}`}
+            className={`border rounded-lg px-3 py-2 flex items-center justify-between group/agent hover:shadow-sm transition-all ${colors.solidBg} ${colors.solidBorder}`}
           >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      ))}
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 ${colors.icon}`}>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-gray-900 truncate">{agentName}</span>
+            </div>
+            <button
+              onClick={() => onRemoveAgent(agentName)}
+              className="w-5 h-5 flex-shrink-0 text-gray-400 hover:text-red-500 opacity-0 group-hover/agent:opacity-100 transition-all"
+              title="Remove agent"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -32,11 +32,16 @@ export interface AgentNodeData extends Record<string, unknown> {
   stepPurpose?: string;
 }
 
+export interface StepGroupAgent {
+  name: string;
+  category?: string;
+}
+
 export interface StepGroupNodeData extends Record<string, unknown> {
   title: string;
   mode: 'sequential' | 'parallel';
   purpose?: string;
-  agents: string[];
+  agents: (string | StepGroupAgent)[];
   label: string;
   description?: string;
 }

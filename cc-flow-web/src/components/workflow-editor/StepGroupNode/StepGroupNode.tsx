@@ -6,6 +6,7 @@ import AgentList from './AgentList';
 
 export default function StepGroupNode({ id, data, selected }: NodeProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const { deleteElements } = useReactFlow();
   const stepData = data as StepGroupNodeData;
 
@@ -25,7 +26,12 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
   const handleRemoveAgent = useCallback((agentName: string) => {
     const updateNodeData = (window as { __updateNodeData?: (id: string, data: Record<string, unknown>) => void }).__updateNodeData;
     if (typeof updateNodeData === 'function') {
-      const updatedAgents = stepData.agents.filter((name: string) => name !== agentName);
+      const updatedAgents = stepData.agents.filter((agent) => {
+        if (typeof agent === 'string') {
+          return agent !== agentName;
+        }
+        return agent.name !== agentName;
+      });
       updateNodeData(id, { agents: updatedAgents });
     }
   }, [stepData.agents, id]);
@@ -33,12 +39,30 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setIsDragOver(false);
   }, []);
 
   const handleDrop = useCallback(() => {
-    // Don't prevent default or stop propagation
+    setIsDragOver(false);
     // Let Canvas handle all drop logic
   }, []);
+
+  // Calculate dynamic height based on number of agents
+  const agentCount = stepData.agents.length;
+  const headerHeight = 64; // pt-16 = 64px
+  const dropZoneHeight = 150; // Fixed height for drop zone
+  const agentItemHeight = 44; // Height per agent item including gap
+  const padding = 24; // px-3 pb-3 = 12px * 2
+  const reservedSlots = 3; // Reserve space for 3 agents initially
+  
+  // Always reserve space for at least 3 agents, expand if more
+  const visibleAgentCount = Math.max(reservedSlots, agentCount);
+  const agentListHeight = visibleAgentCount * agentItemHeight + 8; // 8px for spacing
+  const totalHeight = headerHeight + agentListHeight + dropZoneHeight + padding;
 
   return (
     <div
@@ -46,23 +70,26 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
-        width: 300,
-        height: 200,
-        minWidth: 300,
-        minHeight: 200,
+        width: 410,
+        minWidth: 410,
+        height: totalHeight,
+        minHeight: totalHeight,
         zIndex: selected ? 1 : 0,
       }}
     >
       <div
         className={`w-full h-full border-2 border-dashed rounded-lg transition-all ${
           selected
-            ? "border-purple-500 bg-purple-50/50"
-            : "border-purple-300 bg-purple-50/30 hover:border-purple-400 hover:bg-purple-50/40"
-        }`}
+            ? "border-purple-500 shadow-lg ring-2 ring-purple-200"
+            : isDragOver
+            ? "border-purple-500 shadow-md"
+            : "border-purple-300 hover:border-purple-400 hover:shadow-md"
+        } bg-white`}
         style={{
           position: 'relative',
         }}
         onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         {/* Target handle at the top */}
@@ -77,15 +104,69 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
           purpose={stepData.purpose}
           mode={stepData.mode}
           onDelete={handleDelete}
-          isHovered={isHovered}
         />
 
-        {/* Content area */}
-        <div className="flex flex-col h-full pt-16 pb-4">
-          <AgentList
-            agents={stepData.agents}
-            onRemoveAgent={handleRemoveAgent}
-          />
+        {/* Content area with agents */}
+        <div className="pt-16 px-3 pb-3 flex flex-col h-full">
+          {/* Title outside the border */}
+          <h4 className="text-xs font-semibold text-gray-600 mb-1.5">
+            Agents ({agentCount}/10)
+          </h4>
+          
+          {/* Agent list area - grows dynamically */}
+          <div className="flex-1 mb-2 border-2 border-gray-200 rounded-lg bg-gray-50/50 p-3">
+            {agentCount > 0 ? (
+              <AgentList
+                agents={stepData.agents}
+                onRemoveAgent={handleRemoveAgent}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-20 text-gray-400 text-sm w-full text-center">
+                No agents yet
+              </div>
+            )}
+          </div>
+          
+          {/* Fixed height drop zone at bottom */}
+          <div
+            className={`border-2 border-dashed rounded-lg p-4 transition-all ${
+              isDragOver
+                ? "border-purple-500 bg-purple-50"
+                : "border-purple-200 bg-purple-25"
+            }`}
+            style={{ height: `${dropZoneHeight}px`, flexShrink: 0 }}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <div className="flex flex-col items-center justify-center text-center h-full">
+              <svg
+                className={`w-8 h-8 mb-2 transition-colors ${
+                  isDragOver ? "text-purple-500" : "text-purple-300"
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              <p
+                className={`text-sm font-medium transition-colors ${
+                  isDragOver ? "text-purple-600" : "text-purple-400"
+                }`}
+              >
+                Drop agents here
+              </p>
+              <p className="text-xs text-purple-300 mt-1">
+                {agentCount}/10 agents
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Source handle at the bottom */}
