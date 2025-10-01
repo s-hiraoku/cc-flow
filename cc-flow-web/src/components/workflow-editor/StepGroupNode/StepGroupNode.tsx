@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Handle, Position, useReactFlow, NodeProps } from '@xyflow/react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Handle, Position, useReactFlow, useUpdateNodeInternals, NodeProps } from '@xyflow/react';
 import { StepGroupNodeData } from '@/types/workflow';
 import StepGroupHeader from './StepGroupHeader';
 import AgentList from './AgentList';
@@ -8,6 +8,7 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const { deleteElements } = useReactFlow();
+  const updateNodeInternals = useUpdateNodeInternals();
   const stepData = data as StepGroupNodeData;
 
   const handleDelete = useCallback((e: React.MouseEvent) => {
@@ -63,6 +64,11 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
   const visibleAgentCount = Math.max(reservedSlots, agentCount);
   const agentListHeight = visibleAgentCount * agentItemHeight + 8; // 8px for spacing
   const totalHeight = headerHeight + agentListHeight + dropZoneHeight + padding;
+
+  // Update node internals when agent count changes
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [agentCount, id, updateNodeInternals]);
 
   return (
     <div
