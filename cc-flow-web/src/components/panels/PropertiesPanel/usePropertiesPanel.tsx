@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from "react";
-import { WorkflowMetadata, WorkflowNode, WorkflowEdge, isAgentNodeData, AgentNodeData } from "@/types/workflow";
+import { WorkflowMetadata, WorkflowNode, WorkflowEdge, WorkflowNodeData, isAgentNodeData, AgentNodeData } from "@/types/workflow";
 import { WorkflowService } from "@/services/WorkflowService";
 import { createWorkflowJSON } from "@/utils/workflowUtils";
 
@@ -43,7 +43,7 @@ export function usePropertiesPanel({
 
   // Node data update handler
   const onNodeUpdate = useCallback(
-    (nodeId: string, updates: Partial<AgentNodeData>) => {
+    (nodeId: string, updates: Partial<WorkflowNodeData>) => {
       if (!onNodesChange) return;
 
       const updatedNodes = nodes.map((node) => {

@@ -231,11 +231,16 @@ function convertNodeToStep(node: WorkflowNode): WorkflowStepPayload {
   }
 
   if (isStepGroupNode(node)) {
+    // Convert agents array to string[] (handle both string and StepGroupAgent types)
+    const agentNames = node.data.agents.map(agent =>
+      typeof agent === 'string' ? agent : agent.name
+    );
+
     return {
       title: node.data.title,
       mode: node.data.mode,
       purpose: node.data.purpose || "",
-      agents: node.data.agents,
+      agents: agentNames,
     };
   }
 

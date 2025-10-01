@@ -3,8 +3,10 @@ import { Input, Textarea, SelectField } from "@/components/ui";
 import {
   WorkflowMetadata,
   WorkflowNode,
+  WorkflowNodeData,
   AgentNodeData,
   isAgentNode,
+  isStepGroupNode,
 } from "@/types/workflow";
 import { WorkflowMode } from "@/utils/workflowUtils";
 import { WORKFLOW_MODELS } from "@/constants/workflow";
@@ -13,7 +15,7 @@ interface UseNodeSettingsProps {
   primarySelectedNode?: WorkflowNode;
   metadata: WorkflowMetadata;
   updateMetadata: (field: keyof WorkflowMetadata, value: string) => void;
-  onNodeUpdate?: (nodeId: string, updates: Partial<AgentNodeData>) => void;
+  onNodeUpdate?: (nodeId: string, updates: Partial<WorkflowNodeData>) => void;
 }
 
 export function useNodeSettings({
@@ -150,13 +152,59 @@ export function useNodeSettings({
         );
 
       case "step-group":
+        if (!isStepGroupNode(primarySelectedNode)) return null;
+
+        const stepGroupData = primarySelectedNode.data;
+
         return (
           <div className="space-y-4">
             <div className="text-sm text-gray-600 mb-4">
               Configure step group execution mode and agents
             </div>
-            <div className="text-sm text-gray-500">
-              Step group settings will be implemented here
+
+            <Input
+              label="Group Title"
+              placeholder="Parallel Group"
+              value={stepGroupData.title || ""}
+              onChange={(e) =>
+                onNodeUpdate?.(primarySelectedNode.id, {
+                  title: e.target.value,
+                })
+              }
+              id="step-group-title"
+              required
+            />
+
+            <Textarea
+              label="Purpose"
+              placeholder="Describe the group's purpose..."
+              value={stepGroupData.purpose || ""}
+              onChange={(e) =>
+                onNodeUpdate?.(primarySelectedNode.id, {
+                  purpose: e.target.value,
+                })
+              }
+              id="step-group-purpose"
+              rows={3}
+            />
+
+            <SelectField
+              label="Execution Mode"
+              value={stepGroupData.mode}
+              onValueChange={(value) =>
+                onNodeUpdate?.(primarySelectedNode.id, {
+                  mode: value as 'sequential' | 'parallel',
+                })
+              }
+              id="step-group-mode"
+              options={[
+                { value: "sequential", label: "Sequential" },
+                { value: "parallel", label: "Parallel" },
+              ]}
+            />
+
+            <div className="text-xs text-gray-500 mt-2">
+              Agents: {stepGroupData.agents.length}/10
             </div>
           </div>
         );
