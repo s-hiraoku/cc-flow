@@ -8,7 +8,7 @@ import { AgentService } from "@/services";
 import {
   getCategoryBorderAndBg,
   getCategoryIcon,
-  getCategoryIconColor
+  getCategoryIconColor,
 } from "@/utils/agentPaletteUtils";
 import { PanelLeftOpen, PanelLeftClose } from "lucide-react";
 
@@ -34,7 +34,7 @@ const PRIMITIVE_NODES: PrimitiveNode[] = [
   {
     type: "step-group",
     name: "Parallel Group",
-    description: "Container for parallel execution of nested workflow nodes.",
+    description: "Container for parallel execution of grouped agents.",
   },
 ];
 
@@ -73,7 +73,13 @@ export default function AgentPalette({
   // Drag start handler
   const setPaletteData = (
     event: React.DragEvent,
-    payload: { type: string; name: string; description?: string; path?: string; category?: string }
+    payload: {
+      type: string;
+      name: string;
+      description?: string;
+      path?: string;
+      category?: string;
+    }
   ) => {
     event.dataTransfer.setData("application/reactflow", payload.type);
     event.dataTransfer.setData(
@@ -135,40 +141,40 @@ export default function AgentPalette({
     []
   );
 
-
-
-
-
   return (
     <Panel
-      title={collapsed ? (
-        <div className="flex items-center justify-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label="Expand agent palette"
-            onClick={() => setCollapsed(false)}
-            className="p-1"
-          >
-            <PanelLeftOpen className="h-4 w-4" />
-          </Button>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between">
-          <span>Agent Palette</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label="Collapse agent palette"
-            onClick={() => setCollapsed(true)}
-            className="p-1"
-          >
-            <PanelLeftClose className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
+      title={
+        collapsed ? (
+          <div className="flex items-center justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-label="Expand agent palette"
+              onClick={() => setCollapsed(false)}
+              className="p-1"
+            >
+              <PanelLeftOpen className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <span>Agent Palette</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-label="Collapse agent palette"
+              onClick={() => setCollapsed(true)}
+              className="p-1"
+            >
+              <PanelLeftClose className="h-4 w-4" />
+            </Button>
+          </div>
+        )
+      }
       subtitle={collapsed ? undefined : "Drag agents to the canvas"}
-      className={`relative transition-all duration-200 ${collapsed ? 'w-12 shadow-lg' : 'w-80'}`}
+      className={`relative transition-all duration-200 ${
+        collapsed ? "w-12 shadow-lg" : "w-80"
+      }`}
     >
       {!collapsed && (
         <div className="p-4 space-y-4">
@@ -330,7 +336,9 @@ export default function AgentPalette({
               {loading && (
                 <div className="flex items-center justify-center py-8">
                   <LoadingSpinner size="md" className="mr-3" />
-                  <span className="text-sm text-gray-500">Loading agents...</span>
+                  <span className="text-sm text-gray-500">
+                    Loading agents...
+                  </span>
                 </div>
               )}
 
@@ -338,9 +346,9 @@ export default function AgentPalette({
                 filteredAgents.map((agent) => (
                   <div
                     key={agent.name}
-                    className={`p-4 cursor-grab active:cursor-grabbing hover:shadow-lg transition-all duration-200 border-2 border-solid rounded-lg shadow-sm select-none ${
-                      getCategoryBorderAndBg(agent.category || "default")
-                    }`}
+                    className={`p-4 cursor-grab active:cursor-grabbing hover:shadow-lg transition-all duration-200 border-2 border-solid rounded-lg shadow-sm select-none ${getCategoryBorderAndBg(
+                      agent.category || "default"
+                    )}`}
                     draggable={true}
                     onDragStart={(e) => handleAgentDragStart(e, agent)}
                   >
@@ -377,7 +385,11 @@ export default function AgentPalette({
                         </p>
                         {agent.category && (
                           <div className="mt-2">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryIconColor(agent.category)}`}>
+                            <span
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryIconColor(
+                                agent.category
+                              )}`}
+                            >
                               {agent.category}
                             </span>
                           </div>

@@ -4,11 +4,9 @@ import {
   WorkflowMetadata,
   WorkflowNode,
   WorkflowNodeData,
-  AgentNodeData,
   isAgentNode,
   isStepGroupNode,
 } from "@/types/workflow";
-import { WorkflowMode } from "@/utils/workflowUtils";
 import { WORKFLOW_MODELS } from "@/constants/workflow";
 
 interface UseNodeSettingsProps {
@@ -134,7 +132,6 @@ export function useNodeSettings({
                 id="step-title"
               />
 
-
               <Textarea
                 label="Step Purpose"
                 placeholder="Describe what this step accomplishes..."
@@ -186,21 +183,6 @@ export function useNodeSettings({
               }
               id="step-group-purpose"
               rows={3}
-            />
-
-            <SelectField
-              label="Execution Mode"
-              value={stepGroupData.mode}
-              onValueChange={(value) =>
-                onNodeUpdate?.(primarySelectedNode.id, {
-                  mode: value as 'sequential' | 'parallel',
-                })
-              }
-              id="step-group-mode"
-              options={[
-                { value: "sequential", label: "Sequential" },
-                { value: "parallel", label: "Parallel" },
-              ]}
             />
 
             <div className="text-xs text-gray-500 mt-2">
