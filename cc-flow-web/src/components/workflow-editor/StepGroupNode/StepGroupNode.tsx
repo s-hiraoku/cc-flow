@@ -52,14 +52,26 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
     // Let Canvas handle all drop logic
   }, []);
 
-  // Fixed node height to prevent overflow
+  // Calculate dynamic height based on number of agents
   const agentCount = stepData.agents.length;
   const headerHeight = 64; // pt-16 = 64px
-  const agentListHeight = 140; // Fixed height for agent list with scroll
   const dropZoneHeight = 150; // Fixed height for drop zone
+  const agentItemHeight = 52; // Height per agent item including gap
   const padding = 24; // px-3 pb-3 = 12px * 2
-  const titleHeight = 24; // Title height
-  const totalHeight = headerHeight + titleHeight + agentListHeight + dropZoneHeight + padding + 16; // 16px extra spacing
+  const titleHeight = 28; // Title height with margin
+  const minAgentAreaHeight = 80; // Minimum height for agent area
+
+  // Calculate agent area height (minimum 80px for "No agents yet")
+  const agentAreaHeight = agentCount > 0
+    ? agentCount * agentItemHeight + 24 // 24px for padding
+    : minAgentAreaHeight;
+
+  const totalHeight = headerHeight + titleHeight + agentAreaHeight + dropZoneHeight + padding;
+
+  // Update node internals when size changes
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [totalHeight, id, updateNodeInternals]);
 
   return (
     <div
@@ -110,8 +122,8 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
             Agents ({agentCount}/10)
           </h4>
           
-          {/* Agent list area - fixed height with scroll */}
-          <div className="mb-2 border-2 border-gray-200 rounded-lg bg-gray-50/50 p-3 overflow-y-auto" style={{ height: '140px' }}>
+          {/* Agent list area - dynamic height */}
+          <div className="mb-2 border-2 border-gray-200 rounded-lg bg-gray-50/50 p-3">
             {agentCount > 0 ? (
               <AgentList
                 agents={stepData.agents}
