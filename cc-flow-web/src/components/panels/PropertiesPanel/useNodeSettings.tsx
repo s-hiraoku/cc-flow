@@ -1,4 +1,6 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Input, Textarea, SelectField } from "@/components/ui";
 import {
   WorkflowMetadata,
@@ -8,6 +10,7 @@ import {
   isStepGroupNode,
 } from "@/types/workflow";
 import { WORKFLOW_MODELS } from "@/constants/workflow";
+import { WorkflowMetadataSchema } from "@/schemas/workflowValidation";
 
 interface UseNodeSettingsProps {
   primarySelectedNode?: WorkflowNode;
@@ -22,6 +25,26 @@ export function useNodeSettings({
   updateMetadata,
   onNodeUpdate,
 }: UseNodeSettingsProps) {
+  // React Hook Form for Start node validation
+  const {
+    register,
+    formState: { errors },
+    setValue,
+    trigger,
+  } = useForm({
+    resolver: valibotResolver(WorkflowMetadataSchema),
+    mode: "onBlur",
+    defaultValues: metadata,
+  });
+
+  // Sync form values with metadata changes
+  useEffect(() => {
+    setValue("workflowName", metadata.workflowName);
+    setValue("workflowPurpose", metadata.workflowPurpose);
+    setValue("workflowModel", metadata.workflowModel);
+    setValue("workflowArgumentHint", metadata.workflowArgumentHint);
+  }, [metadata, setValue]);
+
   // Render node-specific settings components
   const renderNodeSettings = useCallback(() => {
     if (!primarySelectedNode) {
@@ -39,26 +62,32 @@ export function useNodeSettings({
               label="Workflow Name"
               placeholder="my-workflow"
               value={metadata.workflowName}
-              onChange={(e) => updateMetadata("workflowName", e.target.value)}
+              {...register("workflowName", {
+                onChange: (e) => updateMetadata("workflowName", e.target.value),
+              })}
               id="workflow-name"
               required
+              error={errors.workflowName?.message}
             />
             <Textarea
               label="Purpose"
               placeholder="Describe workflow purpose..."
               value={metadata.workflowPurpose}
-              onChange={(e) =>
-                updateMetadata("workflowPurpose", e.target.value)
-              }
+              {...register("workflowPurpose", {
+                onChange: (e) => updateMetadata("workflowPurpose", e.target.value),
+              })}
               id="workflow-purpose"
               rows={3}
-              required
+              error={errors.workflowPurpose?.message}
             />
             <SelectField
               label="Model"
               placeholder="Select a model"
               value={metadata.workflowModel}
-              onValueChange={(value) => updateMetadata("workflowModel", value)}
+              onValueChange={(value) => {
+                updateMetadata("workflowModel", value);
+                setValue("workflowModel", value, { shouldValidate: true });
+              }}
               id="workflow-model"
               options={[...WORKFLOW_MODELS]}
             />
@@ -66,10 +95,11 @@ export function useNodeSettings({
               label="Argument Hint"
               placeholder="<context>"
               value={metadata.workflowArgumentHint}
-              onChange={(e) =>
-                updateMetadata("workflowArgumentHint", e.target.value)
-              }
+              {...register("workflowArgumentHint", {
+                onChange: (e) => updateMetadata("workflowArgumentHint", e.target.value),
+              })}
               id="argument-hint"
+              error={errors.workflowArgumentHint?.message}
             />
           </div>
         );
@@ -206,9 +236,18 @@ export function useNodeSettings({
     metadata.workflowArgumentHint,
     updateMetadata,
     onNodeUpdate,
+    register,
+    errors,
+    trigger,
+    setValue,
   ]);
+
+  // Check if there are any validation errors
+  const hasErrors = Object.keys(errors).length > 0;
 
   return {
     renderNodeSettings,
+    hasErrors,
+    errors,
   };
 }

@@ -7,10 +7,13 @@ interface InputProps {
   placeholder?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   className?: string;
   glassEffect?: boolean;
   required?: boolean;
   id?: string;
+  error?: string;
+  name?: string;
 }
 
 export function Input({
@@ -19,18 +22,21 @@ export function Input({
   placeholder,
   value,
   onChange,
+  onBlur,
   className = '',
   glassEffect = false,
   required = false,
-  id
+  id,
+  error,
+  name
 }: InputProps) {
   const baseClasses = "w-full px-3 py-2 rounded-md text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
 
   const standardClasses = `
     ${baseClasses}
-    border border-gray-300 shadow-sm bg-white text-gray-900
+    border shadow-sm bg-white text-gray-900
     placeholder:text-gray-500
-    focus:ring-indigo-500 focus:border-indigo-500
+    ${error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}
     ${className}
   `.trim();
 
@@ -46,9 +52,11 @@ export function Input({
     <input
       type={type}
       id={id}
+      name={name}
       placeholder={placeholder}
       value={value}
       onChange={onChange}
+      onBlur={onBlur}
       required={required}
       className={glassEffect ? glassClasses : standardClasses}
     />
@@ -73,9 +81,23 @@ export function Input({
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
         {inputContent}
+        {error && (
+          <p className="mt-1 text-sm text-red-600">
+            {error}
+          </p>
+        )}
       </div>
     );
   }
 
-  return inputContent;
+  return (
+    <>
+      {inputContent}
+      {error && (
+        <p className="mt-1 text-sm text-red-600">
+          {error}
+        </p>
+      )}
+    </>
+  );
 }

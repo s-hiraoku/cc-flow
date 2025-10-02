@@ -50,7 +50,7 @@ export default function PropertiesPanel({
     onNodesChange,
   });
 
-  const { renderNodeSettings } = useNodeSettings({
+  const { renderNodeSettings, hasErrors } = useNodeSettings({
     primarySelectedNode,
     metadata,
     updateMetadata,
