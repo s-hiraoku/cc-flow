@@ -12,6 +12,7 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
   // Get dynamic colors and icon based on category
   const agentData = data as AgentNodeData;
   const category = agentData?.category || "default";
+  const hasError = agentData.hasError || false;
   const colors = getCategoryColors(category);
   const icon = getCategoryIcon(category);
 
@@ -24,8 +25,16 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
   return (
     <div className="relative group">
       <Card
-        className={`min-w-[200px] p-4 cursor-pointer transition-all duration-200 border-2 ${colors.solidBorder} ${colors.solidBg} ${
-          selected ? `ring-2 ${colors.ring} shadow-lg` : "hover:shadow-md"
+        className={`min-w-[200px] p-4 cursor-pointer transition-all duration-200 border-2 ${
+          hasError
+            ? "border-red-500 bg-red-50"
+            : `${colors.solidBorder} ${colors.solidBg}`
+        } ${
+          selected
+            ? hasError
+              ? "ring-2 ring-red-500 shadow-lg"
+              : `ring-2 ${colors.ring} shadow-lg`
+            : "hover:shadow-md"
         }`}
       >
         {/* Delete button */}
@@ -43,7 +52,9 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
         <Handle
           type="target"
           position={Position.Top}
-          className={`w-3 h-3 ${colors.handle} border-2 border-white`}
+          className={`w-3 h-3 border-2 border-white ${
+            hasError ? "bg-red-500" : colors.handle
+          }`}
         />
 
         <div className="flex items-start">
@@ -66,6 +77,11 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
           </div>
           <div className="ml-3 flex-1">
             <h3 className="text-sm font-semibold text-gray-900">{agentData.label}</h3>
+            {agentData.stepTitle && agentData.stepTitle !== agentData.agentName && (
+              <p className="text-xs font-medium text-indigo-600 mt-0.5">
+                title: {agentData.stepTitle}
+              </p>
+            )}
             {agentData.description && (
               <p className="text-xs text-gray-500 mt-1 line-clamp-2">
                 {agentData.description}
@@ -84,7 +100,9 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
         <Handle
           type="source"
           position={Position.Bottom}
-          className={`w-3 h-3 ${colors.handle} border-2 border-white`}
+          className={`w-3 h-3 border-2 border-white ${
+            hasError ? "bg-red-500" : colors.handle
+          }`}
         />
       </Card>
     </div>

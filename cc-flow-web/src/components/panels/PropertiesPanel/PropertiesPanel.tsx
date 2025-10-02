@@ -50,12 +50,34 @@ export default function PropertiesPanel({
     onNodesChange,
   });
 
-  const { renderNodeSettings, hasErrors } = useNodeSettings({
+  const { renderNodeSettings, hasErrors, errors } = useNodeSettings({
     primarySelectedNode,
     metadata,
     updateMetadata,
     onNodeUpdate,
   });
+
+  // Update node error state when validation errors change
+  React.useEffect(() => {
+    if (primarySelectedNode && onNodesChange) {
+      // Apply validation errors to nodes that have validation
+      // Currently Start node, Agent node, and Step Group node have form validation via useNodeSettings
+      const shouldHaveError =
+        (primarySelectedNode.type === 'start' || primarySelectedNode.type === 'agent' || primarySelectedNode.type === 'step-group')
+        && hasErrors
+        && Object.keys(errors).length > 0;
+
+      // Only update if error state changed
+      if (primarySelectedNode.data.hasError !== shouldHaveError) {
+        const updatedNodes = nodes.map(node =>
+          node.id === primarySelectedNode.id
+            ? { ...node, data: { ...node.data, hasError: shouldHaveError } }
+            : node
+        );
+        onNodesChange(updatedNodes);
+      }
+    }
+  }, [primarySelectedNode, hasErrors, errors, nodes, onNodesChange]);
 
   const { renderSelectionInfo } = useSelectionInfo({
     selectedNodes,

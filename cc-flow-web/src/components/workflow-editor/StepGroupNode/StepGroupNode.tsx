@@ -10,6 +10,7 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
   const { deleteElements } = useReactFlow();
   const updateNodeInternals = useUpdateNodeInternals();
   const stepData = data as StepGroupNodeData;
+  const hasError = stepData.hasError || false;
 
   const handleDelete = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -88,7 +89,11 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
     >
       <div
         className={`w-full h-full border-2 border-dashed rounded-lg transition-all ${
-          selected
+          hasError
+            ? selected
+              ? "border-red-500 shadow-lg ring-2 ring-red-200"
+              : "border-red-500 hover:border-red-600 hover:shadow-md"
+            : selected
             ? "border-purple-500 shadow-lg ring-2 ring-purple-200"
             : isDragOver
             ? "border-purple-500 shadow-md"
@@ -105,7 +110,9 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
         <Handle
           type="target"
           position={Position.Top}
-          className="w-3 h-3 bg-purple-500 border-2 border-white"
+          className={`w-3 h-3 border-2 border-white ${
+            hasError ? "bg-red-500" : "bg-purple-500"
+          }`}
         />
 
         <StepGroupHeader
@@ -182,7 +189,9 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
         <Handle
           type="source"
           position={Position.Bottom}
-          className="w-3 h-3 bg-purple-500 border-2 border-white"
+          className={`w-3 h-3 border-2 border-white ${
+            hasError ? "bg-red-500" : "bg-purple-500"
+          }`}
         />
       </div>
     </div>

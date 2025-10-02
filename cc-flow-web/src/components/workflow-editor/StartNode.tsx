@@ -8,6 +8,7 @@ import { StartNodeData } from "@/types/workflow";
 export default function StartNode({ id, data, selected }: NodeProps) {
   const { deleteElements } = useReactFlow();
   const startData = data as StartNodeData;
+  const hasError = startData.hasError || false;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -23,8 +24,16 @@ export default function StartNode({ id, data, selected }: NodeProps) {
       }}
     >
       <Card
-        className={`w-full h-full p-4 border-l-4 border-l-emerald-500 bg-emerald-50/60 shadow-sm transition-all relative ${
-          selected ? "ring-2 ring-emerald-500" : "hover:shadow-md"
+        className={`w-full h-full p-4 border-l-4 ${
+          hasError
+            ? "border-l-red-500 bg-red-50/60"
+            : "border-l-emerald-500 bg-emerald-50/60"
+        } shadow-sm transition-all relative ${
+          selected
+            ? hasError
+              ? "ring-2 ring-red-500"
+              : "ring-2 ring-emerald-500"
+            : "hover:shadow-md"
         }`}
       >
         {/* Delete button */}
@@ -39,7 +48,11 @@ export default function StartNode({ id, data, selected }: NodeProps) {
         </button>
 
         <div className="flex items-start">
-          <div className="w-8 h-8 flex items-center justify-center bg-emerald-200 rounded-full text-emerald-700">
+          <div className={`w-8 h-8 flex items-center justify-center rounded-full ${
+            hasError
+              ? "bg-red-200 text-red-700"
+              : "bg-emerald-200 text-emerald-700"
+          }`}>
             <svg
               className="w-4 h-4"
               viewBox="0 0 24 24"
@@ -55,16 +68,22 @@ export default function StartNode({ id, data, selected }: NodeProps) {
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-semibold text-emerald-900">{startData.label}</h3>
+            <h3 className={`text-sm font-semibold ${
+              hasError ? "text-red-900" : "text-emerald-900"
+            }`}>{startData.label}</h3>
             {startData.description && (
-              <p className="text-xs text-emerald-700/80 mt-1">{startData.description}</p>
+              <p className={`text-xs mt-1 ${
+                hasError ? "text-red-700/80" : "text-emerald-700/80"
+              }`}>{startData.description}</p>
             )}
           </div>
         </div>
         <Handle
           type="source"
           position={Position.Bottom}
-          className="w-3 h-3 bg-emerald-500 border-2 border-white"
+          className={`w-3 h-3 border-2 border-white ${
+            hasError ? "bg-red-500" : "bg-emerald-500"
+          }`}
         />
       </Card>
     </div>

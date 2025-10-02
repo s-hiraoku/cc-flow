@@ -30,6 +30,8 @@ export interface AgentNodeData extends Record<string, unknown> {
   stepTitle?: string;
   stepMode?: 'sequential' | 'parallel';
   stepPurpose?: string;
+  // Validation state
+  hasError?: boolean;
 }
 
 export interface StepGroupAgent {
@@ -44,12 +46,16 @@ export interface StepGroupNodeData extends Record<string, unknown> {
   agents: (string | StepGroupAgent)[];
   label: string;
   description?: string;
+  // Validation state
+  hasError?: boolean;
 }
 
 export interface StartNodeData extends Record<string, unknown> {
   kind: 'start';
   label: string;
   description?: string;
+  // Validation state
+  hasError?: boolean;
 }
 
 export interface EndNodeData extends Record<string, unknown> {
