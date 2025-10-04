@@ -10,7 +10,7 @@ interface PanelProps {
   variant?: PanelVariant;
 }
 
-const containerBase = "flex h-full flex-col rounded-2xl border";
+const containerBase = "flex h-full flex-col border";
 
 const containerVariants: Record<PanelVariant, string> = {
   default: "border-gray-200 bg-white text-gray-900 shadow-lg",

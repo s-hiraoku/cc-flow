@@ -7,7 +7,7 @@ import { WorkflowStep, GenerateError, GenerateResult } from "./types";
 
 interface EditorNotificationAreaProps {
   generating: boolean;
-  currentStep?: WorkflowStep;
+  currentStep?: WorkflowStep | null;
   error?: GenerateError | null;
   result?: GenerateResult | null;
   showSuccessMessage: boolean;

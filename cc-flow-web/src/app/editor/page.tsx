@@ -92,7 +92,7 @@ export default function EditorPage() {
             isSuccessVisible={isSuccessVisible}
           />
 
-          <section className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden px-4 pb-6 pt-4 sm:px-6 lg:px-8">
+          <section className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden p-4">
             <div
               id="editor-canvas"
               className="relative flex min-w-0 flex-1 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl"

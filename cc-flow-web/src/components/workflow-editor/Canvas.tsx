@@ -160,7 +160,9 @@ function CanvasInner({
         edgeTypes={edgeTypes}
         deleteKeyCode={["Backspace", "Delete"]}
         fitView
+        fitViewOptions={{ padding: 0.1 }}
         className="bg-transparent"
+        style={{ width: '100%', height: '100%' }}
         nodesDraggable={true}
         nodesConnectable={true}
         elementsSelectable={true}
@@ -173,7 +175,7 @@ function CanvasInner({
         onInit={(reactFlowInstance) => {
           // Force fit view to ensure nodes are visible
           setTimeout(() => {
-            reactFlowInstance.fitView({ padding: 0.2 });
+            reactFlowInstance.fitView({ padding: 0.1, includeHiddenNodes: false });
           }, 100);
         }}
       >
