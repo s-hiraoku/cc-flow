@@ -1,9 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { readdir, readFile, stat } from 'fs/promises';
 import { join, extname } from 'path';
 import { Agent, AgentsResponse } from '@/types/agent';
-
-const AGENTS_BASE_PATH = process.env.AGENTS_PATH || '../.claude/agents';
 
 async function scanAgentsDirectory(dirPath: string, category: string = ''): Promise<Agent[]> {
   const agents: Agent[] = [];
@@ -25,15 +23,15 @@ async function scanAgentsDirectory(dirPath: string, category: string = ''): Prom
           const content = await readFile(fullPath, 'utf-8');
           const agentName = entry.replace('.md', '');
 
-          // Extract description from markdown (first paragraph or title)
-          const lines = content.split('\n');
+          // Extract description from YAML frontmatter
           let description = 'No description available';
+          const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
-          for (const line of lines) {
-            const trimmed = line.trim();
-            if (trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('-')) {
-              description = trimmed;
-              break;
+          if (frontmatterMatch) {
+            const frontmatter = frontmatterMatch[1];
+            const descriptionMatch = frontmatter.match(/^description:\s*(.+)$/m);
+            if (descriptionMatch) {
+              description = descriptionMatch[1].trim();
             }
           }
 
@@ -57,9 +55,19 @@ async function scanAgentsDirectory(dirPath: string, category: string = ''): Prom
   return agents;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const agentsPath = join(process.cwd(), AGENTS_BASE_PATH);
+    // Get Claude root path from environment variable set by CLI
+    const claudeRootPath = process.env.CLAUDE_ROOT_PATH;
+
+    if (!claudeRootPath) {
+      return NextResponse.json(
+        { error: 'Claude root path not configured. Please start using cc-flow-web CLI.' },
+        { status: 400 }
+      );
+    }
+
+    const agentsPath = join(claudeRootPath, 'agents');
     const allAgents = await scanAgentsDirectory(agentsPath);
 
     // Group agents by category
@@ -71,7 +79,7 @@ export async function GET() {
       if (!categories[categoryKey]) {
         categories[categoryKey] = {
           name: categoryKey,
-          path: `${AGENTS_BASE_PATH}/${categoryKey}`,
+          path: `${agentsPath}/${categoryKey}`,
           agents: [],
           description: `${categoryKey} agents`
         };

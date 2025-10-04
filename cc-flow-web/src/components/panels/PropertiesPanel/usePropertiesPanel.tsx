@@ -80,22 +80,41 @@ export function usePropertiesPanel({
     return nodeTypeLabels[primarySelectedNode.type] || "Node Settings";
   }, [primarySelectedNode]);
 
-  // Generate workflow JSONs
+  // Generate workflow JSONs with error tracking
   const serializedWorkflowJSON = useMemo(() => {
     try {
-      return WorkflowService.generateWorkflowJSON(metadata, nodes, edges);
+      return { json: WorkflowService.generateWorkflowJSON(metadata, nodes, edges), error: null };
     } catch (error) {
       console.error("Failed to generate workflow preview JSON", error);
-      return JSON.stringify({ error: "Unable to generate preview" }, null, 2);
+
+      // Extract error message from WorkflowValidationError or generic Error
+      const errorMessage = error instanceof Error
+        ? error.message.replace(/^Error \[WorkflowValidationError\]:\s*/, '')
+        : "Unable to generate preview";
+
+      return {
+        json: JSON.stringify({ error: "Unable to generate preview" }, null, 2),
+        error: errorMessage
+      };
     }
   }, [metadata, nodes, edges]);
 
   const createWorkflowJSONString = useMemo(() => {
     try {
-      return createWorkflowJSON(metadata, nodes, edges);
+      return { json: createWorkflowJSON(metadata, nodes, edges), error: null };
     } catch (error) {
-      console.warn("Unable to generate workflow JSON:", error);
-      return JSON.stringify({ error: "Invalid workflow structure" }, null, 2);
+      // Silently handle validation errors during preview
+      // These are expected when the workflow is incomplete
+
+      // Extract error message from WorkflowValidationError or generic Error
+      const errorMessage = error instanceof Error
+        ? error.message.replace(/^Error \[WorkflowValidationError\]:\s*/, '')
+        : "Invalid workflow structure";
+
+      return {
+        json: JSON.stringify({ error: "Invalid workflow structure" }, null, 2),
+        error: errorMessage
+      };
     }
   }, [metadata, nodes, edges]);
 

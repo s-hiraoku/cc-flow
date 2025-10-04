@@ -100,9 +100,19 @@ describe('useWorkflowEditor', () => {
 
     expect(result.current.canSave).toBe(false);
 
-    // Add nodes
+    // Add nodes with start, agent, and end nodes
     act(() => {
       result.current.handleNodesChange([
+        {
+          id: 'start-node',
+          type: 'start',
+          position: { x: 0, y: 0 },
+          data: {
+            kind: 'start',
+            label: 'Start',
+            description: 'Workflow starts here',
+          },
+        },
         {
           id: 'test-node',
           type: 'agent',
@@ -114,6 +124,24 @@ describe('useWorkflowEditor', () => {
             description: 'Test description',
           },
         },
+        {
+          id: 'end-node',
+          type: 'end',
+          position: { x: 200, y: 200 },
+          data: {
+            kind: 'end',
+            label: 'End',
+            description: 'Workflow ends here',
+          },
+        },
+      ]);
+    });
+
+    // Add edges to connect nodes
+    act(() => {
+      result.current.handleEdgesChange([
+        { id: 'e1', source: 'start-node', target: 'test-node', type: 'default' },
+        { id: 'e2', source: 'test-node', target: 'end-node', type: 'default' },
       ]);
     });
 
@@ -222,7 +250,7 @@ describe('useWorkflowEditor', () => {
     const previewJSON = result.current.generatePreviewJSON();
     const parsed = JSON.parse(previewJSON);
 
-    expect(parsed.workflowSteps[0].agents).toEqual(['Test Agent Without AgentName']);
+    expect(parsed.workflowSteps[0].agents).toEqual(['test-agent-fallback']);
   });
 
   it('should disable save when workflow name is empty or whitespace', () => {

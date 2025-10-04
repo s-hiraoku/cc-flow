@@ -3,7 +3,7 @@ import { AgentService } from '../AgentService';
 import type { Agent } from '@/types/agent';
 
 // Mock fetch
-global.fetch = vi.fn();
+global.fetch = vi.fn() as unknown as typeof fetch;
 
 const mockAgents: Agent[] = [
   {
@@ -48,7 +48,7 @@ describe('AgentService', () => {
         },
       };
 
-      vi.mocked(fetch).mockResolvedValue({
+      fetch.mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       } as Response);
@@ -61,7 +61,7 @@ describe('AgentService', () => {
     });
 
     it('should handle fetch agents error', async () => {
-      vi.mocked(fetch).mockResolvedValue({
+      fetch.mockResolvedValue({
         ok: false,
         status: 500,
         statusText: 'Internal Server Error',
@@ -73,7 +73,7 @@ describe('AgentService', () => {
     });
 
     it('should handle network error', async () => {
-      vi.mocked(fetch).mockRejectedValue(new Error('Network error'));
+      fetch.mockRejectedValue(new Error('Network error'));
 
       await expect(AgentService.fetchAgents()).rejects.toThrow('Network error');
     });
@@ -81,7 +81,7 @@ describe('AgentService', () => {
     it('should handle empty categories response', async () => {
       const mockResponse = { categories: {} };
 
-      vi.mocked(fetch).mockResolvedValue({
+      fetch.mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       } as Response);

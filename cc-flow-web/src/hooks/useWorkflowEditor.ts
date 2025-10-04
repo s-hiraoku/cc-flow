@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Connection } from '@xyflow/react';
 import { WorkflowNode, WorkflowEdge, WorkflowMetadata } from '@/types/workflow';
 import { autoSaveWorkflow, loadAutoSavedWorkflow } from '@/utils/autoSave';
+import { validateWorkflowGraph } from '@/utils/workflowUtils';
 
 interface UseWorkflowEditorReturn {
   nodes: WorkflowNode[];
@@ -77,8 +78,25 @@ export function useWorkflowEditor(): UseWorkflowEditorReturn {
   }, [metadata, nodes]);
 
   const canSave = useMemo(() => {
-    return Boolean(metadata.workflowName?.trim() && nodes.length > 0);
-  }, [metadata.workflowName, nodes.length]);
+    // Check basic requirements
+    if (!metadata.workflowName?.trim() || nodes.length === 0) {
+      return false;
+    }
+
+    // Check if any node has validation error
+    const hasNodeErrors = nodes.some(node => node.data.hasError);
+    if (hasNodeErrors) {
+      return false;
+    }
+
+    // Validate workflow graph structure
+    const validation = validateWorkflowGraph(nodes, edges);
+    if (!validation.isValid) {
+      return false;
+    }
+
+    return true;
+  }, [metadata.workflowName, nodes, edges]);
 
   return {
     nodes,

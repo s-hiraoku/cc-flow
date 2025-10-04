@@ -12,6 +12,9 @@ vi.mock('@/services/WorkflowService', () => ({
     saveWorkflow: vi.fn(),
     loadWorkflow: vi.fn(),
     validateWorkflow: vi.fn(),
+    validateWorkflowData: vi.fn(),
+    generateWorkflowJSON: vi.fn(),
+    buildWorkflowPayload: vi.fn(),
   },
 }));
 
@@ -93,8 +96,12 @@ const WorkflowEditorTestWrapper = () => {
 };
 
 describe('Workflow Editor Integration', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+
+    const { WorkflowService } = await import('@/services/WorkflowService');
+    vi.mocked(WorkflowService.generateWorkflowJSON).mockReturnValue('{}');
+    vi.mocked(WorkflowService.validateWorkflowData).mockReturnValue(null);
   });
 
   it('should render workflow editor with nodes and edges', () => {

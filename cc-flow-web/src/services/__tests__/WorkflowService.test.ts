@@ -7,7 +7,7 @@ import {
 import type { WorkflowNode, WorkflowEdge, WorkflowMetadata } from '@/types/workflow';
 
 // Mock fetch
-global.fetch = vi.fn();
+global.fetch = vi.fn() as unknown as typeof fetch;
 
 const mockMetadata: WorkflowMetadata = {
   workflowName: 'Test Workflow',
@@ -83,7 +83,7 @@ describe('WorkflowService', () => {
         workflowId: 'workflow-123',
       };
 
-      vi.mocked(fetch).mockResolvedValue({
+      fetch.mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       } as Response);
@@ -110,7 +110,7 @@ describe('WorkflowService', () => {
     it('should handle save workflow error with error message', async () => {
       const errorData = { error: 'Validation failed' };
 
-      vi.mocked(fetch).mockResolvedValue({
+      fetch.mockResolvedValue({
         ok: false,
         status: 400,
         statusText: 'Bad Request',
@@ -127,7 +127,7 @@ describe('WorkflowService', () => {
     });
 
     it('should handle save workflow error without error message', async () => {
-      vi.mocked(fetch).mockResolvedValue({
+      fetch.mockResolvedValue({
         ok: false,
         status: 500,
         statusText: 'Internal Server Error',
@@ -144,7 +144,7 @@ describe('WorkflowService', () => {
     });
 
     it('should handle network error', async () => {
-      vi.mocked(fetch).mockRejectedValue(new Error('Network error'));
+      fetch.mockRejectedValue(new Error('Network error'));
 
       const request: WorkflowSaveRequest = {
         metadata: mockMetadata,
@@ -156,7 +156,7 @@ describe('WorkflowService', () => {
     });
 
     it('should handle malformed JSON response', async () => {
-      vi.mocked(fetch).mockResolvedValue({
+      fetch.mockResolvedValue({
         ok: false,
         status: 400,
         statusText: 'Bad Request',
@@ -198,11 +198,12 @@ describe('WorkflowService', () => {
         'test-agent-1',
         'test-agent-2',
       ]);
+      expect(parsed.stepGroups).toEqual([]);
       expect(parsed.nodes).toHaveLength(4);
       expect(parsed.edges).toEqual(mockEdges);
     });
 
-    it('should fallback to label when agentName is missing', () => {
+    it('should use agentName even when empty string', () => {
       const nodes: WorkflowNode[] = [
         startNode,
         {
@@ -211,7 +212,7 @@ describe('WorkflowService', () => {
           position: { x: 100, y: 120 },
           data: {
             label: 'Fallback Agent',
-            agentName: '',
+            agentName: '', // Empty string, not undefined
             description: 'Agent without explicit name',
             agentPath: './agents/fallback.md',
           },
@@ -223,13 +224,14 @@ describe('WorkflowService', () => {
       const parsed = JSON.parse(result) as SerializedWorkflow;
 
       expect(parsed.agents).toHaveLength(1);
+      // agentData?.agentName is '' (not nullish), so ?? doesn't apply fallback
       expect(parsed.agents[0]).toMatchObject({
-        agentName: 'Fallback Agent',
+        agentName: '', // Empty string is kept, label not used
         agentPath: './agents/fallback.md',
       });
     });
 
-    it('should exclude agents without label and agentName', () => {
+    it('should include agents even with empty agentName using label as fallback', () => {
       const nodes: WorkflowNode[] = [
         ...baseNodes,
         {
@@ -237,9 +239,9 @@ describe('WorkflowService', () => {
           type: 'agent',
           position: { x: 200, y: 240 },
           data: {
-            label: '',
+            label: 'Empty Agent Label',
             agentName: '',
-            description: 'Should be excluded',
+            description: 'Agent with empty agentName',
           },
         },
       ];
@@ -247,9 +249,11 @@ describe('WorkflowService', () => {
       const result = WorkflowService.generateWorkflowJSON(mockMetadata, nodes);
       const parsed = JSON.parse(result) as SerializedWorkflow;
 
+      // Empty string agentName is kept as-is (not nullish, so ?? doesn't apply)
       expect(parsed.agents.map((agent) => agent.agentName)).toEqual([
         'test-agent-1',
         'test-agent-2',
+        '', // Empty string is kept, not replaced with label
       ]);
     });
 
@@ -260,6 +264,7 @@ describe('WorkflowService', () => {
       expect(parsed.startNode).toBeNull();
       expect(parsed.endNode).toBeNull();
       expect(parsed.agents).toEqual([]);
+      expect(parsed.stepGroups).toEqual([]);
       expect(parsed.nodes).toEqual([]);
     });
   });

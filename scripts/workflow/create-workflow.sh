@@ -115,10 +115,18 @@ NODE
     WORKFLOW_STEPS_JSON="$steps_json"
 
     # 環境変数を設定（既存の値がある場合は上書きしない）
-    [[ -z "${WORKFLOW_NAME:-}" && -n "$meta_name" ]] && export WORKFLOW_NAME="$meta_name"
-    [[ -z "${WORKFLOW_PURPOSE:-}" && -n "$meta_purpose" ]] && export WORKFLOW_PURPOSE="$meta_purpose"
-    [[ -z "${WORKFLOW_MODEL:-}" && -n "$meta_model" ]] && export WORKFLOW_MODEL="$meta_model"
-    [[ -z "${WORKFLOW_ARGUMENT_HINT:-}" && -n "$meta_argument_hint" ]] && export WORKFLOW_ARGUMENT_HINT="$meta_argument_hint"
+    if [[ -z "${WORKFLOW_NAME:-}" && -n "$meta_name" ]]; then
+        export WORKFLOW_NAME="$meta_name"
+    fi
+    if [[ -z "${WORKFLOW_PURPOSE:-}" && -n "$meta_purpose" ]]; then
+        export WORKFLOW_PURPOSE="$meta_purpose"
+    fi
+    if [[ -z "${WORKFLOW_MODEL:-}" && -n "$meta_model" ]]; then
+        export WORKFLOW_MODEL="$meta_model"
+    fi
+    if [[ -z "${WORKFLOW_ARGUMENT_HINT:-}" && -n "$meta_argument_hint" ]]; then
+        export WORKFLOW_ARGUMENT_HINT="$meta_argument_hint"
+    fi
 }
 
 # 簡潔な使用方法を表示

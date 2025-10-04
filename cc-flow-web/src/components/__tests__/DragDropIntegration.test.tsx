@@ -13,6 +13,7 @@ vi.mock('@/services/AgentService', () => ({
     getAgents: vi.fn(),
     searchAgents: vi.fn(),
     getAgentsByCategory: vi.fn(),
+    getUniqueCategories: vi.fn(),
   },
 }));
 
@@ -73,8 +74,10 @@ const DragDropTestWrapper = () => {
 };
 
 describe('Drag and Drop Integration', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    const { AgentService } = await import('@/services/AgentService');
+    vi.mocked(AgentService.getUniqueCategories).mockReturnValue(['spec', 'utility']);
   });
 
   it('should render both AgentPalette and Canvas', () => {

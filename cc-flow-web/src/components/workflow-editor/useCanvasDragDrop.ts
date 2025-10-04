@@ -73,6 +73,7 @@ export function useCanvasDragDrop({
             agentPath: paletteData.path,
             description: paletteData.description,
             category: paletteData.category,
+            stepTitle: paletteData.name, // Set default stepTitle to agent name
           },
           style: {
             width: 200,

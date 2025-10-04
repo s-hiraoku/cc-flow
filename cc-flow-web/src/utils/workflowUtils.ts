@@ -30,10 +30,7 @@ export interface CreateWorkflowPayload {
  * Custom error class for workflow validation failures
  */
 export class WorkflowValidationError extends Error {
-  constructor(
-    message: string,
-    public validation: ValidationResult
-  ) {
+  constructor(message: string, public validation: ValidationResult) {
     super(message);
     this.name = "WorkflowValidationError";
   }
@@ -232,8 +229,8 @@ function convertNodeToStep(node: WorkflowNode): WorkflowStepPayload {
 
   if (isStepGroupNode(node)) {
     // Convert agents array to string[] (handle both string and StepGroupAgent types)
-    const agentNames = node.data.agents.map(agent =>
-      typeof agent === 'string' ? agent : agent.name
+    const agentNames = node.data.agents.map((agent) =>
+      typeof agent === "string" ? agent : agent.name
     );
 
     return {

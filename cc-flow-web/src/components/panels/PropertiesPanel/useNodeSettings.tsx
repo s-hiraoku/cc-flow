@@ -73,6 +73,21 @@ export function useNodeSettings({
     setValue("workflowArgumentHint", metadata.workflowArgumentHint);
   }, [metadata, setValue]);
 
+  // Update Start Node with metadata changes (separate effect to avoid infinite loop)
+  useEffect(() => {
+    if (primarySelectedNode?.type === 'start' && onNodeUpdate) {
+      const startNodeData = primarySelectedNode.data;
+      // Only update if values have actually changed
+      if (startNodeData.workflowName !== metadata.workflowName ||
+          startNodeData.workflowPurpose !== metadata.workflowPurpose) {
+        onNodeUpdate(primarySelectedNode.id, {
+          workflowName: metadata.workflowName,
+          workflowPurpose: metadata.workflowPurpose,
+        });
+      }
+    }
+  }, [metadata.workflowName, metadata.workflowPurpose, primarySelectedNode?.id, primarySelectedNode?.type, onNodeUpdate]);
+
   // Sync Step Group form values when node changes
   useEffect(() => {
     if (primarySelectedNode && isStepGroupNode(primarySelectedNode)) {
@@ -84,10 +99,18 @@ export function useNodeSettings({
   // Sync Agent form values when node changes
   useEffect(() => {
     if (primarySelectedNode && isAgentNode(primarySelectedNode)) {
-      setAgentValue("stepTitle", primarySelectedNode.data.stepTitle || primarySelectedNode.data.agentName || '');
+      const stepTitle = primarySelectedNode.data.stepTitle || primarySelectedNode.data.agentName || '';
+      setAgentValue("stepTitle", stepTitle);
       setAgentValue("stepPurpose", primarySelectedNode.data.stepPurpose || '');
+
+      // Set default stepTitle if not already set
+      if (!primarySelectedNode.data.stepTitle && primarySelectedNode.data.agentName && onNodeUpdate) {
+        onNodeUpdate(primarySelectedNode.id, {
+          stepTitle: primarySelectedNode.data.agentName,
+        });
+      }
     }
-  }, [primarySelectedNode, setAgentValue]);
+  }, [primarySelectedNode, setAgentValue, onNodeUpdate]);
 
   // Render node-specific settings components
   const renderNodeSettings = useCallback(() => {
@@ -197,7 +220,7 @@ export function useNodeSettings({
               <Input
                 label="Step Title"
                 placeholder={agentData.agentName}
-                defaultValue={agentData.stepTitle || agentData.agentName}
+                value={agentData.stepTitle || agentData.agentName || ""}
                 {...registerAgent("stepTitle", {
                   onChange: (e) =>
                     onNodeUpdate?.(primarySelectedNode.id, {
@@ -212,7 +235,7 @@ export function useNodeSettings({
               <Textarea
                 label="Step Purpose"
                 placeholder="Describe what this step accomplishes..."
-                defaultValue={agentData.stepPurpose || ""}
+                value={agentData.stepPurpose || ""}
                 {...registerAgent("stepPurpose", {
                   onChange: (e) =>
                     onNodeUpdate?.(primarySelectedNode.id, {
@@ -268,8 +291,16 @@ export function useNodeSettings({
               error={stepGroupErrors.purpose?.message}
             />
 
-            <div className="text-xs text-gray-500 mt-2">
-              Agents: {stepGroupData.agents.length}/10
+            <div className="mt-2">
+              <div className="text-xs text-gray-500">
+                Agents: {stepGroupData.agents.length}/10
+              </div>
+              {stepGroupData.agents.length === 0 && (
+                <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md text-xs text-red-700">
+                  <span className="font-semibold">Error: </span>
+                  At least one agent must be added to the step group
+                </div>
+              )}
             </div>
           </div>
         );
@@ -309,7 +340,12 @@ export function useNodeSettings({
     ? stepGroupErrors
     : {};
 
-  const hasErrors = Object.keys(combinedErrors).length > 0;
+  // Check for Step Group specific validation (empty agents array)
+  const hasStepGroupAgentError = primarySelectedNode?.type === 'step-group' &&
+    isStepGroupNode(primarySelectedNode) &&
+    primarySelectedNode.data.agents.length === 0;
+
+  const hasErrors = Object.keys(combinedErrors).length > 0 || hasStepGroupAgentError;
 
   return {
     renderNodeSettings,

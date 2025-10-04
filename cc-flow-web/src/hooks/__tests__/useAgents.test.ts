@@ -4,7 +4,7 @@ import { useAgents } from '../useAgents';
 import type { Agent } from '@/types/agent';
 
 // Mock fetch
-global.fetch = vi.fn();
+global.fetch = vi.fn() as unknown as typeof fetch;
 
 const mockAgents: Agent[] = [
   {
@@ -39,7 +39,7 @@ const mockApiResponse = {
 describe('useAgents', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(fetch).mockResolvedValue({
+    fetch.mockResolvedValue({
       ok: true,
       json: async () => mockApiResponse,
     } as Response);
@@ -68,7 +68,7 @@ describe('useAgents', () => {
 
   it('should handle loading error', async () => {
     const error = new Error('Failed to load agents');
-    vi.mocked(fetch).mockRejectedValue(error);
+    fetch.mockRejectedValue(error);
 
     const { result } = renderHook(() => useAgents());
 
@@ -81,7 +81,7 @@ describe('useAgents', () => {
   });
 
   it('should handle HTTP error response', async () => {
-    vi.mocked(fetch).mockResolvedValue({
+    fetch.mockResolvedValue({
       ok: false,
       status: 500,
       statusText: 'Internal Server Error',
@@ -114,7 +114,7 @@ describe('useAgents', () => {
   });
 
   it('should handle empty categories response', async () => {
-    vi.mocked(fetch).mockResolvedValue({
+    fetch.mockResolvedValue({
       ok: true,
       json: async () => ({ categories: {} }),
     } as Response);
@@ -130,7 +130,7 @@ describe('useAgents', () => {
   });
 
   it('should handle malformed categories response', async () => {
-    vi.mocked(fetch).mockResolvedValue({
+    fetch.mockResolvedValue({
       ok: true,
       json: async () => ({
         categories: {
@@ -167,7 +167,7 @@ describe('useAgents', () => {
     expect(result.current.agents).toEqual(mockAgents);
 
     // Mock network error for refetch
-    vi.mocked(fetch).mockRejectedValue(new Error('Network error'));
+    fetch.mockRejectedValue(new Error('Network error'));
 
     await result.current.refetch();
 
@@ -178,7 +178,7 @@ describe('useAgents', () => {
 
   it('should reset error on successful refetch', async () => {
     // Initial error
-    vi.mocked(fetch).mockRejectedValue(new Error('Initial error'));
+    fetch.mockRejectedValue(new Error('Initial error'));
 
     const { result } = renderHook(() => useAgents());
 
@@ -189,7 +189,7 @@ describe('useAgents', () => {
     expect(result.current.error).toBe('Initial error');
 
     // Successful refetch
-    vi.mocked(fetch).mockResolvedValue({
+    fetch.mockResolvedValue({
       ok: true,
       json: async () => mockApiResponse,
     } as Response);

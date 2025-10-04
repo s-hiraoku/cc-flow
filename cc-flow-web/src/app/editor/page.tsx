@@ -1,17 +1,17 @@
 "use client";
 
 import React, { useCallback, useState } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui";
 import Canvas from "@/components/workflow-editor/Canvas";
 import AgentPalette from "@/components/panels/AgentPalette";
 import PropertiesPanel from "@/components/panels/PropertiesPanel/PropertiesPanel";
 import { ErrorBoundary } from "@/components/common";
-import { useWorkflowEditor, useAgents, useWorkflowSave } from "@/hooks";
+import { EditorToolbar, EditorNotificationArea } from "@/components/editor";
+import { useWorkflowEditor, useAgents, useWorkflowGenerate, useAutoHideMessage } from "@/hooks";
 import { Agent } from "@/types/agent";
 import { WorkflowNode } from "@/types/workflow";
 
 export default function EditorPage() {
+  // All hooks must be called before any conditional returns
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
 
   // Custom hooks for state management
@@ -28,7 +28,13 @@ export default function EditorPage() {
   } = useWorkflowEditor();
 
   const { agents, loading: agentsLoading, error: agentsError } = useAgents();
-  const { saving, error: saveError, lastSaved, saveWorkflow } = useWorkflowSave();
+  const { generating, currentStep, error: generateError, result: generateResult, generateWorkflow } = useWorkflowGenerate();
+
+  // Auto-hide success message after 5 seconds with fade out animation
+  const { isVisible: showSuccessMessage, isAnimating: isSuccessVisible } = useAutoHideMessage(
+    Boolean(generateResult && !generating),
+    5000
+  );
 
   // Event handlers
   const handleNodesChangeWithSelection = useCallback((newNodes: WorkflowNode[]) => {
@@ -42,9 +48,9 @@ export default function EditorPage() {
     console.log("Dragging agent:", agent);
   }, []);
 
-  const handleSaveWorkflow = useCallback(async () => {
-    await saveWorkflow(metadata, nodes, edges);
-  }, [saveWorkflow, metadata, nodes, edges]);
+  const handleGenerateWorkflow = useCallback(async () => {
+    await generateWorkflow(metadata, nodes, edges);
+  }, [generateWorkflow, metadata, nodes, edges]);
 
   const handlePreviewJSON = useCallback(() => {
     console.log("Preview JSON:", generatePreviewJSON());
@@ -61,96 +67,49 @@ export default function EditorPage() {
           onAgentDragStart={handleAgentDragStart}
         />
 
-      {/* Main Editor */}
-      <div className="flex-1 flex flex-col">
-        {/* Toolbar */}
-        <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm">
-          <div className="flex items-center">
-            <Link href="/" className="text-gray-500 hover:text-gray-700 mr-4">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </Link>
-            <h1 className="text-xl font-semibold text-gray-900">
-              Workflow Editor
-            </h1>
-            <span className="ml-4 text-sm text-gray-500">
-              {nodes.length} node{nodes.length !== 1 ? "s" : ""}, {edges.length}{" "}
-              connection{edges.length !== 1 ? "s" : ""}
-            </span>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              variant="secondary"
-              onClick={handlePreviewJSON}
-            >
-              Preview JSON
-            </Button>
-            <Button
-              variant="primary"
-              onClick={handleSaveWorkflow}
-              disabled={!canSave || saving}
-            >
-              {saving ? "Saving..." : "Save Workflow"}
-            </Button>
-          </div>
-        </div>
-
-        {(lastSaved || saveError) && (
-          <div className="px-6 pt-4 bg-white border-b border-gray-200">
-            {lastSaved && (
-              <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-sm">
-                <p className="font-medium">Workflow saved successfully.</p>
-                <p className="mt-1">{lastSaved.workflowName}</p>
-                {(lastSaved.filename || lastSaved.path) && (
-                  <p className="mt-1 text-emerald-700/80">
-                    {lastSaved.filename && <span>File: {lastSaved.filename}</span>}
-                    {lastSaved.filename && lastSaved.path && <span> · </span>}
-                    {lastSaved.path && <span>Path: {lastSaved.path}</span>}
-                  </p>
-                )}
-              </div>
-            )}
-            {saveError && (
-              <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm">
-                <p className="font-medium">Failed to save workflow.</p>
-                <p className="mt-1">{saveError}</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ReactFlow Canvas */}
-        <div className="flex-1">
-          <Canvas
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={handleNodesChangeWithSelection}
-            onEdgesChange={handleEdgesChange}
-            onConnect={handleConnect}
+        {/* Main Editor */}
+        <div className="flex-1 flex flex-col">
+          {/* Toolbar */}
+          <EditorToolbar
+            nodeCount={nodes.length}
+            edgeCount={edges.length}
+            canSave={canSave}
+            generating={generating}
+            onPreviewJSON={handlePreviewJSON}
+            onGenerateWorkflow={handleGenerateWorkflow}
           />
-        </div>
-      </div>
 
-      {/* Properties Panel */}
-      <PropertiesPanel
-        metadata={metadata}
-        onMetadataChange={setMetadata}
-        nodes={nodes}
-        edges={edges}
-        selectedNodeIds={selectedNodeIds}
-        onNodesChange={handleNodesChange}
-      />
+          {/* Notification Area (Progress & Success Messages) */}
+          <EditorNotificationArea
+            generating={generating}
+            currentStep={currentStep}
+            error={generateError}
+            result={generateResult}
+            showSuccessMessage={showSuccessMessage}
+            isSuccessVisible={isSuccessVisible}
+          />
+
+          {/* ReactFlow Canvas */}
+          <div className="flex-1">
+            <Canvas
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={handleNodesChangeWithSelection}
+              onEdgesChange={handleEdgesChange}
+              onConnect={handleConnect}
+            />
+          </div>
+        </div>
+
+        {/* Properties Panel */}
+        <PropertiesPanel
+          metadata={metadata}
+          onMetadataChange={setMetadata}
+          nodes={nodes}
+          edges={edges}
+          selectedNodeIds={selectedNodeIds}
+          onNodesChange={handleNodesChange}
+        />
       </div>
     </ErrorBoundary>
   );

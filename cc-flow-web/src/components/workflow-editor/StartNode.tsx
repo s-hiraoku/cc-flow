@@ -67,7 +67,7 @@ export default function StartNode({ id, data, selected }: NodeProps) {
               />
             </svg>
           </div>
-          <div className="ml-3">
+          <div className="ml-3 flex-1">
             <h3 className={`text-sm font-semibold ${
               hasError ? "text-red-900" : "text-emerald-900"
             }`}>{startData.label}</h3>
@@ -75,6 +75,20 @@ export default function StartNode({ id, data, selected }: NodeProps) {
               <p className={`text-xs mt-1 ${
                 hasError ? "text-red-700/80" : "text-emerald-700/80"
               }`}>{startData.description}</p>
+            )}
+            {startData.workflowName && (
+              <div className={`mt-2 text-xs ${
+                hasError ? "text-red-800" : "text-emerald-800"
+              }`}>
+                <span className="font-medium">Workflow:</span> {startData.workflowName}
+              </div>
+            )}
+            {startData.workflowPurpose && (
+              <div className={`mt-1 text-xs ${
+                hasError ? "text-red-700/80" : "text-emerald-700/80"
+              }`}>
+                <span className="font-medium">Purpose:</span> {startData.workflowPurpose}
+              </div>
             )}
           </div>
         </div>

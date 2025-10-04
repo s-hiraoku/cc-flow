@@ -54,6 +54,8 @@ export interface StartNodeData extends Record<string, unknown> {
   kind: 'start';
   label: string;
   description?: string;
+  workflowName?: string;
+  workflowPurpose?: string;
   // Validation state
   hasError?: boolean;
 }

@@ -64,8 +64,7 @@ export default function PropertiesPanel({
       // Currently Start node, Agent node, and Step Group node have form validation via useNodeSettings
       const shouldHaveError =
         (primarySelectedNode.type === 'start' || primarySelectedNode.type === 'agent' || primarySelectedNode.type === 'step-group')
-        && hasErrors
-        && Object.keys(errors).length > 0;
+        && hasErrors;
 
       // Only update if error state changed
       if (primarySelectedNode.data.hasError !== shouldHaveError) {
@@ -190,13 +189,19 @@ export default function PropertiesPanel({
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
                   JSON Preview
                 </h3>
+                {(createWorkflowJSONString.error || serializedWorkflowJSON.error) && (
+                  <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-md text-xs text-red-700">
+                    <span className="font-semibold">Error: </span>
+                    {createWorkflowJSONString.error || serializedWorkflowJSON.error}
+                  </div>
+                )}
                 <div className="space-y-4">
                   <Card className="p-3">
                     <p className="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                       create-workflow.sh Input
                     </p>
                     <pre className="text-xs font-mono text-slate-700 whitespace-pre-wrap max-h-48 overflow-y-auto">
-                      {createWorkflowJSONString}
+                      {createWorkflowJSONString.json}
                     </pre>
                   </Card>
                   <Card className="p-3">
@@ -204,7 +209,7 @@ export default function PropertiesPanel({
                       Serialized Workflow Payload
                     </p>
                     <pre className="text-xs font-mono text-green-600 whitespace-pre-wrap max-h-48 overflow-y-auto">
-                      {serializedWorkflowJSON}
+                      {serializedWorkflowJSON.json}
                     </pre>
                   </Card>
                 </div>

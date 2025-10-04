@@ -160,7 +160,7 @@ export class WorkflowService {
           title: groupData.title,
           mode: groupData.mode,
           purpose: groupData.purpose,
-          agents: groupData.agents,
+          agents: groupData.agents.map(agent => typeof agent === 'string' ? agent : agent.name),
         };
       });
 

@@ -1,8 +1,14 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Handle, Position, useReactFlow, useUpdateNodeInternals, NodeProps } from '@xyflow/react';
-import { StepGroupNodeData } from '@/types/workflow';
-import StepGroupHeader from './StepGroupHeader';
-import AgentList from './AgentList';
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  Handle,
+  Position,
+  useReactFlow,
+  useUpdateNodeInternals,
+  NodeProps,
+} from "@xyflow/react";
+import { StepGroupNodeData } from "@/types/workflow";
+import StepGroupHeader from "./StepGroupHeader";
+import AgentList from "./AgentList";
 
 export default function StepGroupNode({ id, data, selected }: NodeProps) {
   const [isHovered, setIsHovered] = useState(false);
@@ -12,10 +18,13 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
   const stepData = data as StepGroupNodeData;
   const hasError = stepData.hasError || false;
 
-  const handleDelete = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    deleteElements({ nodes: [{ id }] });
-  }, [deleteElements, id]);
+  const handleDelete = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      deleteElements({ nodes: [{ id }] });
+    },
+    [deleteElements, id]
+  );
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -25,22 +34,32 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
     setIsHovered(false);
   }, []);
 
-  const handleRemoveAgent = useCallback((agentName: string) => {
-    const updateNodeData = (window as { __updateNodeData?: (id: string, data: Record<string, unknown>) => void }).__updateNodeData;
-    if (typeof updateNodeData === 'function') {
-      const updatedAgents = stepData.agents.filter((agent) => {
-        if (typeof agent === 'string') {
-          return agent !== agentName;
+  const handleRemoveAgent = useCallback(
+    (agentName: string) => {
+      const updateNodeData = (
+        window as {
+          __updateNodeData?: (
+            id: string,
+            data: Record<string, unknown>
+          ) => void;
         }
-        return agent.name !== agentName;
-      });
-      updateNodeData(id, { agents: updatedAgents });
-    }
-  }, [stepData.agents, id]);
+      ).__updateNodeData;
+      if (typeof updateNodeData === "function") {
+        const updatedAgents = stepData.agents.filter((agent) => {
+          if (typeof agent === "string") {
+            return agent !== agentName;
+          }
+          return agent.name !== agentName;
+        });
+        updateNodeData(id, { agents: updatedAgents });
+      }
+    },
+    [stepData.agents, id]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
+    e.dataTransfer.dropEffect = "copy";
     setIsDragOver(true);
   }, []);
 
@@ -60,14 +79,16 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
   const agentItemHeight = 52; // Height per agent item including gap
   const padding = 24; // px-3 pb-3 = 12px * 2
   const titleHeight = 28; // Title height with margin
-  const minAgentAreaHeight = 80; // Minimum height for agent area
+  const minAgentAreaHeight = 100; // Minimum height for agent area
 
-  // Calculate agent area height (minimum 80px for "No agents yet")
-  const agentAreaHeight = agentCount > 0
-    ? agentCount * agentItemHeight + 24 // 24px for padding
-    : minAgentAreaHeight;
+  // Calculate agent area height (minimum 100px for "No agents yet")
+  const agentAreaHeight =
+    agentCount > 0
+      ? agentCount * agentItemHeight + 24 // 24px for padding
+      : minAgentAreaHeight;
 
-  const totalHeight = headerHeight + titleHeight + agentAreaHeight + dropZoneHeight + padding;
+  const totalHeight =
+    headerHeight + titleHeight + agentAreaHeight + dropZoneHeight + padding;
 
   // Update node internals when size changes
   useEffect(() => {
@@ -100,7 +121,7 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
             : "border-purple-300 hover:border-purple-400 hover:shadow-md"
         } bg-white`}
         style={{
-          position: 'relative',
+          position: "relative",
         }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -128,7 +149,7 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
           <h4 className="text-xs font-semibold text-gray-600 mb-1.5">
             Agents ({agentCount}/10)
           </h4>
-          
+
           {/* Agent list area - dynamic height */}
           <div className="mb-2 border-2 border-gray-200 rounded-lg bg-gray-50/50 p-3">
             {agentCount > 0 ? (
@@ -142,7 +163,7 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
               </div>
             )}
           </div>
-          
+
           {/* Fixed height drop zone at bottom */}
           <div
             className={`border-2 border-dashed rounded-lg p-4 transition-all ${

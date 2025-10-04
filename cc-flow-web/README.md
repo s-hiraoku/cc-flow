@@ -1,20 +1,86 @@
 # CC-Flow Web Editor
 
-A comprehensive Next.js 15 web application that provides a visual interface for designing and managing complex workflow configurations. Built as a complement to the existing cc-flow CLI ecosystem.
+Visual workflow editor for CC-Flow with an intuitive drag-and-drop interface.
 
-## Project Overview
+## Installation
 
-The CC-Flow Web Editor leverages ReactFlow for visual editing, shadcn/ui for design consistency, and seamless integration with the command-line interface. Currently running on localhost:3002 with functional drag-and-drop workflow creation, agent palette, properties panel, and API integration.
+### Option 1: Install from npm (Recommended)
 
-**Current Status**: Phase 1 Complete - Functional web editor with core workflow creation capabilities.
+```bash
+npm install -g @hiraoku/cc-flow-web
+```
 
-## Quick Start
+### Option 2: Development Installation
+
+Clone the repository and install dependencies:
+
+```bash
+git clone <repository-url>
+cd cc-flow-web
+npm install
+```
+
+## Usage
+
+### Using the Published Package
+
+Navigate to your `.claude` directory and run:
+
+```bash
+cd /path/to/your/project/.claude
+cc-flow-web
+```
+
+This will:
+1. Start the web server on port 3000
+2. Automatically open your browser to the editor
+3. Use the current directory as the Claude root path
+4. Look for `agents/` and `commands/` subdirectories
+
+#### CLI Options
+
+```
+-p, --port <port>    Port to run the server on (default: 3000)
+--no-open            Do not open browser automatically
+-h, --help           Display help
+-V, --version        Display version
+```
+
+#### Examples
+
+```bash
+# Start on custom port
+cd /path/to/.claude
+cc-flow-web --port 8080
+
+# Start without opening browser
+cd /path/to/.claude
+cc-flow-web --no-open
+```
+
+### Development Mode
+
+For development, create a `.env.local` file with your Claude root path:
+
+```bash
+CLAUDE_ROOT_PATH=/path/to/your/project/.claude
+```
+
+Then start the development server:
+
+```bash
+npm run dev
+```
+
+Open your browser to `http://localhost:3000`
+
+## Development
 
 ### Prerequisites
 - Node.js >= 18.0.0
 - npm >= 9.0.0
 
-### Development Setup
+### Setup
 ```bash
 # Install dependencies
 npm install
@@ -22,8 +88,6 @@ npm install
 # Start development server
 npm run dev
 ```
-
-Open [http://localhost:3002](http://localhost:3002) with your browser to access the workflow editor.
 
 ### Available Scripts
 ```bash

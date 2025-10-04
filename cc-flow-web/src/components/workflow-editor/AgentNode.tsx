@@ -23,9 +23,9 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
 
 
   return (
-    <div className="relative group">
+    <div className="relative group" style={{ width: 400, minWidth: 400 }}>
       <Card
-        className={`min-w-[200px] p-4 cursor-pointer transition-all duration-200 border-2 ${
+        className={`w-full p-4 cursor-pointer transition-all duration-200 border-2 ${
           hasError
             ? "border-red-500 bg-red-50"
             : `${colors.solidBorder} ${colors.solidBg}`
@@ -40,8 +40,7 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
         {/* Delete button */}
         <button
           onClick={handleDelete}
-          className="absolute top-1 right-1 w-5 h-5 bg-gray-500 hover:bg-gray-600 text-white rounded-full flex items-center justify-center shadow-sm transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
-          style={{ zIndex: 1000 }}
+          className="absolute top-2 right-2 w-5 h-5 bg-gray-500 hover:bg-gray-600 text-white rounded-full flex items-center justify-center shadow-sm transition-all opacity-0 group-hover:opacity-100 cursor-pointer z-10"
           title="Delete node"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,6 +54,7 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
           className={`w-3 h-3 border-2 border-white ${
             hasError ? "bg-red-500" : colors.handle
           }`}
+          style={{ left: '50%', transform: 'translateX(-50%)' }}
         />
 
         <div className="flex items-start">
@@ -77,9 +77,9 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
           </div>
           <div className="ml-3 flex-1">
             <h3 className="text-sm font-semibold text-gray-900">{agentData.label}</h3>
-            {agentData.stepTitle && agentData.stepTitle !== agentData.agentName && (
+            {agentData.stepTitle && (
               <p className="text-xs font-medium text-indigo-600 mt-0.5">
-                title: {agentData.stepTitle}
+                Title: {agentData.stepTitle}
               </p>
             )}
             {agentData.description && (
@@ -103,6 +103,7 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
           className={`w-3 h-3 border-2 border-white ${
             hasError ? "bg-red-500" : colors.handle
           }`}
+          style={{ left: '50%', transform: 'translateX(-50%)' }}
         />
       </Card>
     </div>
