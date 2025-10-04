@@ -18,7 +18,7 @@ export async function GET() {
       );
     }
 
-    const commandsDir = path.join(CLAUDE_ROOT, 'commands');
+    const commandsDir = path.join(CLAUDE_ROOT, '.claude', 'commands');
 
     if (!fs.existsSync(commandsDir)) {
       return NextResponse.json({ directories: [] });

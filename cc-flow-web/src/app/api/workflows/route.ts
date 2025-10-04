@@ -17,7 +17,7 @@ const getWorkflowsPath = (): string => {
   const workflowsPath = process.env.WORKFLOWS_PATH;
 
   if (claudeRoot) {
-    return workflowsPath || join(claudeRoot, 'workflows');
+    return workflowsPath || join(claudeRoot, '.claude', 'workflows');
   }
 
   // Fallback for development mode
