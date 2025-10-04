@@ -17,7 +17,7 @@ color: blue
 This sub-agent was automatically converted from a custom slash command.
 
 - **Source**: `.claude/commands/kiro/spec-impl.md`
-- **Conversion Date**: 2025-10-04 13:38:36
+- **Conversion Date**: 2025-10-04 18:06:40
 - **Conversion Version**: 1.0
 - **Functionality**: 100% equivalent to the original slash command
 
