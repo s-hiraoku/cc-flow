@@ -21,78 +21,94 @@ Purpose: This is the workflow for specification-driven development. It takes use
 
 `/cc-sdd-workflow "your task or requirement"`
 
-**Stepwise Instructions:**
+## Execution Instructions
 
-- Step 1: steering
+- ### Step 1: steering
 
-  Mode: sequential
+  **Mode**: sequential
 
-  Purpose: First, create the project knowledge base.
+  **Purpose**: First, create the project knowledge base.
 
-  - Use Task tool with subagent_type: "steering" and pass user task: $ARGUMENTS
+  **Agents**:
 
-  Wait for completion before moving on.
+  - Use Task tool with `subagent_type: "steering"` and pass user task: `$ARGUMENTS`
 
-- Step 2: spec-init
+  ⏸ Wait for completion before moving on.
 
-  Mode: sequential
+- ### Step 2: spec-init
 
-  Purpose: Define the project requirements.
+  **Mode**: sequential
 
-  - Use Task tool with subagent_type: "spec-init" and pass user task: $ARGUMENTS
+  **Purpose**: Define the project requirements.
 
-  Wait for completion before moving on.
+  **Agents**:
 
-- Step 3: spec-requirements
+  - Use Task tool with `subagent_type: "spec-init"` and pass user task: `$ARGUMENTS`
 
-  Mode: sequential
+  ⏸ Wait for completion before moving on.
 
-  Purpose: We will refine the requirements.
+- ### Step 3: spec-requirements
 
-  - Use Task tool with subagent_type: "spec-requirements" and pass user task: $ARGUMENTS
+  **Mode**: sequential
 
-  Wait for completion before moving on.
+  **Purpose**: We will refine the requirements.
 
-- Step 4: spec-design
+  **Agents**:
 
-  Mode: sequential
+  - Use Task tool with `subagent_type: "spec-requirements"` and pass user task: `$ARGUMENTS`
 
-  Purpose: Create comprehensive technical design for a specification
+  ⏸ Wait for completion before moving on.
 
-  - Use Task tool with subagent_type: "spec-design" and pass user task: $ARGUMENTS
+- ### Step 4: spec-design
 
-  Wait for completion before moving on.
+  **Mode**: sequential
 
-- Step 5: spec-tasks
+  **Purpose**: Create comprehensive technical design for a specification
 
-  Mode: sequential
+  **Agents**:
 
-  Purpose: Generate implementation tasks for a specification
+  - Use Task tool with `subagent_type: "spec-design"` and pass user task: `$ARGUMENTS`
 
-  - Use Task tool with subagent_type: "spec-tasks" and pass user task: $ARGUMENTS
+  ⏸ Wait for completion before moving on.
 
-  Wait for completion before moving on.
+- ### Step 5: spec-tasks
 
-- Step 6: spec-impl
+  **Mode**: sequential
 
-  Mode: sequential
+  **Purpose**: Generate implementation tasks for a specification
 
-  Purpose: Execute spec tasks using TDD methodology
+  **Agents**:
 
-  - Use Task tool with subagent_type: "spec-impl" and pass user task: $ARGUMENTS
+  - Use Task tool with `subagent_type: "spec-tasks"` and pass user task: `$ARGUMENTS`
 
-  Wait for completion before moving on.
+  ⏸ Wait for completion before moving on.
 
-- Step 7: validate-gap
+- ### Step 6: spec-impl
 
-  Mode: sequential
+  **Mode**: sequential
 
-  Purpose: Analyze implementation gap between requirements and existing codebase
+  **Purpose**: Execute spec tasks using TDD methodology
 
-  - Use Task tool with subagent_type: "validate-gap" and pass user task: $ARGUMENTS
+  **Agents**:
 
-  Wait for completion before moving on.
+  - Use Task tool with `subagent_type: "spec-impl"` and pass user task: `$ARGUMENTS`
 
-- Final Step: Consolidate all sub-agent responses into comprehensive summary
+  ⏸ Wait for completion before moving on.
+
+- ### Step 7: validate-gap
+
+  **Mode**: sequential
+
+  **Purpose**: Analyze implementation gap between requirements and existing codebase
+
+  **Agents**:
+
+  - Use Task tool with `subagent_type: "validate-gap"` and pass user task: `$ARGUMENTS`
+
+  ⏸ Wait for completion before moving on.
+
+### Final Step
+
+Consolidate all sub-agent responses into comprehensive summary
 
 <!-- POML_GENERATED_INSTRUCTIONS_END -->
