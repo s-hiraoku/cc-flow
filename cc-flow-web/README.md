@@ -100,24 +100,22 @@ npm run type-check  # TypeScript type checking
 
 ## Features
 
-### ✅ Implemented (Phase 1)
-- **Visual Workflow Editor**: ReactFlow-based drag-and-drop interface
-- **Agent Management**: Automatic discovery and categorization of agents
-- **Real-time Preview**: Live JSON output with immediate validation
-- **Properties Panel**: Workflow metadata and configuration editing
-- **API Integration**: Backend services for agent discovery and workflow operations
+### ✅ Implemented (v0.0.1)
+- **Visual Workflow Editor**: ReactFlow-based drag-and-drop canvas with 4 node types (Start, Agent, Step Group, End)
+- **Agent Palette**: Search, filter, and drag agents with category-based organization
+- **Properties Panel**: Configure settings, view workflow statistics, and preview JSON outputs
+- **Real-time Validation**: Automatic error detection with visual indicators and detailed error messages
+- **Workflow Persistence**: Save/restore workflows as JSON files with complete state preservation
+- **Workflow Generation**: Generate CLI-ready commands with progress tracking and notifications
+- **Keyboard Navigation**: Full keyboard accessibility with Tab, Enter, Space, and Escape support
+- **Step Group Management**: Sequential and parallel execution modes with agent grouping
 
-### 🚧 In Development (Phase 2)
-- Enhanced validation system with real-time error highlighting
-- Step group management for sequential/parallel execution
-- Improved user experience with keyboard shortcuts
-- Advanced drag-and-drop with visual indicators
-
-### 📋 Planned (Phase 3)
-- Workflow templates and presets
-- Advanced graph analysis and optimization
-- Collaboration features and version control
-- Integration with external CI/CD systems
+### 📋 Planned (Future Versions)
+- Workflow templates and presets library
+- Advanced graph analysis and optimization suggestions
+- Collaboration features and real-time multi-user editing
+- Version control integration and change tracking
+- External CI/CD system integration
 
 ## Technology Stack
 
@@ -194,6 +192,6 @@ This project is part of the CC-Flow ecosystem. Please refer to the main reposito
 
 ---
 
-**Project Status**: Phase 1 Complete, Phase 2 In Progress
-**Latest Version**: 1.0
+**Project Status**: Initial Release
+**Latest Version**: 0.0.1
 **Maintained by**: CC-Flow Development Team

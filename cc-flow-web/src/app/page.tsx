@@ -4,11 +4,10 @@ import {
   ArrowRight,
   FileText,
   Keyboard,
-  LineChart,
-  MousePointer,
-  Palette,
+  Settings2,
   ShieldCheck,
   Sparkles,
+  Users,
   Workflow,
 } from "lucide-react";
 
@@ -51,28 +50,28 @@ const navigation = [
 
 const features: Feature[] = [
   {
-    name: "Focus-friendly canvas",
+    name: "Visual workflow builder",
     description:
-      "Navigate every agent with the keyboard, track focus with high-contrast rings, and rely on descriptive labels for screen readers.",
-    icon: Keyboard,
+      "Drag agents from the palette, connect nodes with edges, and organize workflows with Start, Agent, Step Group, and End nodes using ReactFlow-powered canvas.",
+    icon: Workflow,
   },
   {
-    name: "Adaptive theming",
+    name: "Real-time validation",
     description:
-      "Auto-adjust between light, dark, and high-contrast color tokens so workflows stay legible in any environment.",
-    icon: Palette,
-  },
-  {
-    name: "Workflow transparency",
-    description:
-      "Preview live JSON output while you edit to validate branching, inputs, and automation details at a glance.",
-    icon: LineChart,
-  },
-  {
-    name: "Secure hand-off",
-    description:
-      "Export validated flows directly into cc-flow-cli commands with guardrails that catch breaking changes early.",
+      "Automatic validation highlights errors on nodes with visual indicators, and the properties panel shows detailed error messages with resolution guidance.",
     icon: ShieldCheck,
+  },
+  {
+    name: "Workflow persistence",
+    description:
+      "Save workflows as JSON files and restore them later with full state preservation including nodes, edges, and metadata for seamless collaboration.",
+    icon: FileText,
+  },
+  {
+    name: "Keyboard-first navigation",
+    description:
+      "Navigate every control with Tab, activate with Enter/Space, and use screen readers with proper ARIA labels for inclusive editing experience.",
+    icon: Keyboard,
   },
 ];
 
@@ -96,48 +95,48 @@ const highlights: Highlight[] = [
 
 const steps: Step[] = [
   {
-    title: "Structure agents visually",
+    title: "Build workflows visually",
     description:
-      "Drag, duplicate, and connect actions with keyboard shortcuts or pointer gestures. Each step stays aligned with smart guides.",
+      "Drag agents from the palette, create Start and End nodes, group agents into Step Groups with sequential or parallel execution modes, and connect them with edges.",
     icon: Workflow,
   },
   {
-    title: "Audit logic instantly",
+    title: "Configure and validate",
     description:
-      "Hover to view connection summaries, expand validation hints, and lock your flow when hand-off is ready.",
-    icon: Sparkles,
+      "Set workflow metadata in the Start node, configure step group settings in the Properties panel, and get real-time validation with visual error indicators.",
+    icon: Settings2,
   },
   {
-    title: "Export with confidence",
+    title: "Save and generate",
     description:
-      "Share a clean cc-flow-cli command or JSON output with teammates, including notes and testing reminders.",
+      "Save your workflow as JSON for later editing, or generate CLI-ready commands with complete workflow definitions for cc-flow-cli execution.",
     icon: ShieldCheck,
   },
 ];
 
 const editorTips: Tip[] = [
   {
-    title: "Keyboard navigation",
+    title: "Agent palette",
     description:
-      "Press Tab to move focus across panels, Shift+Tab to reverse, and Enter or Space to activate focused controls.",
-    icon: Keyboard,
+      "Search agents by name, filter by category, and drag them onto the canvas. Each card shows agent details with hover animations.",
+    icon: Users,
   },
   {
-    title: "Canvas shortcuts",
+    title: "Properties panel",
     description:
-      "Drag empty canvas space to pan, scroll or pinch to zoom, and fall back to the zoom controls for precise adjustments.",
-    icon: MousePointer,
+      "Configure node settings, view workflow stats (nodes, connections, agents, step groups), and preview JSON outputs in real-time.",
+    icon: Settings2,
   },
   {
-    title: "Validation & export",
+    title: "Save & Restore",
     description:
-      "Open the properties panel to resolve warnings and copy clean JSON payloads before handing flows to the CLI.",
+      "Save workflows as JSON files with the Download icon, and restore them later using the Upload button to preserve complete workflow state.",
     icon: FileText,
   },
   {
-    title: "Generator",
+    title: "Generate workflow",
     description:
-      "Use Generate workflow to create CLI-ready commands and shareable outputs once your nodes are locked in.",
+      "Click Generate workflow to validate the flow and create CLI-ready commands with real-time progress and error notifications.",
     icon: Sparkles,
   },
 ];
@@ -292,13 +291,19 @@ export default function HomePage() {
                 </div>
                 <pre className="overflow-x-auto rounded-2xl border border-white/10 bg-slate-950/90 p-4 text-sm leading-relaxed text-slate-200">
 {`{
-  "flowId": "support-escalation",
-  "entry": "triageAgent",
-  "agents": [
+  "workflowName": "api-design-flow",
+  "workflowPurpose": "API design workflow",
+  "workflowSteps": [
     {
-      "id": "triageAgent",
-      "type": "classifier",
-      "fallback": "escalationAgent"
+      "title": "Design Phase",
+      "mode": "sequential",
+      "purpose": "Create API specs",
+      "agents": ["spec-design", "spec-requirements"]
+    },
+    {
+      "title": "Implementation",
+      "mode": "parallel",
+      "agents": ["spec-impl"]
     }
   ]
 }`}
