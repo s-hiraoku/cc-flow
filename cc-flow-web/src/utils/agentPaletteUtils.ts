@@ -13,52 +13,52 @@ export const ICON_PALETTE = [
 // Dynamic color palette for categories
 export const COLOR_PALETTE = [
   {
-    border: "border-blue-300",
-    bg: "bg-gradient-to-r from-white to-blue-50",
-    hover: "hover:border-blue-400 hover:from-blue-50 hover:to-blue-100",
-    icon: "bg-blue-100 text-blue-600"
+    border: "border-sky-400/40",
+    bg: "bg-slate-950/60",
+    hover: "hover:border-sky-300/60 hover:bg-sky-500/15",
+    icon: "bg-sky-500/20 text-sky-100"
   },
   {
-    border: "border-green-300",
-    bg: "bg-gradient-to-r from-white to-green-50",
-    hover: "hover:border-green-400 hover:from-green-50 hover:to-green-100",
-    icon: "bg-green-100 text-green-600"
+    border: "border-emerald-400/40",
+    bg: "bg-slate-950/60",
+    hover: "hover:border-emerald-300/60 hover:bg-emerald-500/15",
+    icon: "bg-emerald-500/20 text-emerald-100"
   },
   {
-    border: "border-purple-300",
-    bg: "bg-gradient-to-r from-white to-purple-50",
-    hover: "hover:border-purple-400 hover:from-purple-50 hover:to-purple-100",
-    icon: "bg-purple-100 text-purple-600"
+    border: "border-purple-400/40",
+    bg: "bg-slate-950/60",
+    hover: "hover:border-purple-300/60 hover:bg-purple-500/15",
+    icon: "bg-purple-500/20 text-purple-100"
   },
   {
-    border: "border-orange-300",
-    bg: "bg-gradient-to-r from-white to-orange-50",
-    hover: "hover:border-orange-400 hover:from-orange-50 hover:to-orange-100",
-    icon: "bg-orange-100 text-orange-600"
+    border: "border-amber-400/40",
+    bg: "bg-slate-950/60",
+    hover: "hover:border-amber-300/60 hover:bg-amber-500/15",
+    icon: "bg-amber-500/25 text-amber-100"
   },
   {
-    border: "border-pink-300",
-    bg: "bg-gradient-to-r from-white to-pink-50",
-    hover: "hover:border-pink-400 hover:from-pink-50 hover:to-pink-100",
-    icon: "bg-pink-100 text-pink-600"
+    border: "border-rose-400/40",
+    bg: "bg-slate-950/60",
+    hover: "hover:border-rose-300/60 hover:bg-rose-500/15",
+    icon: "bg-rose-500/20 text-rose-100"
   },
   {
-    border: "border-indigo-300",
-    bg: "bg-gradient-to-r from-white to-indigo-50",
-    hover: "hover:border-indigo-400 hover:from-indigo-50 hover:to-indigo-100",
-    icon: "bg-indigo-100 text-indigo-600"
+    border: "border-indigo-400/40",
+    bg: "bg-slate-950/60",
+    hover: "hover:border-indigo-300/60 hover:bg-indigo-500/15",
+    icon: "bg-indigo-500/20 text-indigo-100"
   },
   {
-    border: "border-teal-300",
-    bg: "bg-gradient-to-r from-white to-teal-50",
-    hover: "hover:border-teal-400 hover:from-teal-50 hover:to-teal-100",
-    icon: "bg-teal-100 text-teal-600"
+    border: "border-teal-400/40",
+    bg: "bg-slate-950/60",
+    hover: "hover:border-teal-300/60 hover:bg-teal-500/15",
+    icon: "bg-teal-500/20 text-teal-100"
   },
   {
-    border: "border-yellow-300",
-    bg: "bg-gradient-to-r from-white to-yellow-50",
-    hover: "hover:border-yellow-400 hover:from-yellow-50 hover:to-yellow-100",
-    icon: "bg-yellow-100 text-yellow-600"
+    border: "border-cyan-400/40",
+    bg: "bg-slate-950/60",
+    hover: "hover:border-cyan-300/60 hover:bg-cyan-500/15",
+    icon: "bg-cyan-500/20 text-cyan-100"
   }
 ];
 
@@ -80,10 +80,10 @@ export function getIndexFromFirstLetter(str: string): number {
 export function getCategoryColors(category: string) {
   if (!category) {
     return {
-      border: "border-gray-300",
-      bg: "bg-gradient-to-r from-white to-gray-50",
-      hover: "hover:border-gray-400 hover:from-gray-50 hover:to-gray-100",
-      icon: "bg-gray-100 text-gray-600"
+      border: "border-white/10",
+      bg: "bg-slate-950/60",
+      hover: "hover:border-indigo-300/60 hover:bg-indigo-500/15",
+      icon: "bg-slate-700/60 text-slate-200"
     };
   }
 

@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Handle, Position, useReactFlow, NodeProps } from "@xyflow/react";
-import { Card } from "@/components/ui";
 import { EndNodeData } from "@/types/workflow";
 
 export default function EndNode({ id, data, selected }: NodeProps) {
@@ -15,27 +14,28 @@ export default function EndNode({ id, data, selected }: NodeProps) {
   };
 
   return (
-    <div className="relative group"
+    <div
+      className="group relative"
       style={{
         width: 400,
-        height: 'auto',
-        minWidth: 400
+        height: "auto",
+        minWidth: 400,
       }}
     >
-      <Card
-        className={`w-full h-full p-4 border-l-4 border-l-orange-500 bg-orange-50/60 shadow-sm transition-all relative ${
-          selected ? "ring-2 ring-orange-500" : "hover:shadow-md"
-        }`}
+      <div
+        className={`relative w-full rounded-2xl border-l-4 border-l-amber-500 px-4 py-4 backdrop-blur transition-all duration-200 ${
+          selected ? "ring-2 ring-amber-400/60 shadow-lg" : "hover:shadow-md"
+        } bg-amber-500/10`}
       >
         <Handle
           type="target"
           position={Position.Top}
-          className="w-3 h-3 bg-orange-500 border-2 border-white"
+          className="h-3 w-3 border-2 border-slate-900 bg-amber-500"
         />
         {/* Delete button */}
         <button
           onClick={handleDelete}
-          className="absolute top-2 right-2 w-5 h-5 bg-gray-500 hover:bg-gray-600 text-white rounded-full flex items-center justify-center shadow-sm transition-all opacity-0 group-hover:opacity-100 cursor-pointer z-10"
+          className="absolute right-3 top-3 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/10 text-slate-200 opacity-0 shadow-sm transition-all hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400 group-hover:opacity-100"
           title="Delete node"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,7 +46,7 @@ export default function EndNode({ id, data, selected }: NodeProps) {
 
 
         <div className="flex items-start">
-          <div className="w-8 h-8 flex items-center justify-center bg-orange-200 rounded-full text-orange-700">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/20 text-amber-100">
             <svg
               className="w-4 h-4"
               viewBox="0 0 24 24"
@@ -62,13 +62,13 @@ export default function EndNode({ id, data, selected }: NodeProps) {
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-semibold text-orange-900">{endData.label}</h3>
+            <h3 className="text-sm font-semibold text-white">{endData.label}</h3>
             {endData.description && (
-              <p className="text-xs text-orange-700/80 mt-1">{endData.description}</p>
+              <p className="mt-1 text-xs text-slate-300">{endData.description}</p>
             )}
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

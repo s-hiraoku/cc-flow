@@ -27,7 +27,11 @@ export default function WorkflowProgressIndicator({
   }, [currentStep]);
 
   return (
-    <div className="mb-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 shadow-sm">
+    <div
+      role="status"
+      aria-live="polite"
+      className="mb-3 rounded-2xl border border-sky-400/40 bg-slate-900/60 px-4 py-3 text-sm text-slate-200 shadow-lg backdrop-blur"
+    >
       <div className="space-y-2">
         {WORKFLOW_STEPS.map((step) => (
           <div key={step.name} className="flex items-center">
@@ -40,8 +44,8 @@ export default function WorkflowProgressIndicator({
             <span
               className={
                 currentStep === step.name || error?.step === step.name
-                  ? 'font-medium'
-                  : ''
+                  ? "font-semibold text-white"
+                  : "text-slate-300"
               }
             >
               {step.label}
@@ -50,7 +54,11 @@ export default function WorkflowProgressIndicator({
         ))}
       </div>
 
-      {error && <ErrorDetails error={error} />}
+      {error && (
+        <div className="mt-3 rounded-xl border border-rose-400/40 bg-rose-500/10 p-3">
+          <ErrorDetails error={error} />
+        </div>
+      )}
     </div>
   );
 }

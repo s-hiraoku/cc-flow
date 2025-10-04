@@ -26,7 +26,6 @@ export default function EditorNotificationArea({
   showSuccessMessage,
   isSuccessVisible,
 }: EditorNotificationAreaProps) {
-  // Don't render if there's nothing to show
   if (!generating && !showSuccessMessage && !error) {
     return null;
   }
@@ -34,19 +33,20 @@ export default function EditorNotificationArea({
   const showProgress = (generating && currentStep) || (error && currentStep);
 
   return (
-    <div className="px-6 pt-4 bg-white border-b border-gray-200">
-      {/* Progress indicator */}
-      {showProgress && (
+    <section
+      aria-live="polite"
+      className="border-b border-white/10 bg-slate-950/70 px-6 pb-4 pt-4 text-sm text-slate-100 backdrop-blur"
+    >
+      {showProgress ? (
         <WorkflowProgressIndicator currentStep={currentStep} error={error} />
-      )}
+      ) : null}
 
-      {/* Success message */}
       <WorkflowSuccessMessage
         commandName={result?.commandName}
         commandPath={result?.commandPath}
         isVisible={showSuccessMessage}
         isAnimating={isSuccessVisible}
       />
-    </div>
+    </section>
   );
 }

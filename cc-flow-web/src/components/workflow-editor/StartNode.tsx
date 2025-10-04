@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Handle, Position, useReactFlow, NodeProps } from "@xyflow/react";
-import { Card } from "@/components/ui";
 import { StartNodeData } from "@/types/workflow";
 
 export default function StartNode({ id, data, selected }: NodeProps) {
@@ -16,30 +15,31 @@ export default function StartNode({ id, data, selected }: NodeProps) {
   };
 
   return (
-    <div className="relative group"
+    <div
+      className="group relative"
       style={{
         width: 400,
-        height: 'auto',
-        minWidth: 400
+        height: "auto",
+        minWidth: 400,
       }}
     >
-      <Card
-        className={`w-full h-full p-4 border-l-4 ${
+      <div
+        className={`relative w-full rounded-2xl border-l-4 px-4 py-4 backdrop-blur transition-all duration-200 ${
           hasError
-            ? "border-l-red-500 bg-red-50/60"
-            : "border-l-emerald-500 bg-emerald-50/60"
-        } shadow-sm transition-all relative ${
+            ? "border-l-red-500 bg-red-500/10"
+            : "border-l-emerald-500 bg-emerald-500/10"
+        } ${
           selected
             ? hasError
-              ? "ring-2 ring-red-500"
-              : "ring-2 ring-emerald-500"
+              ? "ring-2 ring-red-400/60 shadow-lg"
+              : "ring-2 ring-emerald-400/60 shadow-lg"
             : "hover:shadow-md"
         }`}
       >
         {/* Delete button */}
         <button
           onClick={handleDelete}
-          className="absolute top-2 right-2 w-5 h-5 bg-gray-500 hover:bg-gray-600 text-white rounded-full flex items-center justify-center shadow-sm transition-all opacity-0 group-hover:opacity-100 cursor-pointer z-10"
+          className="absolute right-3 top-3 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/10 text-slate-200 opacity-0 shadow-sm transition-all hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 group-hover:opacity-100"
           title="Delete node"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,11 +48,11 @@ export default function StartNode({ id, data, selected }: NodeProps) {
         </button>
 
         <div className="flex items-start">
-          <div className={`w-8 h-8 flex items-center justify-center rounded-full ${
-            hasError
-              ? "bg-red-200 text-red-700"
-              : "bg-emerald-200 text-emerald-700"
-          }`}>
+          <div
+            className={`flex h-8 w-8 items-center justify-center rounded-full ${
+              hasError ? "bg-red-500/20 text-red-100" : "bg-emerald-500/20 text-emerald-100"
+            }`}
+          >
             <svg
               className="w-4 h-4"
               viewBox="0 0 24 24"
@@ -67,27 +67,19 @@ export default function StartNode({ id, data, selected }: NodeProps) {
               />
             </svg>
           </div>
-          <div className="ml-3 flex-1">
-            <h3 className={`text-sm font-semibold ${
-              hasError ? "text-red-900" : "text-emerald-900"
-            }`}>{startData.label}</h3>
+          <div className="ml-3 flex-1 text-slate-100">
+            <h3 className="text-sm font-semibold text-white">{startData.label}</h3>
             {startData.description && (
-              <p className={`text-xs mt-1 ${
-                hasError ? "text-red-700/80" : "text-emerald-700/80"
-              }`}>{startData.description}</p>
+              <p className="mt-1 text-xs text-slate-300">{startData.description}</p>
             )}
             {startData.workflowName && (
-              <div className={`mt-2 text-xs ${
-                hasError ? "text-red-800" : "text-emerald-800"
-              }`}>
-                <span className="font-medium">Workflow:</span> {startData.workflowName}
+              <div className="mt-2 text-xs text-slate-200">
+                <span className="font-medium text-slate-100">Workflow:</span> {startData.workflowName}
               </div>
             )}
             {startData.workflowPurpose && (
-              <div className={`mt-1 text-xs ${
-                hasError ? "text-red-700/80" : "text-emerald-700/80"
-              }`}>
-                <span className="font-medium">Purpose:</span> {startData.workflowPurpose}
+              <div className="mt-1 text-xs text-slate-200">
+                <span className="font-medium text-slate-100">Purpose:</span> {startData.workflowPurpose}
               </div>
             )}
           </div>
@@ -95,11 +87,11 @@ export default function StartNode({ id, data, selected }: NodeProps) {
         <Handle
           type="source"
           position={Position.Bottom}
-          className={`w-3 h-3 border-2 border-white ${
+          className={`h-3 w-3 border-2 border-slate-900 ${
             hasError ? "bg-red-500" : "bg-emerald-500"
           }`}
         />
-      </Card>
+      </div>
     </div>
   );
 }

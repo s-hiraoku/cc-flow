@@ -1,5 +1,5 @@
-import React from 'react';
-import { WorkflowStep, GenerateError } from './types';
+import React from "react";
+import { WorkflowStep, GenerateError } from "./types";
 
 interface StepIconProps {
   currentStep?: WorkflowStep;
@@ -25,7 +25,7 @@ export default function StepIcon({
   if (error?.step === stepName) {
     return (
       <svg
-        className="h-4 w-4 mr-2 text-red-600"
+        className="mr-2 h-4 w-4 text-rose-400"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -44,7 +44,7 @@ export default function StepIcon({
   if (currentStep === stepName) {
     return (
       <svg
-        className="animate-spin h-4 w-4 mr-2 text-blue-600"
+        className="mr-2 h-4 w-4 animate-spin text-sky-300"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
@@ -70,7 +70,7 @@ export default function StepIcon({
   if (completedSteps.includes(stepName)) {
     return (
       <svg
-        className="h-4 w-4 mr-2 text-green-600"
+        className="mr-2 h-4 w-4 text-emerald-300"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -88,7 +88,7 @@ export default function StepIcon({
   // Pending state
   return (
     <svg
-      className="h-4 w-4 mr-2 text-gray-400"
+      className="mr-2 h-4 w-4 text-slate-500"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"

@@ -9,7 +9,6 @@ import { EditorToolbar, EditorNotificationArea } from "@/components/editor";
 import { useWorkflowEditor, useAgents, useWorkflowGenerate, useAutoHideMessage } from "@/hooks";
 import { Agent } from "@/types/agent";
 import { WorkflowNode } from "@/types/workflow";
-
 export default function EditorPage() {
   // All hooks must be called before any conditional returns
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
@@ -58,8 +57,17 @@ export default function EditorPage() {
 
   return (
     <ErrorBoundary>
-      <div className="h-screen flex bg-gray-50">
-        {/* Agent Palette */}
+      <div className="relative flex h-screen w-full flex-col overflow-hidden bg-slate-950 text-slate-100 lg:flex-row">
+        <div className="pointer-events-none absolute inset-x-0 top-[-20rem] -z-10 h-[32rem] bg-gradient-to-br from-indigo-500/40 via-transparent to-sky-500/30 blur-3xl" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-[-18rem] -z-10 h-[26rem] bg-gradient-to-t from-purple-500/30 via-transparent to-indigo-500/20 blur-3xl" />
+
+        <a
+          href="#editor-canvas"
+          className="absolute left-6 top-6 z-50 -translate-y-32 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg transition-transform focus-visible:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
+        >
+          Skip to workflow canvas
+        </a>
+
         <AgentPalette
           agents={agents}
           loading={agentsLoading}
@@ -67,9 +75,7 @@ export default function EditorPage() {
           onAgentDragStart={handleAgentDragStart}
         />
 
-        {/* Main Editor */}
-        <div className="flex-1 flex flex-col">
-          {/* Toolbar */}
+        <main className="relative flex min-w-0 flex-1 flex-col">
           <EditorToolbar
             nodeCount={nodes.length}
             edgeCount={edges.length}
@@ -79,7 +85,6 @@ export default function EditorPage() {
             onGenerateWorkflow={handleGenerateWorkflow}
           />
 
-          {/* Notification Area (Progress & Success Messages) */}
           <EditorNotificationArea
             generating={generating}
             currentStep={currentStep}
@@ -89,19 +94,22 @@ export default function EditorPage() {
             isSuccessVisible={isSuccessVisible}
           />
 
-          {/* ReactFlow Canvas */}
-          <div className="flex-1">
-            <Canvas
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={handleNodesChangeWithSelection}
-              onEdgesChange={handleEdgesChange}
-              onConnect={handleConnect}
-            />
-          </div>
-        </div>
+          <section className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden px-4 pb-6 pt-4 sm:px-6 lg:px-8">
+            <div
+              id="editor-canvas"
+              className="relative flex min-w-0 flex-1 overflow-hidden rounded-3xl border border-white/10 bg-slate-950/60 shadow-2xl"
+            >
+              <Canvas
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={handleNodesChangeWithSelection}
+                onEdgesChange={handleEdgesChange}
+                onConnect={handleConnect}
+              />
+            </div>
+          </section>
+        </main>
 
-        {/* Properties Panel */}
         <PropertiesPanel
           metadata={metadata}
           onMetadataChange={setMetadata}

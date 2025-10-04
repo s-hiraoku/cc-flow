@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Panel, Card, Button } from "@/components/ui";
+import { Panel, Button } from "@/components/ui";
 import { PanelRightOpen, PanelRightClose } from "lucide-react";
 import {
   WorkflowMetadata,
@@ -85,6 +85,7 @@ export default function PropertiesPanel({
 
   return (
     <Panel
+      variant="dark"
       title={collapsed ? (
         <div className="flex items-center justify-center">
           <Button
@@ -92,7 +93,7 @@ export default function PropertiesPanel({
             size="sm"
             aria-label="Expand properties"
             onClick={() => setCollapsed(false)}
-            className="p-1"
+            className="p-1 text-slate-200 hover:bg-white/10 hover:text-white focus:ring-offset-slate-950"
           >
             <PanelRightOpen className="h-4 w-4" />
           </Button>
@@ -105,113 +106,102 @@ export default function PropertiesPanel({
             size="sm"
             aria-label="Collapse properties"
             onClick={() => setCollapsed(true)}
-            className="p-1"
+            className="p-1 text-slate-200 hover:bg-white/10 hover:text-white focus:ring-offset-slate-950"
           >
             <PanelRightClose className="h-4 w-4" />
           </Button>
         </div>
       )}
       subtitle={collapsed ? undefined : "Configure workflow settings"}
-      className={`relative transition-all duration-200 ${
-        collapsed ? "w-12 shadow-lg" : "w-80"
-      }`}
+      className={`relative transition-all duration-200 backdrop-blur ${
+        collapsed ? "w-full shadow-lg lg:w-14" : "w-full lg:w-[24rem]"
+      } lg:flex-shrink-0`}
     >
       {!collapsed && (
-        <div className="flex flex-col h-full min-h-0">
-          <div className="flex-1 overflow-y-auto overflow-x-hidden">
-            <div className="p-4 space-y-6">
+        <div className="flex flex-col h-full min-h-0 overflow-hidden">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4">
+            <div className="space-y-4">
               {/* Settings Section */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                <h3 className="mb-4 text-lg font-semibold text-white">
                   {getSettingsTitle()}
                 </h3>
-                
-                {renderSelectionInfo()}
-                
-                <div className="mt-4">
-                  {renderNodeSettings()}
+
+                <div className="space-y-4 text-sm text-slate-200">
+                  {renderSelectionInfo()}
+                  <div>{renderNodeSettings()}</div>
                 </div>
               </div>
 
               {/* Workflow Stats */}
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+              <div className="border-t border-white/10 pt-4">
+                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-300">
                   Workflow Stats
                 </h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-500">Nodes:</span>
-                    <span className="ml-2 font-medium">{workflowSummary.nodeCount}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Connections:</span>
-                    <span className="ml-2 font-medium">{workflowSummary.edgeCount}</span>
-                  </div>
-                </div>
-                <div className="mt-4 space-y-2 text-sm">
+                <dl className="space-y-2 text-sm text-slate-300">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-500">Start Node</span>
-                    <span className="font-medium text-gray-900">
+                    <dt>Start node</dt>
+                    <dd className="font-semibold text-white">
                       {workflowSummary.startLabel ?? "Not configured"}
-                    </span>
+                    </dd>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-500">End Node</span>
-                    <span className="font-medium text-gray-900">
+                    <dt>End node</dt>
+                    <dd className="font-semibold text-white">
                       {workflowSummary.endLabel ?? "Not configured"}
-                    </span>
+                    </dd>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-md bg-indigo-50 px-3 py-2 text-indigo-700">
-                      <p className="text-xs uppercase tracking-wide">Agents</p>
-                      <p className="text-lg font-semibold">
+                  <div className="grid grid-cols-3 gap-2 mt-3">
+                    <div className="rounded-lg border border-indigo-400/40 bg-indigo-500/15 px-2 py-1.5 text-indigo-100">
+                      <p className="text-[10px] uppercase tracking-wide">Agents</p>
+                      <p className="text-base font-semibold text-white">
                         {workflowSummary.agentCount}
                       </p>
                     </div>
-                    <div className="rounded-md bg-slate-50 px-3 py-2 text-slate-700">
-                      <p className="text-xs uppercase tracking-wide">
-                        Step Groups
-                      </p>
-                      <p className="text-lg font-semibold">
+                    <div className="rounded-lg border border-purple-400/40 bg-purple-500/15 px-2 py-1.5 text-purple-100">
+                      <p className="text-[10px] uppercase tracking-wide">Groups</p>
+                      <p className="text-base font-semibold text-white">
                         {workflowSummary.stepGroupCount}
                       </p>
                     </div>
+                    <div className="rounded-lg border border-emerald-400/40 bg-emerald-500/15 px-2 py-1.5 text-emerald-100">
+                      <p className="text-[10px] uppercase tracking-wide">Edges</p>
+                      <p className="text-base font-semibold text-white">
+                        {workflowSummary.edgeCount}
+                      </p>
+                    </div>
                   </div>
-                  <div className="rounded-md bg-emerald-50 px-3 py-2 text-emerald-700">
-                    <p className="text-xs uppercase tracking-wide">Edges</p>
-                    <p className="text-lg font-semibold">{workflowSummary.edgeCount}</p>
-                  </div>
-                </div>
+                </dl>
               </div>
 
               {/* JSON Preview Section */}
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+              <div className="border-t border-white/10 pt-4">
+                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-300">
                   JSON Preview
                 </h3>
                 {(createWorkflowJSONString.error || serializedWorkflowJSON.error) && (
-                  <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-md text-xs text-red-700">
+                  <div className="mb-2 rounded-lg border border-rose-400/40 bg-rose-500/10 p-2 text-xs text-rose-100">
                     <span className="font-semibold">Error: </span>
                     {createWorkflowJSONString.error || serializedWorkflowJSON.error}
                   </div>
                 )}
-                <div className="space-y-4">
-                  <Card className="p-3">
-                    <p className="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      create-workflow.sh Input
+                <div className="space-y-3">
+                  <div className="w-full rounded-lg border border-white/15 bg-slate-950/60 p-2">
+                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-300">
+                      create-workflow.sh input
                     </p>
-                    <pre className="text-xs font-mono text-slate-700 whitespace-pre-wrap max-h-48 overflow-y-auto">
+                    <pre className="max-h-24 max-w-full overflow-x-auto overflow-y-auto whitespace-pre-wrap break-words rounded-lg bg-slate-950/80 p-2 text-[10px] font-mono leading-relaxed text-slate-200">
                       {createWorkflowJSONString.json}
                     </pre>
-                  </Card>
-                  <Card className="p-3">
-                    <p className="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      Serialized Workflow Payload
+                  </div>
+                  <div className="w-full rounded-lg border border-white/15 bg-slate-950/60 p-2">
+                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-300">
+                      Serialized workflow payload
                     </p>
-                    <pre className="text-xs font-mono text-green-600 whitespace-pre-wrap max-h-48 overflow-y-auto">
+                    <pre className="max-h-24 max-w-full overflow-x-auto overflow-y-auto whitespace-pre-wrap break-words rounded-lg bg-slate-950/80 p-2 text-[10px] font-mono leading-relaxed text-emerald-200">
                       {serializedWorkflowJSON.json}
                     </pre>
-                  </Card>
+                  </div>
                 </div>
               </div>
             </div>

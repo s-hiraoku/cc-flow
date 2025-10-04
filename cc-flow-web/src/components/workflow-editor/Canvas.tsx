@@ -56,9 +56,10 @@ function CanvasControls() {
   );
 
   const baseButtonClasses =
-    "flex h-8 w-8 items-center justify-center rounded-md transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500";
+    "flex h-9 w-9 items-center justify-center rounded-lg border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400";
 
-  const buttonStyles = "bg-white/0 text-gray-700 hover:bg-gray-100 hover:text-indigo-600";
+  const buttonStyles =
+    "border-white/10 bg-white/10 text-slate-200 hover:border-indigo-400/60 hover:bg-indigo-500/20 hover:text-white";
 
   const handleToggleInteractive = () => {
     const next = !isInteractive;
@@ -72,7 +73,7 @@ function CanvasControls() {
   return (
     <Panel
       position="bottom-left"
-      className="flex gap-2 rounded-lg border border-gray-200 bg-white/95 p-1.5 shadow-md backdrop-blur"
+      className="flex gap-2 rounded-xl border border-white/10 bg-slate-950/70 p-1.5 shadow-lg backdrop-blur"
     >
       <button
         type="button"
@@ -102,7 +103,9 @@ function CanvasControls() {
         type="button"
         onClick={handleToggleInteractive}
         className={`${baseButtonClasses} ${buttonStyles} ${
-          isInteractive ? "text-indigo-600" : "text-gray-500"
+          isInteractive
+            ? "border-emerald-400/70 text-emerald-200"
+            : "text-slate-300"
         }`}
         aria-label={isInteractive ? "Disable interactions" : "Enable interactions"}
         aria-pressed={isInteractive}
@@ -140,7 +143,7 @@ function CanvasInner({
 
   return (
     <div
-      className="h-full w-full"
+      className="h-full w-full min-w-0"
       onDrop={dragDropHandlers.onDrop}
       onDragOver={dragDropHandlers.onDragOver}
     >
@@ -157,7 +160,7 @@ function CanvasInner({
         edgeTypes={edgeTypes}
         deleteKeyCode={["Backspace", "Delete"]}
         fitView
-        className="bg-gray-50"
+        className="bg-transparent"
         nodesDraggable={true}
         nodesConnectable={true}
         elementsSelectable={true}
@@ -174,9 +177,19 @@ function CanvasInner({
           }, 100);
         }}
       >
-        <Background color="#e5e7eb" gap={20} size={1} />
+        <Background color="rgba(148, 163, 184, 0.25)" gap={24} size={1} />
         <CanvasControls />
-        <MiniMap />
+        <MiniMap
+          style={{
+            backgroundColor: "rgba(15, 23, 42, 0.85)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            borderRadius: 12,
+            color: "#e2e8f0",
+          }}
+          maskColor="rgba(15, 23, 42, 0.85)"
+          nodeStrokeColor={() => "#818cf8"}
+          nodeColor={() => "#312e81"}
+        />
       </ReactFlow>
     </div>
   );

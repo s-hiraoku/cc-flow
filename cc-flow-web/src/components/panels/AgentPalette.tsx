@@ -38,6 +38,25 @@ const PRIMITIVE_NODES: PrimitiveNode[] = [
   },
 ];
 
+const PRIMITIVE_THEME: Record<PrimitiveNodeType, { card: string; icon: string }> = {
+  start: {
+    card: "border-emerald-400/40 bg-emerald-500/10",
+    icon: "bg-emerald-500/20 text-emerald-200",
+  },
+  end: {
+    card: "border-amber-400/40 bg-amber-500/10",
+    icon: "bg-amber-500/20 text-amber-200",
+  },
+  group: {
+    card: "border-indigo-400/40 bg-indigo-500/10",
+    icon: "bg-indigo-500/20 text-indigo-200",
+  },
+  "step-group": {
+    card: "border-purple-400/40 bg-purple-500/10",
+    icon: "bg-purple-500/20 text-purple-200",
+  },
+};
+
 interface AgentPaletteProps {
   agents: Agent[];
   loading?: boolean;
@@ -143,6 +162,7 @@ export default function AgentPalette({
 
   return (
     <Panel
+      variant="dark"
       title={
         collapsed ? (
           <div className="flex items-center justify-center">
@@ -151,7 +171,7 @@ export default function AgentPalette({
               size="sm"
               aria-label="Expand agent palette"
               onClick={() => setCollapsed(false)}
-              className="p-1"
+              className="p-1 text-slate-200 hover:bg-white/10 hover:text-white focus:ring-offset-slate-950"
             >
               <PanelLeftOpen className="h-4 w-4" />
             </Button>
@@ -164,27 +184,27 @@ export default function AgentPalette({
               size="sm"
               aria-label="Collapse agent palette"
               onClick={() => setCollapsed(true)}
-              className="p-1"
+              className="p-1 text-slate-200 hover:bg-white/10 hover:text-white focus:ring-offset-slate-950"
             >
               <PanelLeftClose className="h-4 w-4" />
             </Button>
           </div>
         )
       }
-      subtitle={collapsed ? undefined : "Drag agents to the canvas"}
-      className={`relative transition-all duration-200 ${
-        collapsed ? "w-12 shadow-lg" : "w-80"
-      }`}
+      subtitle={collapsed ? undefined : "Drag items onto the canvas"}
+      className={`relative transition-all duration-200 backdrop-blur ${
+        collapsed ? "w-full shadow-lg lg:w-14" : "w-full lg:w-[22rem]"
+      } lg:flex-shrink-0`}
     >
       {!collapsed && (
         <div className="p-4 space-y-4">
           {/* Error State */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center mr-2">
+            <div className="rounded-xl border border-rose-400/40 bg-rose-500/10 p-3 text-sm text-rose-100">
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-500/30 text-rose-200">
                   <svg
-                    className="w-4 h-4 text-white"
+                    className="h-4 w-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -197,9 +217,9 @@ export default function AgentPalette({
                     />
                   </svg>
                 </div>
-                <div className="text-sm text-red-700">
-                  <p className="font-medium">Failed to load agents</p>
-                  <p>{error}</p>
+                <div>
+                  <p className="font-medium text-rose-100">Failed to load agents</p>
+                  <p className="text-rose-200/80">{error}</p>
                 </div>
               </div>
             </div>
@@ -207,40 +227,31 @@ export default function AgentPalette({
 
           {/* Workflow primitives */}
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-300">
               Workflow Nodes
             </h3>
             <div className="space-y-2">
               {PRIMITIVE_NODES.map((primitive) => (
                 <div
                   key={primitive.type}
-                  className={`p-3 rounded-lg cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition ${
-                    primitive.type === "step-group"
-                      ? "border-2 border-dashed border-purple-300 bg-gradient-to-r from-white to-purple-50"
-                      : primitive.type === "end"
-                      ? "border border-orange-200 bg-gradient-to-r from-white to-orange-50"
-                      : "border border-emerald-200 bg-gradient-to-r from-white to-emerald-50"
-                  }`}
+                  className={`cursor-grab select-none rounded-xl border ${
+                    PRIMITIVE_THEME[primitive.type]?.card ?? "border-white/10 bg-white/5"
+                  } p-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-200/60 hover:shadow-xl active:cursor-grabbing`}
                   draggable
                   onDragStart={(event) =>
                     handlePrimitiveDragStart(event, primitive)
                   }
                 >
-                  <div className="flex items-start">
+                  <div className="flex items-start gap-3">
                     <div
-                      className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                        primitive.type === "group"
-                          ? "bg-purple-100 text-purple-700"
-                          : primitive.type === "step-group"
-                          ? "bg-purple-100 text-purple-700"
-                          : primitive.type === "end"
-                          ? "bg-orange-100 text-orange-700"
-                          : "bg-emerald-100 text-emerald-700"
+                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${
+                        PRIMITIVE_THEME[primitive.type]?.icon ?? "bg-white/10 text-white"
                       }`}
+                      aria-hidden
                     >
                       {primitive.type === "start" ? (
                         <svg
-                          className="w-4 h-4"
+                          className="h-4 w-4"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -254,7 +265,7 @@ export default function AgentPalette({
                         </svg>
                       ) : primitive.type === "end" ? (
                         <svg
-                          className="w-4 h-4"
+                          className="h-4 w-4"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -268,7 +279,7 @@ export default function AgentPalette({
                         </svg>
                       ) : primitive.type === "step-group" ? (
                         <svg
-                          className="w-4 h-4"
+                          className="h-4 w-4"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -282,7 +293,7 @@ export default function AgentPalette({
                         </svg>
                       ) : (
                         <svg
-                          className="w-4 h-4"
+                          className="h-4 w-4"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -296,11 +307,14 @@ export default function AgentPalette({
                         </svg>
                       )}
                     </div>
-                    <div className="ml-3 pointer-events-none">
-                      <h4 className="text-sm font-medium text-gray-900">
-                        {primitive.name} Node
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-slate-300">
+                        {primitive.type === "step-group" ? "Parallel" : primitive.type === "end" ? "Output" : "Entry"}
+                      </p>
+                      <h4 className="text-sm font-semibold text-white">
+                        {primitive.name} node
                       </h4>
-                      <p className="text-xs text-gray-600 mt-1">
+                      <p className="mt-1 text-xs text-slate-300">
                         {primitive.description}
                       </p>
                     </div>
@@ -312,47 +326,61 @@ export default function AgentPalette({
 
           {/* Search Field */}
           <div className="flex flex-col gap-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-300">
               Agent Nodes
             </h3>
             <div>
+              <label htmlFor="agent-search" className="sr-only">
+                Search agents
+              </label>
               <input
+                id="agent-search"
                 type="text"
                 placeholder="Search agents..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 disabled={loading}
-                className="w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed placeholder-gray-500"
+                className="w-full rounded-full border border-white/10 bg-slate-950/60 px-4 py-2 text-sm text-slate-100 placeholder-slate-400 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 disabled:cursor-not-allowed disabled:opacity-60"
+                aria-describedby="agent-filter-status"
               />
             </div>
 
             {/* カテゴリフィルタ */}
-            <div>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                      selectedCategory === category
-                        ? "bg-indigo-100 text-indigo-800"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 ${
+                    selectedCategory === category
+                      ? "border-indigo-400/60 bg-indigo-500/20 text-white"
+                      : "border-white/10 bg-white/5 text-slate-200 hover:border-indigo-300/60 hover:text-white"
+                  }`}
+                  aria-pressed={selectedCategory === category}
+                >
+                  {category}
+                </button>
+              ))}
             </div>
+
+            <p
+              id="agent-filter-status"
+              className="text-xs text-slate-400"
+              aria-live="polite"
+            >
+              {loading
+                ? "Loading agents..."
+                : `${filteredAgents.length} agent${
+                    filteredAgents.length === 1 ? "" : "s"
+                  } available`}
+            </p>
 
             {/* Agents List */}
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {loading && (
-                <div className="flex items-center justify-center py-8">
+                <div className="flex items-center justify-center py-8 text-slate-300">
                   <LoadingSpinner size="md" className="mr-3" />
-                  <span className="text-sm text-gray-500">
-                    Loading agents...
-                  </span>
+                  <span className="text-sm">Loading agents...</span>
                 </div>
               )}
 
@@ -360,21 +388,22 @@ export default function AgentPalette({
                 filteredAgents.map((agent) => (
                   <div
                     key={agent.name}
-                    className={`p-4 cursor-grab active:cursor-grabbing hover:shadow-lg transition-all duration-200 border-2 border-solid rounded-lg shadow-sm select-none ${getCategoryBorderAndBg(
+                    className={`group cursor-grab select-none rounded-2xl border px-4 py-4 transition-all duration-200 backdrop-blur-md active:cursor-grabbing ${getCategoryBorderAndBg(
                       agent.category || "default"
                     )}`}
-                    draggable={true}
+                    draggable
                     onDragStart={(e) => handleAgentDragStart(e, agent)}
                   >
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0 pointer-events-none">
+                    <div className="flex items-start gap-3">
+                      <div className="pointer-events-none">
                         <div
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center ${getCategoryIconColor(
+                          className={`flex h-9 w-9 items-center justify-center rounded-lg ${getCategoryIconColor(
                             agent.category || "default"
                           )}`}
+                          aria-hidden
                         >
                           <svg
-                            className="w-4 h-4"
+                            className="h-4 w-4"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -388,19 +417,19 @@ export default function AgentPalette({
                           </svg>
                         </div>
                       </div>
-                      <div className="ml-3 flex-1 pointer-events-none">
+                      <div className="pointer-events-none flex-1">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-medium text-gray-900">
+                          <h3 className="text-sm font-semibold text-white">
                             {agent.name}
                           </h3>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                        <p className="mt-1 text-xs leading-relaxed text-slate-300 line-clamp-3">
                           {agent.description}
                         </p>
                         {agent.category && (
                           <div className="mt-2">
                             <span
-                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryIconColor(
+                              className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium uppercase tracking-wide text-slate-100 ${getCategoryIconColor(
                                 agent.category
                               )}`}
                             >
@@ -414,10 +443,12 @@ export default function AgentPalette({
                 ))}
 
               {!loading && filteredAgents.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <p className="text-sm">No agents found</p>
-                  <p className="text-xs mt-1">
-                    Try adjusting your search or filter
+                <div className="py-8 text-center text-slate-400">
+                  <p className="text-sm font-medium text-slate-200">
+                    No agents found
+                  </p>
+                  <p className="mt-1 text-xs">
+                    Adjust your search or select a different category.
                   </p>
                 </div>
               )}

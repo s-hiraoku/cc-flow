@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Handle, Position, useReactFlow, NodeProps } from "@xyflow/react";
-import { Card } from "@/components/ui";
 import { AgentNodeData } from "@/types/workflow";
 import { getCategoryColors, getCategoryIcon } from "@/utils/categoryStyles";
 
@@ -24,15 +23,15 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
 
   return (
     <div className="relative group" style={{ width: 400, minWidth: 400 }}>
-      <Card
-        className={`w-full p-4 cursor-pointer transition-all duration-200 border-2 ${
+      <div
+        className={`w-full cursor-pointer rounded-2xl border px-4 py-4 backdrop-blur transition-all duration-200 ${
           hasError
-            ? "border-red-500 bg-red-50"
+            ? "border-red-500/60 bg-red-500/10"
             : `${colors.solidBorder} ${colors.solidBg}`
         } ${
           selected
             ? hasError
-              ? "ring-2 ring-red-500 shadow-lg"
+              ? "ring-2 ring-red-400/70 shadow-lg"
               : `ring-2 ${colors.ring} shadow-lg`
             : "hover:shadow-md"
         }`}
@@ -40,7 +39,7 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
         {/* Delete button */}
         <button
           onClick={handleDelete}
-          className="absolute top-2 right-2 w-5 h-5 bg-gray-500 hover:bg-gray-600 text-white rounded-full flex items-center justify-center shadow-sm transition-all opacity-0 group-hover:opacity-100 cursor-pointer z-10"
+          className="absolute right-3 top-3 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/10 text-slate-200 opacity-0 shadow-sm transition-all hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400 group-hover:opacity-100"
           title="Delete node"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,10 +50,10 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
         <Handle
           type="target"
           position={Position.Top}
-          className={`w-3 h-3 border-2 border-white ${
+          className={`h-3 w-3 border-2 border-slate-900 ${
             hasError ? "bg-red-500" : colors.handle
           }`}
-          style={{ left: '50%', transform: 'translateX(-50%)' }}
+          style={{ left: "50%", transform: "translateX(-50%)" }}
         />
 
         <div className="flex items-start">
@@ -76,20 +75,20 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
             </div>
           </div>
           <div className="ml-3 flex-1">
-            <h3 className="text-sm font-semibold text-gray-900">{agentData.label}</h3>
+            <h3 className="text-sm font-semibold text-white">{agentData.label}</h3>
             {agentData.stepTitle && (
-              <p className="text-xs font-medium text-indigo-600 mt-0.5">
+              <p className={`mt-0.5 text-xs font-medium ${colors.text}`}>
                 Title: {agentData.stepTitle}
               </p>
             )}
             {agentData.description && (
-              <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+              <p className="mt-1 text-xs text-slate-300 line-clamp-2">
                 {agentData.description}
               </p>
             )}
             {category && category !== "default" && (
               <div className="mt-2">
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colors.icon}`}>
+                <span className={`inline-flex items-center rounded-full px-2 py-1 text-[11px] font-medium uppercase tracking-wide ${colors.icon}`}>
                   {category}
                 </span>
               </div>
@@ -100,12 +99,12 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
         <Handle
           type="source"
           position={Position.Bottom}
-          className={`w-3 h-3 border-2 border-white ${
+          className={`h-3 w-3 border-2 border-slate-900 ${
             hasError ? "bg-red-500" : colors.handle
           }`}
-          style={{ left: '50%', transform: 'translateX(-50%)' }}
+          style={{ left: "50%", transform: "translateX(-50%)" }}
         />
-      </Card>
+      </div>
     </div>
   );
 }

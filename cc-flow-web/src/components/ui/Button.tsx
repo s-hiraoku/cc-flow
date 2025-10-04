@@ -22,7 +22,7 @@ export function Button({
   type = 'button',
   disabled = false
 }: ButtonProps) {
-  const baseClasses = "font-medium rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
+  const baseClasses = "font-medium rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer";
 
   const variants = {
     primary: "text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed",

@@ -2,8 +2,10 @@ import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,
+  FileText,
   Keyboard,
   LineChart,
+  MousePointer,
   Palette,
   ShieldCheck,
   Sparkles,
@@ -22,6 +24,12 @@ type Highlight = {
 };
 
 type Step = {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+};
+
+type Tip = {
   title: string;
   description: string;
   icon: LucideIcon;
@@ -104,6 +112,33 @@ const steps: Step[] = [
     description:
       "Share a clean cc-flow-cli command or JSON output with teammates, including notes and testing reminders.",
     icon: ShieldCheck,
+  },
+];
+
+const editorTips: Tip[] = [
+  {
+    title: "Keyboard navigation",
+    description:
+      "Press Tab to move focus across panels, Shift+Tab to reverse, and Enter or Space to activate focused controls.",
+    icon: Keyboard,
+  },
+  {
+    title: "Canvas shortcuts",
+    description:
+      "Drag empty canvas space to pan, scroll or pinch to zoom, and fall back to the zoom controls for precise adjustments.",
+    icon: MousePointer,
+  },
+  {
+    title: "Validation & export",
+    description:
+      "Open the properties panel to resolve warnings and copy clean JSON payloads before handing flows to the CLI.",
+    icon: FileText,
+  },
+  {
+    title: "Generator",
+    description:
+      "Use Generate workflow to create CLI-ready commands and shareable outputs once your nodes are locked in.",
+    icon: Sparkles,
   },
 ];
 
@@ -302,6 +337,47 @@ export default function HomePage() {
                   Learn more
                 </span>
                 <span className="sr-only">Feature details for {feature.name}</span>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="tips-heading"
+          className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8"
+        >
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-3xl space-y-4">
+              <h2 id="tips-heading" className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                Editor quick tips
+              </h2>
+              <p className="text-lg text-slate-300">
+                Set your team up for success with the shortcuts and guardrails we rely on in Chrome DevTools and during production builds. These highlights also appear in the documentation for easy reference.
+              </p>
+            </div>
+            <a
+              href="https://github.com/s-hiraoku/cc-flow/tree/main/docs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-slate-100 transition hover:border-indigo-300 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
+            >
+              View documentation
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+          </div>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+            {editorTips.map((tip) => (
+              <article
+                key={tip.title}
+                className="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-5 shadow-inner transition hover:border-indigo-300/60"
+              >
+                <span className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-200">
+                  <tip.icon className="h-5 w-5" aria-hidden />
+                </span>
+                <div className="space-y-2">
+                  <h3 className="text-base font-semibold text-white">{tip.title}</h3>
+                  <p className="text-sm leading-relaxed text-slate-300">{tip.description}</p>
+                </div>
               </article>
             ))}
           </div>
