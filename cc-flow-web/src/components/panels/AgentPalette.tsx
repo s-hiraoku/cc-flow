@@ -417,7 +417,7 @@ export default function AgentPalette({
               <div className="space-y-4 pb-2">
                 {filteredAgents.map((agent) => (
                   <div
-                    key={agent.name}
+                    key={`${agent.category || 'default'}-${agent.name}`}
                     className={`group cursor-grab select-none rounded-2xl border px-4 py-4 shadow-sm transition-all duration-200 hover:scale-[1.01] hover:border-indigo-300 hover:shadow-lg active:cursor-grabbing active:scale-[0.98] ${getCategoryBorderAndBg(
                       agent.category || "default"
                     )}`}
