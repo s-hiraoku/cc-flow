@@ -398,16 +398,10 @@ export default function AgentPalette({
                   </button>
                 ))}
               </div>
-
-              <p id="agent-filter-status" className="text-xs text-gray-500" aria-live="polite">
-                {loading
-                  ? "Loading agents..."
-                  : `${filteredAgents.length} agent${filteredAgents.length === 1 ? "" : "s"} available`}
-              </p>
             </section>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-5 pb-6">
+          <div className="flex-1 overflow-y-auto px-5 py-6">
             {loading ? (
               <div className="flex h-full items-center justify-center text-gray-600">
                 <LoadingSpinner size="md" className="mr-3" />
