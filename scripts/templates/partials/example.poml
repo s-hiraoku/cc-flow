@@ -1,3 +1,4 @@
+<!-- ORIGINAL VERSION - COMMENTED OUT FOR REFERENCE
 <example captionStyle="bold">
   <section caption="Example Workflow Execution">
     <list for="step in workflowSteps">
@@ -14,5 +15,15 @@
         </list>
       </item>
     </list>
+  </section>
+</example>
+-->
+
+<!-- SIMPLIFIED VERSION - OPTION 1: Minimal example -->
+<example captionStyle="bold">
+  <section caption="Example">
+    <code language="bash">
+      /{{workflowName}} "Create API documentation for user authentication"
+    </code>
   </section>
 </example>

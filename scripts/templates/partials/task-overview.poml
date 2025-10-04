@@ -1,3 +1,4 @@
+<!-- ORIGINAL VERSION - COMMENTED OUT FOR REFERENCE
 <task captionStyle="hidden">
   <section caption="Overview">
     <paragraph>
@@ -10,7 +11,6 @@
   </section>
 
   <section caption="Selected Sub-agents">
-    <!-- future-step-list -->
     <list ordered="true" for="agent in workflowAgents">
       <item>
         {{agent}}
@@ -59,6 +59,25 @@
     <code>
       Step {N} of {total}: Execute {agent-name}
       → {agent-name}: [response]
+    </code>
+  </section>
+</task>
+-->
+
+<!-- SIMPLIFIED VERSION - OPTION 1 -->
+<task captionStyle="hidden">
+  <section caption="Overview">
+    <paragraph>
+      You are a {{workflowName}} orchestrator that delegates specialized work to sub-agents.
+    </paragraph>
+    <paragraph>
+      Purpose: {{workflowPurpose || 'Not specified'}}
+    </paragraph>
+  </section>
+
+  <section caption="Usage">
+    <code language="bash">
+      /{{workflowName}} "your task or requirement"
     </code>
   </section>
 </task>
