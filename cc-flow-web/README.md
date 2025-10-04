@@ -186,6 +186,28 @@ This web editor is designed to work seamlessly with the existing cc-flow CLI eco
 - **Prettier**: Consistent code formatting
 - **Accessibility**: WCAG 2.1 AA compliance for interactive elements
 
+## Security
+
+This package implements comprehensive supply chain security measures:
+
+### For Users
+- **Provenance Verification**: All releases include npm provenance attestations
+- **Dependency Auditing**: Regular security scans with `npm audit`
+- **Minimal Dependencies**: Standalone build reduces attack surface
+
+### Verify Package Integrity
+
+```bash
+# Check provenance (npm 9+)
+npm view @hiraoku/cc-flow-web --json | jq .dist.attestations
+
+# Verify signatures
+npm audit signatures
+```
+
+### Reporting Security Issues
+Please see [SECURITY.md](./SECURITY.md) for details on reporting vulnerabilities.
+
 ## License
 
 This project is part of the CC-Flow ecosystem. Please refer to the main repository for licensing information.

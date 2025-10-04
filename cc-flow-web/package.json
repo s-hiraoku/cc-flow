@@ -1,6 +1,6 @@
 {
   "name": "@hiraoku/cc-flow-web",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": false,
   "description": "Visual workflow editor for CC-Flow with drag-and-drop interface",
   "keywords": [
@@ -12,6 +12,14 @@
   ],
   "author": "Hiraoku",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hiraoku/cc-flow-web.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hiraoku/cc-flow-web/issues"
+  },
+  "homepage": "https://github.com/hiraoku/cc-flow-web#readme",
   "bin": {
     "cc-flow-web": "./bin/cli.js"
   },
@@ -37,7 +45,8 @@
     "test:watch": "vitest --watch",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "publish:safe": "npm publish --provenance --access public"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
