@@ -44,7 +44,7 @@
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
     "prepublishOnly": "npm run build",
-    "publish:safe": "npm publish --provenance --access public"
+    "publish:safe": "npm publish --access public"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
