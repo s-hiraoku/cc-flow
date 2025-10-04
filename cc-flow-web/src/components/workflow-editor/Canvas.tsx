@@ -59,7 +59,7 @@ function CanvasControls() {
     "flex h-9 w-9 items-center justify-center rounded-lg border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400";
 
   const buttonStyles =
-    "border-white/10 bg-white/10 text-slate-200 hover:border-indigo-400/60 hover:bg-indigo-500/20 hover:text-white";
+    "border-gray-200 bg-gray-50 text-gray-700 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600";
 
   const handleToggleInteractive = () => {
     const next = !isInteractive;
@@ -73,7 +73,7 @@ function CanvasControls() {
   return (
     <Panel
       position="bottom-left"
-      className="flex gap-2 rounded-xl border border-white/10 bg-slate-950/70 p-1.5 shadow-lg backdrop-blur"
+      className="flex gap-2 rounded-xl border border-gray-200 bg-white/95 p-2 shadow-xl backdrop-blur"
     >
       <button
         type="button"
@@ -104,8 +104,8 @@ function CanvasControls() {
         onClick={handleToggleInteractive}
         className={`${baseButtonClasses} ${buttonStyles} ${
           isInteractive
-            ? "border-emerald-400/70 text-emerald-200"
-            : "text-slate-300"
+            ? "border-emerald-400 text-emerald-600"
+            : "text-gray-600"
         }`}
         aria-label={isInteractive ? "Disable interactions" : "Enable interactions"}
         aria-pressed={isInteractive}
@@ -181,14 +181,15 @@ function CanvasInner({
         <CanvasControls />
         <MiniMap
           style={{
-            backgroundColor: "rgba(15, 23, 42, 0.85)",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
+            backgroundColor: "rgba(248, 250, 252, 0.95)",
+            border: "1px solid rgba(226, 232, 240, 0.8)",
             borderRadius: 12,
-            color: "#e2e8f0",
+            color: "#475569",
           }}
-          maskColor="rgba(15, 23, 42, 0.85)"
-          nodeStrokeColor={() => "#818cf8"}
-          nodeColor={() => "#312e81"}
+          maskColor="rgba(248, 250, 252, 0.85)"
+          nodeStrokeColor={() => "#6366f1"}
+          nodeColor={() => "#c7d2fe"}
+          nodeBorderRadius={12}
         />
       </ReactFlow>
     </div>

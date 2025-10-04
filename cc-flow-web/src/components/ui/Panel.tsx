@@ -10,10 +10,10 @@ interface PanelProps {
   variant?: PanelVariant;
 }
 
-const containerBase = "flex h-full flex-col rounded-xl border";
+const containerBase = "flex h-full flex-col rounded-2xl border";
 
 const containerVariants: Record<PanelVariant, string> = {
-  default: "border-gray-200 bg-white text-gray-900 shadow-sm",
+  default: "border-gray-200 bg-white text-gray-900 shadow-lg",
   dark: "border-white/10 bg-slate-950/60 text-slate-100 shadow-lg backdrop-blur-lg",
 };
 
@@ -29,7 +29,7 @@ const titleClasses: Record<PanelVariant, string> = {
 
 const subtitleClasses: Record<PanelVariant, string> = {
   default: "text-gray-500",
-  dark: "text-slate-300",
+  dark: "text-gray-400",
 };
 
 export function Panel({

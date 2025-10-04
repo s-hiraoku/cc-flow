@@ -41,7 +41,7 @@ export default function CustomEdge({
         style={{
           ...style,
           strokeWidth: selected ? 2 : 1,
-          stroke: selected ? "#6366f1" : "#b3b3b3",
+          stroke: selected ? "#6366f1" : "#cbd5e1",
           strokeLinecap: "round",
           strokeLinejoin: "round",
         }}
@@ -60,7 +60,7 @@ export default function CustomEdge({
             <button
               onClick={handleDelete}
               onMouseDown={(e) => e.stopPropagation()}
-              className="w-5 h-5 bg-gray-500 hover:bg-gray-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors cursor-pointer border border-white"
+              className="w-5 h-5 bg-gray-100 hover:bg-rose-100 text-gray-600 hover:text-rose-600 rounded-full flex items-center justify-center shadow-lg transition-colors cursor-pointer border border-gray-300 hover:border-rose-300"
               title="Delete edge"
             >
               <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

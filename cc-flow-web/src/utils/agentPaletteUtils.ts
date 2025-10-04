@@ -13,52 +13,52 @@ export const ICON_PALETTE = [
 // Dynamic color palette for categories
 export const COLOR_PALETTE = [
   {
-    border: "border-sky-400/40",
-    bg: "bg-slate-950/60",
-    hover: "hover:border-sky-300/60 hover:bg-sky-500/15",
-    icon: "bg-sky-500/20 text-sky-100"
+    border: "border-sky-300",
+    bg: "bg-white",
+    hover: "hover:border-sky-400 hover:bg-sky-50",
+    icon: "bg-sky-100 text-sky-700"
   },
   {
-    border: "border-emerald-400/40",
-    bg: "bg-slate-950/60",
-    hover: "hover:border-emerald-300/60 hover:bg-emerald-500/15",
-    icon: "bg-emerald-500/20 text-emerald-100"
+    border: "border-emerald-300",
+    bg: "bg-white",
+    hover: "hover:border-emerald-400 hover:bg-emerald-50",
+    icon: "bg-emerald-100 text-emerald-700"
   },
   {
-    border: "border-purple-400/40",
-    bg: "bg-slate-950/60",
-    hover: "hover:border-purple-300/60 hover:bg-purple-500/15",
-    icon: "bg-purple-500/20 text-purple-100"
+    border: "border-purple-300",
+    bg: "bg-white",
+    hover: "hover:border-purple-400 hover:bg-purple-50",
+    icon: "bg-purple-100 text-purple-700"
   },
   {
-    border: "border-amber-400/40",
-    bg: "bg-slate-950/60",
-    hover: "hover:border-amber-300/60 hover:bg-amber-500/15",
-    icon: "bg-amber-500/25 text-amber-100"
+    border: "border-amber-300",
+    bg: "bg-white",
+    hover: "hover:border-amber-400 hover:bg-amber-50",
+    icon: "bg-amber-100 text-amber-700"
   },
   {
-    border: "border-rose-400/40",
-    bg: "bg-slate-950/60",
-    hover: "hover:border-rose-300/60 hover:bg-rose-500/15",
-    icon: "bg-rose-500/20 text-rose-100"
+    border: "border-rose-300",
+    bg: "bg-white",
+    hover: "hover:border-rose-400 hover:bg-rose-50",
+    icon: "bg-rose-100 text-rose-700"
   },
   {
-    border: "border-indigo-400/40",
-    bg: "bg-slate-950/60",
-    hover: "hover:border-indigo-300/60 hover:bg-indigo-500/15",
-    icon: "bg-indigo-500/20 text-indigo-100"
+    border: "border-indigo-300",
+    bg: "bg-white",
+    hover: "hover:border-indigo-400 hover:bg-indigo-50",
+    icon: "bg-indigo-100 text-indigo-700"
   },
   {
-    border: "border-teal-400/40",
-    bg: "bg-slate-950/60",
-    hover: "hover:border-teal-300/60 hover:bg-teal-500/15",
-    icon: "bg-teal-500/20 text-teal-100"
+    border: "border-teal-300",
+    bg: "bg-white",
+    hover: "hover:border-teal-400 hover:bg-teal-50",
+    icon: "bg-teal-100 text-teal-700"
   },
   {
-    border: "border-cyan-400/40",
-    bg: "bg-slate-950/60",
-    hover: "hover:border-cyan-300/60 hover:bg-cyan-500/15",
-    icon: "bg-cyan-500/20 text-cyan-100"
+    border: "border-cyan-300",
+    bg: "bg-white",
+    hover: "hover:border-cyan-400 hover:bg-cyan-50",
+    icon: "bg-cyan-100 text-cyan-700"
   }
 ];
 
@@ -80,10 +80,10 @@ export function getIndexFromFirstLetter(str: string): number {
 export function getCategoryColors(category: string) {
   if (!category) {
     return {
-      border: "border-white/10",
-      bg: "bg-slate-950/60",
-      hover: "hover:border-indigo-300/60 hover:bg-indigo-500/15",
-      icon: "bg-slate-700/60 text-slate-200"
+      border: "border-gray-300",
+      bg: "bg-white",
+      hover: "hover:border-gray-400 hover:bg-gray-50",
+      icon: "bg-gray-100 text-gray-700"
     };
   }
 

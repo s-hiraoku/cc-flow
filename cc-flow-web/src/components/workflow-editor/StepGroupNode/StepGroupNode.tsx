@@ -112,15 +112,15 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
         className={`w-full h-full rounded-2xl border-2 border-dashed transition-all ${
           hasError
             ? selected
-              ? "border-red-500/70 bg-red-500/10 shadow-lg ring-2 ring-red-400/60"
+              ? "border-red-500/70 bg-red-50 shadow-lg ring-2 ring-red-400/60"
               : isDragOver
-              ? "border-red-500/70 bg-red-500/10 shadow-md"
-              : "border-red-500/50 bg-red-500/5 hover:border-red-400/70 hover:bg-red-500/10 hover:shadow-md"
+              ? "border-red-500/70 bg-red-50 shadow-md"
+              : "border-red-500/50 bg-red-50/50 hover:border-red-400/70 hover:bg-red-50 hover:shadow-md"
             : selected
-            ? "border-purple-400/70 bg-purple-500/10 shadow-lg ring-2 ring-purple-400/60"
+            ? "border-purple-400/70 bg-purple-50 shadow-lg ring-2 ring-purple-400/60"
             : isDragOver
-            ? "border-purple-400/70 bg-purple-500/10 shadow-md"
-            : "border-purple-400/40 bg-slate-950/70 hover:border-purple-300/60 hover:bg-slate-950/80 hover:shadow-md"
+            ? "border-purple-400/70 bg-purple-50 shadow-md"
+            : "border-purple-400/40 bg-white hover:border-purple-300/60 hover:bg-purple-50/50 hover:shadow-md"
         }`}
         style={{
           position: "relative",
@@ -146,21 +146,21 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
         />
 
         {/* Content area with agents */}
-        <div className="flex h-full flex-col px-3 pb-3 pt-16 text-slate-100">
+        <div className="flex h-full flex-col px-3 pb-3 pt-16">
           {/* Title outside the border */}
-          <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-purple-200">
+          <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-purple-700">
             Agents ({agentCount}/10)
           </h4>
 
           {/* Agent list area - dynamic height */}
-          <div className="mb-2 rounded-xl border border-white/10 bg-slate-950/70 p-3">
+          <div className="mb-2 rounded-xl border border-purple-200 bg-gray-50 p-3">
             {agentCount > 0 ? (
               <AgentList
                 agents={stepData.agents}
                 onRemoveAgent={handleRemoveAgent}
               />
             ) : (
-              <div className="flex h-20 w-full items-center justify-center text-center text-sm text-slate-400">
+              <div className="flex h-20 w-full items-center justify-center text-center text-sm text-gray-500">
                 No agents yet
               </div>
             )}
@@ -170,8 +170,8 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
           <div
             className={`rounded-xl border-2 border-dashed p-4 transition-all ${
               isDragOver
-                ? "border-purple-400/70 bg-purple-500/15"
-                : "border-purple-400/40 bg-slate-950/60"
+                ? "border-purple-400/70 bg-purple-100"
+                : "border-purple-400/40 bg-gray-50"
             }`}
             style={{ height: `${dropZoneHeight}px`, flexShrink: 0 }}
             onDragOver={handleDragOver}
@@ -181,7 +181,7 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
             <div className="flex flex-col items-center justify-center text-center h-full">
               <svg
                 className={`mb-2 h-8 w-8 transition-colors ${
-                  isDragOver ? "text-purple-200" : "text-purple-400"
+                  isDragOver ? "text-purple-600" : "text-purple-500"
                 }`}
                 fill="none"
                 stroke="currentColor"
@@ -195,11 +195,11 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
                 />
               </svg>
               <p className={`text-sm font-medium transition-colors ${
-                isDragOver ? "text-purple-200" : "text-purple-400"
+                isDragOver ? "text-purple-700" : "text-purple-600"
               }`}>
                 Drop agents here
               </p>
-              <p className="mt-1 text-xs text-purple-300">
+              <p className="mt-1 text-xs text-purple-600">
                 {agentCount}/10 agents
               </p>
             </div>
@@ -210,7 +210,7 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
         <Handle
           type="source"
           position={Position.Bottom}
-          className={`h-3 w-3 border-2 border-slate-900 ${
+          className={`h-3 w-3 border-2 border-white ${
             hasError ? "bg-red-500" : "bg-purple-500"
           }`}
         />

@@ -57,9 +57,7 @@ export default function EditorPage() {
 
   return (
     <ErrorBoundary>
-      <div className="relative flex h-screen w-full flex-col overflow-hidden bg-slate-950 text-slate-100 lg:flex-row">
-        <div className="pointer-events-none absolute inset-x-0 top-[-20rem] -z-10 h-[32rem] bg-gradient-to-br from-indigo-500/40 via-transparent to-sky-500/30 blur-3xl" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-[-18rem] -z-10 h-[26rem] bg-gradient-to-t from-purple-500/30 via-transparent to-indigo-500/20 blur-3xl" />
+      <div className="relative flex h-screen w-full flex-col overflow-hidden bg-gray-50 text-gray-900 lg:flex-row">
 
         <a
           href="#editor-canvas"
@@ -97,7 +95,7 @@ export default function EditorPage() {
           <section className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden px-4 pb-6 pt-4 sm:px-6 lg:px-8">
             <div
               id="editor-canvas"
-              className="relative flex min-w-0 flex-1 overflow-hidden rounded-3xl border border-white/10 bg-slate-950/60 shadow-2xl"
+              className="relative flex min-w-0 flex-1 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl"
             >
               <Canvas
                 nodes={nodes}

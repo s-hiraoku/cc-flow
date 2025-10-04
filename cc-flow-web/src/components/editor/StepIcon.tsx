@@ -88,7 +88,7 @@ export default function StepIcon({
   // Pending state
   return (
     <svg
-      className="mr-2 h-4 w-4 text-slate-500"
+      className="mr-2 h-4 w-4 text-gray-400"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"

@@ -14,91 +14,91 @@ export const ICON_PALETTE = [
 export const COLOR_PALETTE = [
   {
     border: "border-sky-400/40",
-    bg: "bg-slate-950/70",
-    hover: "hover:border-sky-300/60 hover:bg-sky-500/10",
-    icon: "bg-sky-500/20 text-sky-100",
+    bg: "bg-white",
+    hover: "hover:border-sky-300/60 hover:bg-sky-50",
+    icon: "bg-sky-600 text-white",
     handle: "bg-sky-400",
     ring: "ring-sky-400/50",
-    solidBg: "bg-gradient-to-br from-sky-500/15 via-slate-950/80 to-slate-950/90",
+    solidBg: "bg-white",
     solidBorder: "border-sky-400/50",
-    text: "text-sky-100"
+    text: "text-sky-700"
   },
   {
     border: "border-emerald-400/40",
-    bg: "bg-slate-950/70",
-    hover: "hover:border-emerald-300/60 hover:bg-emerald-500/10",
-    icon: "bg-emerald-500/20 text-emerald-100",
+    bg: "bg-white",
+    hover: "hover:border-emerald-300/60 hover:bg-emerald-50",
+    icon: "bg-emerald-600 text-white",
     handle: "bg-emerald-400",
     ring: "ring-emerald-400/50",
-    solidBg: "bg-gradient-to-br from-emerald-500/15 via-slate-950/80 to-slate-950/90",
+    solidBg: "bg-white",
     solidBorder: "border-emerald-400/50",
-    text: "text-emerald-100"
+    text: "text-emerald-700"
   },
   {
     border: "border-violet-400/40",
-    bg: "bg-slate-950/70",
-    hover: "hover:border-violet-300/60 hover:bg-violet-500/10",
-    icon: "bg-violet-500/20 text-violet-100",
+    bg: "bg-white",
+    hover: "hover:border-violet-300/60 hover:bg-violet-50",
+    icon: "bg-violet-600 text-white",
     handle: "bg-violet-400",
     ring: "ring-violet-400/50",
-    solidBg: "bg-gradient-to-br from-violet-500/15 via-slate-950/80 to-slate-950/90",
+    solidBg: "bg-white",
     solidBorder: "border-violet-400/50",
-    text: "text-violet-100"
+    text: "text-violet-700"
   },
   {
     border: "border-amber-400/40",
-    bg: "bg-slate-950/70",
-    hover: "hover:border-amber-300/60 hover:bg-amber-500/10",
-    icon: "bg-amber-500/20 text-amber-100",
+    bg: "bg-white",
+    hover: "hover:border-amber-300/60 hover:bg-amber-50",
+    icon: "bg-amber-600 text-white",
     handle: "bg-amber-400",
     ring: "ring-amber-400/50",
-    solidBg: "bg-gradient-to-br from-amber-500/15 via-slate-950/80 to-slate-950/90",
+    solidBg: "bg-white",
     solidBorder: "border-amber-400/50",
-    text: "text-amber-100"
+    text: "text-amber-700"
   },
   {
     border: "border-rose-400/40",
-    bg: "bg-slate-950/70",
-    hover: "hover:border-rose-300/60 hover:bg-rose-500/10",
-    icon: "bg-rose-500/20 text-rose-100",
+    bg: "bg-white",
+    hover: "hover:border-rose-300/60 hover:bg-rose-50",
+    icon: "bg-rose-600 text-white",
     handle: "bg-rose-400",
     ring: "ring-rose-400/50",
-    solidBg: "bg-gradient-to-br from-rose-500/15 via-slate-950/80 to-slate-950/90",
+    solidBg: "bg-white",
     solidBorder: "border-rose-400/50",
-    text: "text-rose-100"
+    text: "text-rose-700"
   },
   {
     border: "border-indigo-400/40",
-    bg: "bg-slate-950/70",
-    hover: "hover:border-indigo-300/60 hover:bg-indigo-500/10",
-    icon: "bg-indigo-500/20 text-indigo-100",
+    bg: "bg-white",
+    hover: "hover:border-indigo-300/60 hover:bg-indigo-50",
+    icon: "bg-indigo-600 text-white",
     handle: "bg-indigo-400",
     ring: "ring-indigo-400/50",
-    solidBg: "bg-gradient-to-br from-indigo-500/15 via-slate-950/80 to-slate-950/90",
+    solidBg: "bg-white",
     solidBorder: "border-indigo-400/50",
-    text: "text-indigo-100"
+    text: "text-indigo-700"
   },
   {
     border: "border-teal-400/40",
-    bg: "bg-slate-950/70",
-    hover: "hover:border-teal-300/60 hover:bg-teal-500/10",
-    icon: "bg-teal-500/20 text-teal-100",
+    bg: "bg-white",
+    hover: "hover:border-teal-300/60 hover:bg-teal-50",
+    icon: "bg-teal-600 text-white",
     handle: "bg-teal-400",
     ring: "ring-teal-400/50",
-    solidBg: "bg-gradient-to-br from-teal-500/15 via-slate-950/80 to-slate-950/90",
+    solidBg: "bg-white",
     solidBorder: "border-teal-400/50",
-    text: "text-teal-100"
+    text: "text-teal-700"
   },
   {
     border: "border-cyan-400/40",
-    bg: "bg-slate-950/70",
-    hover: "hover:border-cyan-300/60 hover:bg-cyan-500/10",
-    icon: "bg-cyan-500/20 text-cyan-100",
+    bg: "bg-white",
+    hover: "hover:border-cyan-300/60 hover:bg-cyan-50",
+    icon: "bg-cyan-600 text-white",
     handle: "bg-cyan-400",
     ring: "ring-cyan-400/50",
-    solidBg: "bg-gradient-to-br from-cyan-500/15 via-slate-950/80 to-slate-950/90",
+    solidBg: "bg-white",
     solidBorder: "border-cyan-400/50",
-    text: "text-cyan-100"
+    text: "text-cyan-700"
   }
 ];
 
@@ -121,15 +121,15 @@ export function getIndexFromFirstLetter(str: string): number {
 export function getCategoryColors(category?: string) {
   if (!category) {
     return {
-      border: "border-white/15",
-      bg: "bg-slate-950/70",
-      hover: "hover:border-indigo-300/60 hover:bg-indigo-500/10",
-      icon: "bg-slate-700/70 text-slate-200",
+      border: "border-gray-300",
+      bg: "bg-white",
+      hover: "hover:border-indigo-300/60 hover:bg-indigo-50",
+      icon: "bg-gray-600 text-white",
       handle: "bg-indigo-300",
       ring: "ring-indigo-300/40",
-      solidBg: "bg-gradient-to-br from-indigo-500/10 via-slate-950/80 to-slate-950/90",
-      solidBorder: "border-white/15",
-      text: "text-slate-100"
+      solidBg: "bg-white",
+      solidBorder: "border-gray-300",
+      text: "text-gray-600"
     };
   }
 

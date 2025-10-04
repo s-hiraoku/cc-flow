@@ -30,7 +30,7 @@ export default function WorkflowProgressIndicator({
     <div
       role="status"
       aria-live="polite"
-      className="mb-3 rounded-2xl border border-sky-400/40 bg-slate-900/60 px-4 py-3 text-sm text-slate-200 shadow-lg backdrop-blur"
+      className="mb-3 rounded-2xl border border-sky-300 bg-sky-50 px-4 py-3 text-sm text-gray-700 shadow-lg backdrop-blur"
     >
       <div className="space-y-2">
         {WORKFLOW_STEPS.map((step) => (
@@ -44,8 +44,8 @@ export default function WorkflowProgressIndicator({
             <span
               className={
                 currentStep === step.name || error?.step === step.name
-                  ? "font-semibold text-white"
-                  : "text-slate-300"
+                  ? "font-semibold text-gray-900"
+                  : "text-gray-600"
               }
             >
               {step.label}

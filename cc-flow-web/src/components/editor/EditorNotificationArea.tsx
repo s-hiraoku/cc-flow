@@ -35,7 +35,7 @@ export default function EditorNotificationArea({
   return (
     <section
       aria-live="polite"
-      className="border-b border-white/10 bg-slate-950/70 px-6 pb-4 pt-4 text-sm text-slate-100 backdrop-blur"
+      className="border-b border-gray-200 bg-gray-100 px-6 pb-4 pt-4 text-sm text-gray-900 backdrop-blur"
     >
       {showProgress ? (
         <WorkflowProgressIndicator currentStep={currentStep} error={error} />

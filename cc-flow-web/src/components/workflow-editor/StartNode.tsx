@@ -19,15 +19,15 @@ export default function StartNode({ id, data, selected }: NodeProps) {
       className="group relative"
       style={{
         width: 400,
-        height: "auto",
+        minHeight: 180,
         minWidth: 400,
       }}
     >
       <div
-        className={`relative w-full rounded-2xl border-l-4 px-4 py-4 backdrop-blur transition-all duration-200 ${
+        className={`relative w-full rounded-2xl border-l-4 px-4 py-6 backdrop-blur transition-all duration-200 ${
           hasError
-            ? "border-l-red-500 bg-red-500/10"
-            : "border-l-emerald-500 bg-emerald-500/10"
+            ? "border-l-red-500 bg-red-50"
+            : "border-l-emerald-500 bg-emerald-50"
         } ${
           selected
             ? hasError
@@ -39,7 +39,7 @@ export default function StartNode({ id, data, selected }: NodeProps) {
         {/* Delete button */}
         <button
           onClick={handleDelete}
-          className="absolute right-3 top-3 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/10 text-slate-200 opacity-0 shadow-sm transition-all hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 group-hover:opacity-100"
+          className="absolute right-3 top-3 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 bg-gray-100 text-gray-600 opacity-0 shadow-sm transition-all hover:bg-gray-200 hover:text-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 group-hover:opacity-100"
           title="Delete node"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,36 +50,36 @@ export default function StartNode({ id, data, selected }: NodeProps) {
         <div className="flex items-start">
           <div
             className={`flex h-8 w-8 items-center justify-center rounded-full ${
-              hasError ? "bg-red-500/20 text-red-100" : "bg-emerald-500/20 text-emerald-100"
+              hasError ? "bg-red-500/30 text-red-700" : "bg-emerald-500/30 text-emerald-800"
             }`}
           >
             <svg
-              className="w-4 h-4"
+              className="w-5 h-5"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
+              strokeWidth={2.5}
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
                 d="M5 12h14M12 5l7 7-7 7"
               />
             </svg>
           </div>
-          <div className="ml-3 flex-1 text-slate-100">
-            <h3 className="text-sm font-semibold text-white">{startData.label}</h3>
+          <div className="ml-3 flex-1">
+            <h3 className="text-sm font-semibold text-gray-900">{startData.label}</h3>
             {startData.description && (
-              <p className="mt-1 text-xs text-slate-300">{startData.description}</p>
+              <p className="mt-1 text-xs text-gray-600">{startData.description}</p>
             )}
             {startData.workflowName && (
-              <div className="mt-2 text-xs text-slate-200">
-                <span className="font-medium text-slate-100">Workflow:</span> {startData.workflowName}
+              <div className="mt-2 text-xs text-gray-700">
+                <span className="font-medium text-gray-900">Workflow:</span> {startData.workflowName}
               </div>
             )}
             {startData.workflowPurpose && (
-              <div className="mt-1 text-xs text-slate-200">
-                <span className="font-medium text-slate-100">Purpose:</span> {startData.workflowPurpose}
+              <div className="mt-1 text-xs text-gray-700">
+                <span className="font-medium text-gray-900">Purpose:</span> {startData.workflowPurpose}
               </div>
             )}
           </div>
@@ -87,7 +87,7 @@ export default function StartNode({ id, data, selected }: NodeProps) {
         <Handle
           type="source"
           position={Position.Bottom}
-          className={`h-3 w-3 border-2 border-slate-900 ${
+          className={`h-3 w-3 border-2 border-white ${
             hasError ? "bg-red-500" : "bg-emerald-500"
           }`}
         />

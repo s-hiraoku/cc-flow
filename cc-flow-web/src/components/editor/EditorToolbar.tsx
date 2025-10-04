@@ -30,16 +30,16 @@ export default function EditorToolbar({
   const connectionLabel = `${edgeCount} connection${edgeCount !== 1 ? "s" : ""}`;
 
   return (
-    <header className="supports-[backdrop-filter]:bg-slate-950/80 relative z-30 flex items-center justify-between gap-6 border-b border-white/10 bg-slate-950/90 px-6 py-3 text-slate-100 backdrop-blur">
+    <header className="supports-[backdrop-filter]:bg-white/95 relative z-30 flex items-center justify-between gap-6 border-b border-gray-200 bg-white px-8 py-4 text-gray-900 shadow-md backdrop-blur">
       <div className="flex flex-1 items-center gap-4">
         <Link
           href="/"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition hover:border-indigo-400/60 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-700 transition hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           <span className="sr-only">Back to CC-Flow overview</span>
         </Link>
-        <h1 className="text-base font-semibold text-white">Workflow Editor</h1>
+        <h1 className="text-base font-semibold text-gray-900">Workflow Editor</h1>
       </div>
 
       <div
@@ -47,13 +47,13 @@ export default function EditorToolbar({
         role="status"
         aria-live="polite"
       >
-        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-sm font-medium text-slate-100">
-          <Keyboard className="h-3.5 w-3.5 text-indigo-200" aria-hidden />
+        <span className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-gradient-to-b from-white to-gray-50 px-3 py-1.5 text-sm font-medium text-gray-900 shadow-sm">
+          <Keyboard className="h-3.5 w-3.5 text-indigo-500" aria-hidden />
           <span className="sr-only">Current node count:</span>
           <span aria-hidden>{nodeLabel}</span>
         </span>
-        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-slate-200">
-          <GitBranch className="h-3.5 w-3.5 text-sky-200" aria-hidden />
+        <span className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-gradient-to-b from-white to-gray-50 px-3 py-1.5 text-sm font-medium text-gray-900 shadow-sm">
+          <GitBranch className="h-3.5 w-3.5 text-sky-500" aria-hidden />
           <span className="sr-only">Current connection count:</span>
           <span aria-hidden>{connectionLabel}</span>
         </span>
@@ -63,7 +63,7 @@ export default function EditorToolbar({
         <Button
           variant="secondary"
           onClick={onPreviewJSON}
-          className="focus:ring-offset-slate-950"
+          className="focus:ring-offset-white"
         >
           Preview JSON
         </Button>
@@ -71,7 +71,7 @@ export default function EditorToolbar({
           variant="primary"
           onClick={onGenerateWorkflow}
           disabled={!canSave || generating}
-          className="inline-flex items-center gap-2 focus:ring-offset-slate-950"
+          className="inline-flex items-center gap-2 focus:ring-offset-white"
         >
           <PlayCircle className="h-4 w-4" aria-hidden />
           {generating ? "Generating" : "Generate workflow"}
