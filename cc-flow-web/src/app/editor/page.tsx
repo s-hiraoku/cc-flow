@@ -7,6 +7,8 @@ import PropertiesPanel from "@/components/panels/PropertiesPanel/PropertiesPanel
 import { ErrorBoundary } from "@/components/common";
 import { EditorToolbar, EditorNotificationArea } from "@/components/editor";
 import { useWorkflowEditor, useAgents, useWorkflowGenerate, useAutoHideMessage } from "@/hooks";
+import { useWorkflowRestore } from "@/hooks/useWorkflowRestore";
+import { useWorkflowSave } from "@/hooks/useWorkflowSave";
 import { Agent } from "@/types/agent";
 import { WorkflowNode } from "@/types/workflow";
 export default function EditorPage() {
@@ -28,6 +30,8 @@ export default function EditorPage() {
 
   const { agents, loading: agentsLoading, error: agentsError } = useAgents();
   const { generating, currentStep, error: generateError, result: generateResult, generateWorkflow } = useWorkflowGenerate();
+  const { restoring, error: restoreError, restoreWorkflow } = useWorkflowRestore();
+  const { saving, error: saveError, saveWorkflow } = useWorkflowSave();
 
   // Auto-hide success message after 5 seconds with fade out animation
   const { isVisible: showSuccessMessage, isAnimating: isSuccessVisible } = useAutoHideMessage(
@@ -51,9 +55,31 @@ export default function EditorPage() {
     await generateWorkflow(metadata, nodes, edges);
   }, [generateWorkflow, metadata, nodes, edges]);
 
-  const handlePreviewJSON = useCallback(() => {
-    console.log("Preview JSON:", generatePreviewJSON());
-  }, [generatePreviewJSON]);
+  const handleRestoreWorkflow = useCallback(async () => {
+    // Create file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json,.json';
+
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const result = await restoreWorkflow(file);
+      if (result) {
+        // Update editor state with restored workflow
+        setMetadata(result.metadata);
+        handleNodesChange(result.nodes);
+        handleEdgesChange(result.edges);
+      }
+    };
+
+    input.click();
+  }, [restoreWorkflow, setMetadata, handleNodesChange, handleEdgesChange]);
+
+  const handleSaveWorkflow = useCallback(async () => {
+    await saveWorkflow(metadata, nodes, edges);
+  }, [saveWorkflow, metadata, nodes, edges]);
 
   return (
     <ErrorBoundary>
@@ -75,12 +101,11 @@ export default function EditorPage() {
 
         <main className="relative flex min-w-0 flex-1 flex-col">
           <EditorToolbar
-            nodeCount={nodes.length}
-            edgeCount={edges.length}
             canSave={canSave}
             generating={generating}
-            onPreviewJSON={handlePreviewJSON}
             onGenerateWorkflow={handleGenerateWorkflow}
+            onRestoreWorkflow={handleRestoreWorkflow}
+            onSaveWorkflow={handleSaveWorkflow}
           />
 
           <EditorNotificationArea

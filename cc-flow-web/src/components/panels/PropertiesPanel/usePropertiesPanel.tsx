@@ -125,10 +125,17 @@ export function usePropertiesPanel({
     const agentNodes = nodes.filter((node) => isAgentNodeData(node.data));
     const stepGroupNodes = nodes.filter((node) => node.type === "step-group");
 
+    // Count total agents: direct agent nodes + agents in step groups
+    const agentsInStepGroups = stepGroupNodes.reduce((count, node) => {
+      const stepGroupData = node.data as { agents?: (string | { name: string })[] };
+      return count + (stepGroupData.agents?.length ?? 0);
+    }, 0);
+    const totalAgentCount = agentNodes.length + agentsInStepGroups;
+
     return {
       startLabel: startNode?.data.label ?? null,
       endLabel: endNode?.data.label ?? null,
-      agentCount: agentNodes.length,
+      agentCount: totalAgentCount,
       stepGroupCount: stepGroupNodes.length,
       edgeCount: edges.length,
       nodeCount: nodes.length,

@@ -98,9 +98,10 @@ export default function PropertiesPanel({
   const selectionInfoContent = renderSelectionInfo();
   const jsonError = createWorkflowJSONString.error || serializedWorkflowJSON.error;
   const quantitativeStats = [
-    { label: "Agents", value: workflowSummary.agentCount, icon: Users, accent: "bg-indigo-50 text-indigo-600" },
-    { label: "Step Groups", value: workflowSummary.stepGroupCount, icon: Layers, accent: "bg-purple-50 text-purple-600" },
-    { label: "Edges", value: workflowSummary.edgeCount, icon: GitBranch, accent: "bg-emerald-50 text-emerald-600" },
+    { label: "Nodes", value: nodes.length, icon: Layers, accent: "bg-indigo-50 text-indigo-600" },
+    { label: "Connections", value: edges.length, icon: GitBranch, accent: "bg-sky-50 text-sky-600" },
+    { label: "Agents", value: workflowSummary.agentCount, icon: Users, accent: "bg-purple-50 text-purple-600" },
+    { label: "Step Groups", value: workflowSummary.stepGroupCount, icon: Layers, accent: "bg-emerald-50 text-emerald-600" },
   ];
   const jsonPanels = [
     { label: "create-workflow.sh input", value: createWorkflowJSONString.json },
@@ -175,11 +176,11 @@ export default function PropertiesPanel({
                 </div>
                 <div className="space-y-3">
                   <div className="rounded-xl border border-indigo-100 bg-white p-4 shadow-sm">
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-center gap-3">
                       <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
                         <Users className="h-4 w-4" aria-hidden />
                       </span>
-                      <div className="space-y-1 text-sm text-gray-700">
+                      <div className="flex-1 space-y-1 text-sm text-gray-700">
                         {selectionInfoContent}
                       </div>
                     </div>
@@ -203,6 +204,8 @@ export default function PropertiesPanel({
                     <p className="text-xs text-gray-500">Quick overview of configured start/end points and totals.</p>
                   </div>
                 </div>
+
+                {/* Start/End Configuration */}
                 <dl className="space-y-3 text-sm text-gray-700">
                   <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
                     <dt className="flex items-center gap-3 text-gray-600">
@@ -227,20 +230,59 @@ export default function PropertiesPanel({
                     </dd>
                   </div>
                 </dl>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  {quantitativeStats.map(({ label, value, icon: StatIcon, accent }) => (
-                    <div key={label} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+
+                {/* Quantitative Stats - 2x2 Grid */}
+                <div className="space-y-3">
+                  {/* Row 1: Nodes and Connections */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
                       <div className="flex items-center gap-3">
-                        <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${accent}`}>
-                          <StatIcon className="h-4 w-4" aria-hidden />
+                        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                          <Layers className="h-3.5 w-3.5" aria-hidden />
                         </span>
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">{label}</p>
-                          <p className="text-xl font-bold text-gray-900">{value}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">Nodes</p>
+                          <p className="text-lg font-bold text-gray-900">{nodes.length}</p>
                         </div>
                       </div>
                     </div>
-                  ))}
+                    <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+                          <GitBranch className="h-3.5 w-3.5" aria-hidden />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">Connections</p>
+                          <p className="text-lg font-bold text-gray-900">{edges.length}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Row 2: Agents and Step Groups */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600">
+                          <Users className="h-3.5 w-3.5" aria-hidden />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">Agents</p>
+                          <p className="text-lg font-bold text-gray-900">{workflowSummary.agentCount}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                          <Layers className="h-3.5 w-3.5" aria-hidden />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">Step Groups</p>
+                          <p className="text-lg font-bold text-gray-900">{workflowSummary.stepGroupCount}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </section>
 
