@@ -52,8 +52,9 @@ console.log(`📁 Working directory: ${claudeRoot}`);
 console.log(`🚀 Server will run at http://localhost:${options.port}`);
 
 // Start Next.js standalone server
+const standaloneDir = join(packageRoot, '.next', 'standalone');
 const server = spawn('node', [standaloneServer], {
-  cwd: join(packageRoot, '.next', 'standalone'),
+  cwd: standaloneDir,
   env,
   stdio: 'inherit',
 });

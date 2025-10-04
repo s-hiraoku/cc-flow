@@ -10,7 +10,19 @@ interface SaveWorkflowRequest {
   edges: WorkflowEdge[];
 }
 
-const WORKFLOWS_BASE_PATH = process.env.WORKFLOWS_PATH || '../workflows';
+// Workflows are saved relative to CLAUDE_ROOT_PATH
+// This is set by the CLI when starting the server
+const getWorkflowsPath = (): string => {
+  const claudeRoot = process.env.CLAUDE_ROOT_PATH;
+  const workflowsPath = process.env.WORKFLOWS_PATH;
+
+  if (claudeRoot) {
+    return workflowsPath || join(claudeRoot, 'workflows');
+  }
+
+  // Fallback for development mode
+  return workflowsPath || join(process.cwd(), 'workflows');
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,7 +40,7 @@ export async function POST(request: NextRequest) {
     const serializedWorkflow = WorkflowService.buildWorkflowPayload(metadata, nodes, edges);
 
     // Ensure workflows directory exists
-    const workflowsPath = join(process.cwd(), WORKFLOWS_BASE_PATH);
+    const workflowsPath = getWorkflowsPath();
     await mkdir(workflowsPath, { recursive: true });
 
     // Save workflow JSON file

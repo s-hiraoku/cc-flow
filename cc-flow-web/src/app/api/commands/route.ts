@@ -3,14 +3,21 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const CLAUDE_ROOT = process.env.CLAUDE_ROOT_PATH || path.join(process.cwd(), '.claude');
-
 /**
  * GET /api/commands
  * List available command directories
  */
 export async function GET() {
   try {
+    const CLAUDE_ROOT = process.env.CLAUDE_ROOT_PATH;
+
+    if (!CLAUDE_ROOT) {
+      return NextResponse.json(
+        { error: 'Claude root path not configured. Please start using cc-flow-web CLI.' },
+        { status: 400 }
+      );
+    }
+
     const commandsDir = path.join(CLAUDE_ROOT, 'commands');
 
     if (!fs.existsSync(commandsDir)) {
