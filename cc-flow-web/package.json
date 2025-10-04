@@ -1,6 +1,6 @@
 {
   "name": "@hiraoku/cc-flow-web",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": false,
   "description": "Visual workflow editor for CC-Flow with drag-and-drop interface",
   "keywords": [
@@ -16,20 +16,7 @@
     "cc-flow-web": "./bin/cli.js"
   },
   "files": [
-    ".next/app-build-manifest.json",
-    ".next/app-path-routes-manifest.json",
-    ".next/BUILD_ID",
-    ".next/build-manifest.json",
-    ".next/export-marker.json",
-    ".next/images-manifest.json",
-    ".next/next-minimal-server.js.nft.json",
-    ".next/next-server.js.nft.json",
-    ".next/package.json",
-    ".next/prerender-manifest.json",
-    ".next/react-loadable-manifest.json",
-    ".next/required-server-files.json",
-    ".next/routes-manifest.json",
-    ".next/server/**",
+    ".next/standalone/**",
     ".next/static/**",
     "public",
     "bin",
@@ -40,7 +27,8 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && npm run postbuild",
+    "postbuild": "cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",

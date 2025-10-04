@@ -31,19 +31,12 @@ const claudeRoot = process.cwd();
 
 // Resolve paths
 const packageRoot = join(__dirname, '..');
-const nextBinary = join(packageRoot, 'node_modules', '.bin', 'next');
-const nextBuildDir = join(packageRoot, '.next');
+const standaloneServer = join(packageRoot, '.next', 'standalone', 'server.js');
 
-// Check if Next.js is built
-if (!existsSync(nextBuildDir)) {
-  console.error('❌ Next.js build not found. Please run "npm run build" first.');
-  console.error('   Or install the package globally: npm install -g @hiraoku/cc-flow-web');
-  process.exit(1);
-}
-
-// Check if Next.js binary exists
-if (!existsSync(nextBinary)) {
-  console.error('❌ Next.js not found. Please run "npm install" first.');
+// Check if standalone build exists
+if (!existsSync(standaloneServer)) {
+  console.error('❌ Standalone build not found.');
+  console.error('   Please reinstall: npm install -g @hiraoku/cc-flow-web');
   process.exit(1);
 }
 
@@ -58,9 +51,9 @@ console.log('🌐 Starting CC-Flow Web Editor...');
 console.log(`📁 Working directory: ${claudeRoot}`);
 console.log(`🚀 Server will run at http://localhost:${options.port}`);
 
-// Start Next.js server
-const server = spawn('node', [nextBinary, 'start', '-p', options.port], {
-  cwd: packageRoot,
+// Start Next.js standalone server
+const server = spawn('node', [standaloneServer], {
+  cwd: join(packageRoot, '.next', 'standalone'),
   env,
   stdio: 'inherit',
 });
