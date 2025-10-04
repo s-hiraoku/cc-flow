@@ -31,69 +31,109 @@ convert_command_to_agent() {
     local target_file="$target_directory/$command_name.md"
     
     echo "🔄 変換中: $source_file → $target_file"
-    
+
     # メタデータを抽出
-    local name description tools content
-    extract_command_metadata "$source_file" name description tools content
-    
-    # テンプレート変数を設定
-    declare -A template_vars=(
-        ["AGENT_NAME"]="$name"
-        ["AGENT_DESCRIPTION"]="$description"
-        ["AGENT_MODEL"]="sonnet"
-        ["AGENT_TOOLS"]="$tools"
-        ["AGENT_COLOR"]="blue"
-        ["AGENT_CONTENT"]="$content"
-        ["SOURCE_PATH"]="$source_file"
-        ["SOURCE_COMMAND_NAME"]="$command_name"
-        ["SOURCE_ARGUMENT_HINT"]="$(extract_argument_hint "$source_file")"
-        ["SOURCE_ALLOWED_TOOLS"]="$tools"
-        ["CONVERSION_DATE"]="$(date '+%Y-%m-%d %H:%M:%S')"
-        ["CONVERSION_VERSION"]="1.0"
-        ["TARGET_CATEGORY"]="$(basename "$target_directory")"
-        ["TEMPLATE_NAME"]="$(basename "$template_file")"
-        ["VALIDATION_STATUS"]="✅ 変換完了"
-        ["CONVERSION_WARNINGS"]="なし"
-        ["CC_FLOW_VERSION"]="0.0.5"
-    )
-    
-    # テンプレート処理
-    process_template "$template_file" "$target_file" template_vars
-    
+    extract_command_metadata "$source_file"
+
+    # 抽出された変数を確認
+    local name="${EXTRACTED_NAME:-}"
+    local description="${EXTRACTED_DESCRIPTION:-}"
+    local tools="${EXTRACTED_TOOLS:-}"
+    local content="${EXTRACTED_CONTENT:-}"
+
+    # 一時ファイルにテンプレートをコピー
+    cp "$template_file" "$target_file"
+
+    # sedを使ってプレースホルダーを置換
+    # macOSのsedは-iに引数が必要
+    sed -i '' "s|{ AGENT_NAME }|$name|g" "$target_file"
+    sed -i '' "s|{ AGENT_DESCRIPTION }|$description|g" "$target_file"
+    sed -i '' "s|{ AGENT_MODEL }|sonnet|g" "$target_file"
+    sed -i '' "s|{ AGENT_TOOLS }|$tools|g" "$target_file"
+    sed -i '' "s|{ AGENT_COLOR }|blue|g" "$target_file"
+    sed -i '' "s|{ SOURCE_PATH }|$source_file|g" "$target_file"
+    sed -i '' "s|{ SOURCE_COMMAND_NAME }|$command_name|g" "$target_file"
+    sed -i '' "s|{ SOURCE_ARGUMENT_HINT }|$(extract_argument_hint "$source_file")|g" "$target_file"
+    sed -i '' "s|{ SOURCE_ALLOWED_TOOLS }|$tools|g" "$target_file"
+    sed -i '' "s|{ CONVERSION_DATE }|$(date '+%Y-%m-%d %H:%M:%S')|g" "$target_file"
+    sed -i '' "s|{ CONVERSION_VERSION }|1.0|g" "$target_file"
+    sed -i '' "s|{ TARGET_CATEGORY }|$(basename "$target_directory")|g" "$target_file"
+    sed -i '' "s|{ TEMPLATE_NAME }|$(basename "$template_file")|g" "$target_file"
+    sed -i '' "s|{ VALIDATION_STATUS }|✅ 変換完了|g" "$target_file"
+    sed -i '' "s|{ CONVERSION_WARNINGS }|なし|g" "$target_file"
+    sed -i '' "s|{ CC_FLOW_VERSION }|0.0.5|g" "$target_file"
+
+    # { AGENT_NAME } と { AGENT_CONTENT } を置換
+    # 最初の { AGENT_NAME } をもう一度置換（本文内に残っている場合）
+    sed -i '' "s|{AGENT_NAME}|$name|g" "$target_file"
+
+    # { AGENT_CONTENT } を実際のコンテンツに置換
+    # 一時ファイルを使用して複数行コンテンツを処理
+    local temp_file
+    temp_file=$(mktemp)
+
+    # { AGENT_CONTENT } の前までを取得
+    sed -n '/{ AGENT_CONTENT }/q;p' "$target_file" > "$temp_file"
+
+    # コンテンツを追加
+    echo "$content" >> "$temp_file"
+
+    # { AGENT_CONTENT } の後を追加
+    sed -n '/{ AGENT_CONTENT }/,${/{ AGENT_CONTENT }/!p;}' "$target_file" >> "$temp_file"
+
+    # ファイルを置き換え
+    mv "$temp_file" "$target_file"
+
+    # 残りのプレースホルダーも置換
+    sed -i '' "s|{AGENT_CONTENT}||g" "$target_file"
+    sed -i '' "s|{SOURCE_PATH}|$source_file|g" "$target_file"
+    sed -i '' "s|{SOURCE_COMMAND_NAME}|$command_name|g" "$target_file"
+    sed -i '' "s|{SOURCE_ARGUMENT_HINT}|$(extract_argument_hint "$source_file")|g" "$target_file"
+    sed -i '' "s|{SOURCE_ALLOWED_TOOLS}|$tools|g" "$target_file"
+    sed -i '' "s|{CONVERSION_DATE}|$(date '+%Y-%m-%d %H:%M:%S')|g" "$target_file"
+    sed -i '' "s|{CONVERSION_VERSION}|1.0|g" "$target_file"
+    sed -i '' "s|{TARGET_CATEGORY}|$(basename "$target_directory")|g" "$target_file"
+    sed -i '' "s|{TEMPLATE_NAME}|$(basename "$template_file")|g" "$target_file"
+    sed -i '' "s|{VALIDATION_STATUS}|✅ 変換完了|g" "$target_file"
+    sed -i '' "s|{CONVERSION_WARNINGS}|なし|g" "$target_file"
+    sed -i '' "s|{CC_FLOW_VERSION}|0.0.5|g" "$target_file"
+
     echo "✅ 変換完了: $target_file"
 }
 
 # スラッシュコマンドからメタデータを抽出
 extract_command_metadata() {
     local source_file="$1"
-    local -n name_ref="$2"
-    local -n description_ref="$3"
-    local -n tools_ref="$4"
-    local -n content_ref="$5"
-    
+
     # YAMLフロントマターを抽出
     local frontmatter=$(sed -n '/^---$/,/^---$/p' "$source_file" | sed '1d;$d')
-    
+
     # 各フィールドを抽出
-    name_ref=$(echo "$frontmatter" | grep '^name:' | sed 's/^name: *//' | tr -d '"')
-    description_ref=$(echo "$frontmatter" | grep '^description:' | sed 's/^description: *//' | tr -d '"')
-    tools_ref=$(echo "$frontmatter" | grep '^tools:' | sed 's/^tools: *//')
-    
+    local extracted_name=$(echo "$frontmatter" | grep '^name:' | sed 's/^name: *//' | tr -d '"')
+    local extracted_description=$(echo "$frontmatter" | grep '^description:' | sed 's/^description: *//' | tr -d '"')
+    local extracted_tools=$(echo "$frontmatter" | grep '^tools:' | sed 's/^tools: *//')
+
     # デフォルト値の設定
-    if [[ -z "$name_ref" ]]; then
-        name_ref=$(basename "$source_file" .md)
+    if [[ -z "$extracted_name" ]]; then
+        extracted_name=$(basename "$source_file" .md)
     fi
-    
-    if [[ -z "$description_ref" ]]; then
-        description_ref="Converted from slash command"
+
+    if [[ -z "$extracted_description" ]]; then
+        extracted_description="Converted from slash command"
     fi
-    
-    if [[ -z "$tools_ref" ]]; then
-        tools_ref="[Read, Write, Bash]"
+
+    if [[ -z "$extracted_tools" ]]; then
+        extracted_tools="[Read, Write, Bash]"
     fi
-    
+
     # Markdownコンテンツを抽出（フロントマター以降）
-    content_ref=$(sed -n '/^---$/,/^---$/!p' "$source_file" | sed '/^---$/,$!d' | sed '1d')
+    local extracted_content=$(sed -n '/^---$/,/^---$/!p' "$source_file" | sed '/^---$/,$!d' | sed '1d')
+
+    # グローバル変数に結果を設定（Bash 3.2互換）
+    EXTRACTED_NAME="$extracted_name"
+    EXTRACTED_DESCRIPTION="$extracted_description"
+    EXTRACTED_TOOLS="$extracted_tools"
+    EXTRACTED_CONTENT="$extracted_content"
 }
 
 # 引数ヒントを抽出
