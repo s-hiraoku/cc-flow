@@ -36,6 +36,7 @@ type Tip = {
 
 const navigation = [
   { label: "Editor", href: "/editor" },
+  { label: "Converter", href: "/converter" },
   {
     label: "CLI Docs",
     href: "https://github.com/s-hiraoku/cc-flow/tree/main/docs",
@@ -253,15 +254,13 @@ export default function HomePage() {
                 Launch the editor
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
-              <a
-                href="https://github.com/s-hiraoku/cc-flow/tree/main/docs"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/converter"
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-6 py-3 text-base font-semibold text-slate-100 transition hover:border-indigo-300 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
               >
-                Browse the docs
-                <span className="sr-only"> (opens in a new tab)</span>
-              </a>
+                Convert commands
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
             </div>
             <dl className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-inner backdrop-blur motion-safe:animate-in motion-safe:fade-in-50 motion-safe:slide-in-from-bottom-4">
@@ -448,7 +447,7 @@ export default function HomePage() {
                   Ready to build your next agent workflow?
                 </h2>
                 <p className="max-w-xl text-base text-slate-300">
-                  Spin up CC-Flow Web locally or inside your pipeline. Share annotated previews, gather feedback, and export production-ready configurations in minutes.
+                  Build workflows visually, convert slash commands to agents, and export production-ready configurations. Everything you need to create powerful CC-Flow automation.
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -459,15 +458,13 @@ export default function HomePage() {
                   Start in the editor
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
-                <a
-                  href="https://github.com/s-hiraoku/cc-flow"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href="/converter"
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-white/30 px-6 py-3 text-base font-semibold text-slate-100 transition hover:border-white/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
                 >
-                  View the repository
-                  <span className="sr-only"> (opens in a new tab)</span>
-                </a>
+                  Convert commands
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
               </div>
             </div>
           </div>

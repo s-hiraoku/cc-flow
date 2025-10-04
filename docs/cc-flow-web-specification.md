@@ -203,6 +203,74 @@ interface WorkflowSaveData {
 - `useAutoHideMessage`: 自動非表示ロジック
 - フェードアウトアニメーション
 
+### 7. コマンドコンバーター (Command Converter)
+
+#### 機能概要
+- スラッシュコマンドをCC-Flowエージェントに変換
+- `.claude/commands/` 配下のディレクトリを選択
+- `convert-slash-commands.sh` スクリプトを実行
+
+#### UI構成
+
+1. **ディレクトリ選択**
+   - ドロップダウンメニュー
+   - 利用可能なコマンドディレクトリ一覧
+   - `.claude/commands/` から自動検出
+
+2. **アクションボタン**
+   - **Preview (Dry Run)**: 変換プレビュー (実行なし)
+   - **Convert to Agents**: 実際の変換実行
+
+3. **結果表示**
+   - 成功メッセージ (CheckCircle アイコン)
+   - 出力ログ (pre 要素)
+   - 警告メッセージ (あれば)
+   - エラーメッセージ (AlertCircle アイコン)
+
+#### API統合
+
+**エンドポイント**:
+- `GET /api/commands`: コマンドディレクトリ一覧取得
+- `POST /api/commands/convert`: 変換実行
+
+**リクエスト形式**:
+```json
+{
+  "directory": "utility",
+  "dryRun": false
+}
+```
+
+**レスポンス形式**:
+```json
+{
+  "success": true,
+  "output": "変換結果のログ",
+  "error": "警告メッセージ (あれば)",
+  "dryRun": false
+}
+```
+
+#### カスタムフック
+
+1. **useCommandDirectories**
+   - コマンドディレクトリ一覧取得
+   - ローディング状態管理
+   - エラーハンドリング
+
+2. **useCommandConversion**
+   - 変換処理実行
+   - 結果・エラー状態管理
+   - プログレス表示
+
+#### 使用方法
+
+1. Converterページにアクセス (`/converter`)
+2. ディレクトリを選択
+3. Preview (Dry Run) で確認 (オプション)
+4. Convert to Agents で変換実行
+5. 変換されたエージェントは `.claude/agents/` に保存
+
 ## データフロー
 
 ### 1. ワークフロー編集フロー
