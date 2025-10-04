@@ -81,7 +81,7 @@ export default function ConverterPage() {
                       2
                     </span>
                     <span>
-                      <strong className="text-slate-100">Preview (Optional):</strong> Use "Preview (Dry Run)" to see what will be converted without making changes
+                      <strong className="text-slate-100">Preview (Optional):</strong> Use &quot;Preview (Dry Run)&quot; to see what will be converted without making changes
                     </span>
                   </li>
                   <li className="flex gap-3">
@@ -89,7 +89,7 @@ export default function ConverterPage() {
                       3
                     </span>
                     <span>
-                      <strong className="text-slate-100">Convert:</strong> Click "Convert to Agents" to generate agent definitions in .claude/agents/ directory
+                      <strong className="text-slate-100">Convert:</strong> Click &quot;Convert to Agents&quot; to generate agent definitions in .claude/agents/ directory
                     </span>
                   </li>
                   <li className="flex gap-3">

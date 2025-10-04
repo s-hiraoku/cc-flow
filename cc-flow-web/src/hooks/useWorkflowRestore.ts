@@ -114,7 +114,10 @@ function reconstructNodesFromSteps(steps: WorkflowJSON['workflowSteps']): Workfl
     id: 'start',
     type: 'start',
     position: { x: 100, y: 100 },
-    data: { label: 'Start' },
+    data: {
+      kind: 'start',
+      label: 'Start'
+    },
   });
 
   let yPosition = 250;
@@ -125,9 +128,10 @@ function reconstructNodesFromSteps(steps: WorkflowJSON['workflowSteps']): Workfl
 
     nodes.push({
       id: stepId,
-      type: 'stepGroup',
+      type: 'step-group',
       position: { x: 100, y: yPosition },
       data: {
+        title: step.title,
         label: step.title,
         mode: step.mode,
         purpose: step.purpose,
@@ -143,7 +147,10 @@ function reconstructNodesFromSteps(steps: WorkflowJSON['workflowSteps']): Workfl
     id: 'end',
     type: 'end',
     position: { x: 100, y: yPosition },
-    data: { label: 'End' },
+    data: {
+      kind: 'end',
+      label: 'End'
+    },
   });
 
   return nodes;
@@ -162,7 +169,6 @@ function reconstructEdgesFromSteps(
       id: 'e-start-step-1',
       source: 'start',
       target: 'step-1',
-      type: 'smoothstep',
     });
   }
 
@@ -172,7 +178,6 @@ function reconstructEdgesFromSteps(
       id: `e-step-${i + 1}-step-${i + 2}`,
       source: `step-${i + 1}`,
       target: `step-${i + 2}`,
-      type: 'smoothstep',
     });
   }
 
@@ -182,7 +187,6 @@ function reconstructEdgesFromSteps(
       id: `e-step-${steps.length}-end`,
       source: `step-${steps.length}`,
       target: 'end',
-      type: 'smoothstep',
     });
   }
 

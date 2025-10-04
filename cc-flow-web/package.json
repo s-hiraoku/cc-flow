@@ -16,14 +16,24 @@
     "cc-flow-web": "./bin/cli.js"
   },
   "files": [
-    ".next",
+    ".next/app-build-manifest.json",
+    ".next/app-path-routes-manifest.json",
+    ".next/BUILD_ID",
+    ".next/build-manifest.json",
+    ".next/export-marker.json",
+    ".next/images-manifest.json",
+    ".next/next-minimal-server.js.nft.json",
+    ".next/next-server.js.nft.json",
+    ".next/package.json",
+    ".next/prerender-manifest.json",
+    ".next/react-loadable-manifest.json",
+    ".next/required-server-files.json",
+    ".next/routes-manifest.json",
+    ".next/server/**",
+    ".next/static/**",
     "public",
     "bin",
-    "src",
-    "next.config.ts",
-    "tsconfig.json",
-    "tailwind.config.ts",
-    "postcss.config.mjs"
+    "README.md"
   ],
   "engines": {
     "node": ">=18.0.0"
