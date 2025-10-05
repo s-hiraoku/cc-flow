@@ -59,8 +59,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateW
 
     // Get script path from package root
     // When running from npm package, __dirname is in .next/server/app/api/workflows/generate
-    // We need to go up to package root and find scripts/workflow/create-workflow.sh
-    const packageRoot = join(__dirname, '../../../../../..');
+    // .next/standalone is 6 levels up, then we need to go one more level to package root
+    const standaloneDir = join(__dirname, '../../../../../..');
+    const packageRoot = join(standaloneDir, '..');
     const scriptPath = join(packageRoot, 'scripts/workflow/create-workflow.sh');
 
     // Use relative path from Claude root (script expects to run from .claude directory)
