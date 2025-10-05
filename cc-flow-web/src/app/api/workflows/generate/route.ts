@@ -57,9 +57,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateW
     tempFilePath = join(tmpdir(), tempFileName);
     await writeFile(tempFilePath, json, 'utf-8');
 
-    // Get script path from bin directory (relative to .next/standalone)
-    // bin/ is at package root, which is one level up from .next/standalone
-    const scriptPath = join(__dirname, '../../../../../../..', 'bin/workflow/create-workflow.sh');
+    // Get script path from bin directory
+    // __dirname is .next/standalone/.next/server/app/api/workflows/generate
+    // Go up 8 levels to .next, then up 2 more to package root
+    const packageRoot = join(__dirname, '../../../../../../..', '../..');
+    const scriptPath = join(packageRoot, 'bin/workflow/create-workflow.sh');
 
     // Use relative path from Claude root (script expects to run from .claude directory)
     const agentDir = './.claude/agents';
