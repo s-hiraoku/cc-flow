@@ -57,11 +57,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateW
     tempFilePath = join(tmpdir(), tempFileName);
     await writeFile(tempFilePath, json, 'utf-8');
 
-    // Get script path relative to Claude root
-    const scriptPath = join(claudeRootPath, '../scripts/create-workflow.sh');
+    // Get script path from package root
+    // When running from npm package, __dirname is in .next/server/app/api/workflows/generate
+    // We need to go up to package root and find scripts/workflow/create-workflow.sh
+    const packageRoot = join(__dirname, '../../../../../..');
+    const scriptPath = join(packageRoot, 'scripts/workflow/create-workflow.sh');
 
     // Use relative path from Claude root (script expects to run from .claude directory)
-    const agentDir = './agents';
+    const agentDir = './.claude/agents';
 
     console.log('Executing script:', {
       scriptPath,
@@ -146,7 +149,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateW
     }
 
     // Read generated command file
-    const commandPath = join(claudeRootPath, 'commands', `${workflowName}.md`);
+    const commandPath = join(claudeRootPath, '.claude', 'commands', `${workflowName}.md`);
     let commandContent: string;
     try {
       commandContent = await readFile(commandPath, 'utf-8');
