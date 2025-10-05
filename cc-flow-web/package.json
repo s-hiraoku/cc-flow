@@ -1,6 +1,6 @@
 {
   "name": "@hiraoku/cc-flow-web",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "private": false,
   "description": "Visual workflow editor for CC-Flow with drag-and-drop interface",
   "keywords": [
@@ -26,7 +26,6 @@
   "files": [
     ".next/standalone",
     "bin",
-    "scripts",
     "README.md",
     "LICENSE"
   ],
