@@ -1,10 +1,18 @@
 # CC-Flow CLI
 
-Interactive TUI to create Claude Code workflows from your local agents. It discovers agents under `.claude/agents`, lets you pick and order them, then generates a runnable slash command (Markdown) in `.claude/commands/`.
+> **Version 0.1.0** - Modern Terminal UI with Icon System
 
-Links
+Interactive TUI to create Claude Code workflows from your local agents. Features a modern icon system powered by `figures` for consistent cross-terminal display. Discovers agents under `.claude/agents`, lets you pick and order them, then generates runnable slash commands in `.claude/commands/`.
+
+**Links**
 - npm: https://www.npmjs.com/package/@hiraoku/cc-flow-cli
 - Repo: https://github.com/s-hiraoku/cc-flow
+
+**What's New in v0.1.0**
+- ✨ Modern icon system using `figures` package (cross-terminal compatible)
+- 🎨 Tailwind CSS-inspired color palette for better readability
+- 📐 Improved layout calculations for full-width characters
+- 🔧 Enhanced UX with clear visual distinction between selection and action icons
 
 ## Quick Start
 
@@ -38,68 +46,90 @@ Run your command in Claude Code:
 
 ## How It Works
 
-The TUI delegates actual file generation to a shell script:
+The TUI uses `@hiraoku/cc-flow-core` for workflow generation:
 
-- Script: `scripts/create-workflow.sh`
-- Arguments passed: `"<targetPath>" "<agentName,agentName,...>" "[purpose]"`
-- Workflow name: set via env var `WORKFLOW_NAME` (falls back to `<dir>-workflow`)
-- Purpose: set via env var `WORKFLOW_PURPOSE` or third argument (optional)
+**Workflow Generation**
+- Uses: `@hiraoku/cc-flow-core` npm package
+- Input: Agent configuration, execution order, workflow metadata
+- Output: `.claude/commands/<workflow-name>.md` (executable slash command)
+- Format: Supports both simple agent lists and advanced step-based workflows
 
-Script lookup order
-1. Your project’s `scripts/create-workflow.sh` (preferred)
-2. Built-in script bundled with this package
+**Agent Discovery**
+- Scans `.claude/agents/` directory structure
+- Supports categorization by subdirectories (e.g., `spec/`, `utility/`)
+- Reads agent metadata from `.md` files
 
-Target path format (new style)
-- `./agents/<dir>` (e.g., `./agents/spec`)
-- `./agents` (cross-category selection)
+**Workflow Configuration**
+- Workflow name: User input or auto-generated
+- Purpose: Optional description field
+- Execution mode: Sequential (default) or parallel steps
+- Model selection: Optional Claude model specification
 
-Notes
-- Short form `spec` is still accepted by the script for back-compat but emits a warning.
-- In the default flow, the POML intermediate file is cleaned up; only the final `.md` remains.
+## Features
 
-## Examples (script, without TUI)
+### 🎨 Modern Icon System
+- **Cross-terminal compatibility**: Uses `figures` package with automatic fallbacks
+- **Visual clarity**: Clear distinction between selection indicators (▹) and action icons (→)
+- **Consistent display**: Unicode symbols render consistently across all terminals
 
-You can call the script directly (useful for CI):
+### 🎯 Intuitive TUI
+- **Welcome screen**: Clear introduction and feature highlights
+- **Directory selection**: Browse agent categories
+- **Agent selection**: Checkbox-based multi-select
+- **Order configuration**: Drag-and-drop style ordering (Ctrl/Cmd + ↑↓)
+- **Preview**: Review workflow before generation
+- **Status feedback**: Real-time progress indicators
 
-```bash
-# Index-based order
-scripts/create-workflow.sh ./agents/spec "1 3 4"
+### ⚙️ Workflow Conversion
+- **Slash command conversion**: Convert existing `.claude/commands/*.md` to agent format
+- **Batch processing**: Convert multiple commands at once
+- **Validation**: Ensures compatibility and correctness
 
-# Name-based order (comma-separated agent IDs)
-scripts/create-workflow.sh ./agents/spec "spec-init,spec-requirements,spec-design"
+## TUI Flow
 
-# With custom purpose
-scripts/create-workflow.sh ./agents/spec "1 3 4" "API仕様書作成ワークフロー"
+### Main Workflow
+1. **Welcome Screen**: Introduction and feature highlights
+2. **Menu Selection**: Choose between "Create Workflow" or "Convert Commands"
 
-# Cross-category selection
-scripts/create-workflow.sh ./agents "spec-init,utility-date"
+### Create Workflow Path
+3. **Directory Selection**: Choose agent category or "All"
+4. **Agent Selection**: Multi-select agents with checkboxes (Space to toggle)
+5. **Order Configuration**: Arrange execution order (Ctrl/Cmd + ↑↓ to reorder)
+6. **Workflow Configuration**: Set name and purpose
+7. **Environment Check**: Validate dependencies and permissions
+8. **Preview**: Review complete configuration
+9. **Generation**: Create workflow file
+10. **Completion**: Show generated file path and next steps
 
-# Interactive mode with purpose
-scripts/create-workflow.sh ./agents/spec "" "カスタム目的"
-```
-
-This generates `.claude/commands/<dir>-workflow.md`. Run it in Claude Code as `/spec-workflow "..."`.
-
-## TUI Flow (Overview)
-- Welcome screen
-- Environment check (validates `.claude` and available agent directories)
-- Directory selection (`spec`, `utility`, or all)
-- Workflow name input (press Enter to use default)
-- Agent selection (checkboxes)
-- Execution order builder (step-by-step)
-- Preview and confirm
-- Execute generator script and show completion
-
-For a detailed design, see `docs/cc-flow-tui-design.md` (sections 4, 14–22).
+### Convert Commands Path
+3. **Directory Selection**: Choose command directory
+4. **Command Selection**: Select slash commands to convert
+5. **Conversion**: Process selected commands
+6. **Results**: Show conversion summary and generated agents
 
 ## Troubleshooting
-- “Script not found or not executable”
-  - Ensure `scripts/create-workflow.sh` exists and is executable.
-  - If your project doesn’t have it, copy from this repo: `scripts/workflow/`, `scripts/create-workflow.sh`, and `cc-flow-cli/templates/` into your project root.
-- “No agents found”
-  - Ensure `.claude/agents/<dir>/*.md` exist.
-- “POML file is expected in tests”
-  - Current default deletes the intermediate POML; update tests or run in a mode that retains it.
+
+### Common Issues
+
+**"No agents found"**
+- Ensure `.claude/agents/` directory exists
+- Check that agent files are in `.md` format
+- Verify agent files contain required metadata
+
+**"Workflow generation failed"**
+- Ensure `@hiraoku/cc-flow-core` is properly installed
+- Check Node.js version (requires ≥18)
+- Verify write permissions for `.claude/commands/`
+
+**Display issues (garbled characters)**
+- This should be resolved in v0.1.0 with the new icon system
+- If issues persist, ensure your terminal supports Unicode
+- Try a modern terminal emulator (e.g., iTerm2, Windows Terminal, Alacritty)
+
+**Command not found after global install**
+- Run `npm install -g @hiraoku/cc-flow-cli` again
+- Check your PATH includes npm global bin directory
+- Use `npx @hiraoku/cc-flow-cli` as an alternative
 
 ## Development
 
@@ -120,22 +150,78 @@ npm run type-check
 npm test
 ```
 
-Project layout
+### Project Structure
 ```
 cc-flow-cli/
-├─ bin/cc-flow.js            # Entry for npx / global
-├─ scripts/                  # Wrapper scripts (delegates to ../scripts/workflow)
-├─ templates/                # workflow.md / workflow.poml
+├─ bin/
+│  └─ cc-flow.js                    # CLI entry point
 ├─ src/
-│  ├─ cli/main.ts            # TUI entry
-│  ├─ services/ScriptExecutor.ts # Locates and invokes the script
-│  └─ ui/screens/*           # Screens (Welcome, Env, Directory, Agents, Order, Preview, Complete)
-└─ dist/                     # Compiled output
+│  ├─ ink/
+│  │  ├─ App.tsx                    # Main TUI application
+│  │  ├─ components/                # Reusable UI components
+│  │  │  ├─ Interactive.tsx         # Menu, Checkbox, StatusBar
+│  │  │  ├─ Layout.tsx              # Container, Section, Flex
+│  │  │  └─ Frame.tsx               # Border frames
+│  │  ├─ design-system/             # Design system
+│  │  │  ├─ icons.ts                # Icon definitions (figures-based)
+│  │  │  ├─ ScreenComponents.tsx    # UnifiedScreen, HintBox, etc.
+│  │  │  └─ ScreenPatterns.ts       # Layout patterns
+│  │  ├─ screens/                   # Screen components
+│  │  │  ├─ WelcomeScreen.tsx
+│  │  │  ├─ MenuScreen.tsx
+│  │  │  ├─ DirectoryScreen.tsx
+│  │  │  ├─ AgentSelectionScreen.tsx
+│  │  │  ├─ OrderScreen.tsx
+│  │  │  ├─ WorkflowNameScreen.tsx
+│  │  │  ├─ EnvironmentScreen.tsx
+│  │  │  ├─ PreviewScreen.tsx
+│  │  │  ├─ CompleteScreen.tsx
+│  │  │  ├─ CommandSelectionScreen.tsx
+│  │  │  ├─ ConversionScreen.tsx
+│  │  │  └─ ConversionCompleteScreen.tsx
+│  │  ├─ themes/
+│  │  │  └─ theme.ts                # Color palette and theme
+│  │  └─ utils/
+│  │     ├─ directoryUtils.ts       # Agent/directory discovery
+│  │     └─ text.ts                 # Text rendering utilities
+│  ├─ services/
+│  │  ├─ ScriptExecutor.ts          # cc-flow-core integration
+│  │  └─ EnvironmentChecker.ts      # Environment validation
+│  └─ types/                        # TypeScript types
+└─ dist/                            # Compiled output
 ```
+
+### Key Dependencies
+- `ink` (v6.3.0): React-based TUI framework
+- `figures` (v6.1.0): Cross-terminal Unicode symbols
+- `@hiraoku/cc-flow-core`: Workflow generation engine
+- `chalk`: Terminal string styling
+- `string-width` & `wrap-ansi`: Text layout utilities
+
+## Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes with tests
+4. Submit a pull request
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for detailed guidelines.
+
+## Roadmap
+
+### Upcoming Features
+- 🌐 **Web Editor** (Issue #13): Next.js + ReactFlow visual workflow editor
+- 📊 **Workflow Templates**: Pre-built workflow templates library
+- 🔍 **Agent Search**: Full-text search across agents
+- 📝 **Workflow Validation**: Enhanced validation and error reporting
 
 ## License
 
 MIT
-scripts/
-├─ create-workflow.sh        # Shared entry point (executes workflow/create-workflow.sh)
-└─ workflow/                 # Canonical workflow automation scripts
+
+## Links
+- [Changelog](./CHANGELOG.md)
+- [NPM Package](https://www.npmjs.com/package/@hiraoku/cc-flow-cli)
+- [GitHub Repository](https://github.com/s-hiraoku/cc-flow)
+- [Issue Tracker](https://github.com/s-hiraoku/cc-flow/issues)
