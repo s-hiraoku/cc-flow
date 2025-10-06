@@ -1,0 +1,44 @@
+{
+  "name": "@hiraoku/cc-flow-core",
+  "version": "0.0.7",
+  "description": "Core workflow generation logic for CC-Flow - Claude Code workflow creation toolkit",
+  "keywords": [
+    "cc-flow",
+    "workflow",
+    "claude",
+    "claude-code",
+    "poml",
+    "agent",
+    "orchestration"
+  ],
+  "author": "Hiraoku",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hiraoku/cc-flow.git",
+    "directory": "cc-flow-core"
+  },
+  "bugs": {
+    "url": "https://github.com/hiraoku/cc-flow/issues"
+  },
+  "homepage": "https://github.com/hiraoku/cc-flow#readme",
+  "bin": {
+    "cc-flow-create-workflow": "create-workflow.sh",
+    "cc-flow-convert-commands": "convert-slash-commands.sh"
+  },
+  "files": [
+    "create-workflow.sh",
+    "convert-slash-commands.sh",
+    "workflow/",
+    "templates/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Core package - tests will be added\"",
+    "lint": "echo \"Core package - linting will be added\""
+  }
+}

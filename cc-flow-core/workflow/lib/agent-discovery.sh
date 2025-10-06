@@ -155,9 +155,11 @@ discover_directory_items() {
 
 # TARGET_PATHに基づく汎用的なアイテム発見
 discover_items() {
-    local target_path="$1"  # "./agents/spec" or "./agents"
+    local target_path="$1"  # "./agents/spec" or "./agents" or "./.claude/agents"
     # "./"プレフィックスを削除してクリーンなパスを作成
     local clean_path="${target_path#./}"
+    # ".claude/"プレフィックスも削除（既に含まれている場合）
+    clean_path="${clean_path#.claude/}"
 
     # プロジェクトルートを動的に検出
     local project_root
@@ -172,11 +174,11 @@ discover_items() {
     local full_path="$project_root/.claude/$clean_path"
 
     case "$target_path" in
-        "./agents")
+        "./agents"|"./.claude/agents")
             # 全エージェント
             discover_all_items "$full_path"
             ;;
-        "./commands")
+        "./commands"|"./.claude/commands")
             # 全コマンド（将来）
             discover_all_items "$full_path"
             ;;

@@ -224,3 +224,18 @@ show_success_message() {
     echo ""
     echo "使用方法: /$WORKFLOW_NAME \"<context>\""
 }
+
+# 指定されたディレクトリにファイルを生成
+generate_files_to() {
+    local output_dir="$1"
+
+    # 出力ディレクトリを作成
+    safe_mkdir "$output_dir"
+
+    # 直接マークダウンファイルを生成
+    safe_write_file "$output_dir/$WORKFLOW_NAME.md" "$WORKFLOW_MD_CONTENT"
+
+    # 生成されたファイルパスを保存
+    GENERATED_FILE_PATH="$output_dir/$WORKFLOW_NAME.md"
+    info "✅ ワークフローファイルを生成しました: $GENERATED_FILE_PATH"
+}

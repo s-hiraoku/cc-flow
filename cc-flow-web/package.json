@@ -1,6 +1,6 @@
 {
   "name": "@hiraoku/cc-flow-web",
-  "version": "0.0.13",
+  "version": "0.0.27",
   "private": false,
   "description": "Visual workflow editor for CC-Flow with drag-and-drop interface",
   "keywords": [
@@ -35,7 +35,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build && npm run postbuild",
-    "postbuild": "cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
+    "postbuild": "cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && mkdir -p .next/standalone/node_modules/@hiraoku && cp -r node_modules/@hiraoku/cc-flow-core .next/standalone/node_modules/@hiraoku/",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
@@ -48,6 +48,7 @@
     "publish:safe": "npm publish --access public"
   },
   "dependencies": {
+    "@hiraoku/cc-flow-core": "^0.0.7",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",

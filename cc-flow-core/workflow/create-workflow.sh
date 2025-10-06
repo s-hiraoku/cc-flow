@@ -131,10 +131,10 @@ NODE
 
 # 簡潔な使用方法を表示
 show_usage() {
-    echo "使用方法: $0 <対象パス> --steps-json <path>"
+    echo "使用方法: $0 <agents-dir> <commands-dir> --steps-json <path>"
     echo ""
     echo "例:"
-    echo "  $0 ./agents/spec --steps-json ./workflow.json"
+    echo "  $0 /path/to/.claude/agents /path/to/.claude/commands --steps-json ./workflow.json"
     echo ""
     echo "詳細: $0 --help または $0 --examples"
 }
@@ -189,6 +189,10 @@ parse_target_path() {
             TARGET_PATH="$input_path"
             AGENT_DIR="$(basename "$input_path")"
             ;;
+        ./.claude/agents)
+            TARGET_PATH="$input_path"
+            AGENT_DIR="all"
+            ;;
         ./agents)
             TARGET_PATH="$input_path"
             AGENT_DIR="all"
@@ -205,16 +209,18 @@ parse_target_path() {
 }
 # 新しいオプションフラグ式の引数解析
 parse_modern_arguments() {
-    TARGET_PATH=""
+    AGENTS_DIR=""
+    COMMANDS_DIR=""
     local steps_source=""
 
-    if [[ $# -eq 0 ]]; then
+    if [[ $# -lt 2 ]]; then
         show_usage
         exit 1
     fi
 
-    TARGET_PATH="$1"
-    shift
+    AGENTS_DIR="$1"
+    COMMANDS_DIR="$2"
+    shift 2
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -239,29 +245,41 @@ parse_modern_arguments() {
         error_exit "ステップ定義ファイル '$steps_source' が見つかりません"
     fi
 
+    # ディレクトリ存在確認
+    if [[ ! -d "$AGENTS_DIR" ]]; then
+        error_exit "エージェントディレクトリが見つかりません: $AGENTS_DIR"
+    fi
+
+    if [[ ! -d "$COMMANDS_DIR" ]]; then
+        # コマンドディレクトリは存在しなければ作成
+        mkdir -p "$COMMANDS_DIR"
+    fi
+
     # ワークフロー設定を一括解析
     parse_workflow_config "$(cat "$steps_source")"
 
-    info "🔧 パス処理開始: $TARGET_PATH"
-    parse_target_path "$TARGET_PATH"
-    info "✅ パス処理完了"
+    info "✅ ディレクトリ設定完了: agents=$AGENTS_DIR, commands=$COMMANDS_DIR"
 }
 
 main() {
     parse_modern_arguments "$@"
 
-    info "処理開始: 対象パス '$TARGET_PATH'"
+    info "処理開始: agents=$AGENTS_DIR"
 
-    if [[ "$TARGET_PATH" == */.claude/* ]]; then
-        discover_direct_path "$TARGET_PATH"
-        extract_item_names
-    elif [[ "$TARGET_PATH" == ./* ]]; then
-        discover_items "$TARGET_PATH"
-        extract_item_names
-    else
-        discover_agents "$TARGET_PATH"
-        extract_agent_names
+    # エージェントファイルを直接検索
+    local agent_files=()
+    while IFS= read -r -d '' file; do
+        agent_files+=("$file")
+    done < <(find "$AGENTS_DIR" -name "*.md" -type f -print0 | sort -z)
+
+    if [[ ${#agent_files[@]} -eq 0 ]]; then
+        error_exit "$AGENTS_DIR にエージェントが見つかりません"
     fi
+
+    ITEM_FILES=("${agent_files[@]}")
+    AGENT_FILES=("${agent_files[@]}")
+
+    extract_item_names
 
     SELECTED_AGENTS=()
     hydrate_selected_agents_from_steps "$WORKFLOW_STEPS_JSON"
@@ -273,8 +291,8 @@ main() {
     info "✅ 選択されたエージェント: ${SELECTED_AGENTS[*]}"
 
     load_templates
-    process_templates "$AGENT_DIR"
-    generate_files
+    process_templates "$COMMANDS_DIR"
+    generate_files_to "$COMMANDS_DIR"
     show_success_message
 }
 

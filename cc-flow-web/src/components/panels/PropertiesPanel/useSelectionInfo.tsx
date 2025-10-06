@@ -24,7 +24,7 @@ export function useSelectionInfo({
       const node = selectedNodes[0];
       return (
         <div className="text-sm text-gray-600">
-          Selected: <span className="font-medium">{node.data.label || node.type}</span>
+          Selected: <span className="font-medium break-words">{node.data.label || node.type}</span>
         </div>
       );
     }
@@ -32,7 +32,7 @@ export function useSelectionInfo({
     return (
       <div className="text-sm text-gray-600">
         {selectedNodes.length} nodes selected
-        <div className="text-xs text-gray-500 mt-1">
+        <div className="text-xs text-gray-500 mt-1 break-words">
           Showing settings for: {primarySelectedNode?.data.label || primarySelectedNode?.type}
         </div>
       </div>

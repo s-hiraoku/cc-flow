@@ -74,15 +74,15 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
               </svg>
             </div>
           </div>
-          <div className="ml-3 flex-1">
-            <h3 className="text-sm font-semibold text-gray-900">{agentData.label}</h3>
+          <div className="ml-3 flex-1 min-w-0">
+            <h3 className="text-sm font-semibold text-gray-900 break-words line-clamp-2">{agentData.label}</h3>
             {agentData.stepTitle && (
-              <p className={`mt-0.5 text-xs font-medium ${colors.text}`}>
+              <p className={`mt-0.5 text-xs font-medium ${colors.text} break-words line-clamp-1`}>
                 Title: {agentData.stepTitle}
               </p>
             )}
             {agentData.description && (
-              <p className="mt-1 text-xs text-gray-600 line-clamp-2">
+              <p className="mt-1 text-xs text-gray-600 break-words line-clamp-2">
                 {agentData.description}
               </p>
             )}

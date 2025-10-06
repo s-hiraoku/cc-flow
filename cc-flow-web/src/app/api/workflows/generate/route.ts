@@ -57,18 +57,34 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateW
     tempFilePath = join(tmpdir(), tempFileName);
     await writeFile(tempFilePath, json, 'utf-8');
 
-    // Get script path from bin directory
-    // __dirname is .next/standalone/.next/server/app/api/workflows/generate
-    // Go up 8 levels to .next, then up 2 more to package root
-    const packageRoot = join(__dirname, '../../../../../../..', '../..');
-    const scriptPath = join(packageRoot, 'bin/workflow/create-workflow.sh');
+    // Get script path from @hiraoku/cc-flow-core package
+    // Try to resolve package location - handle Next.js standalone build quirks
+    let scriptPath: string;
+    try {
+      const resolved = require.resolve('@hiraoku/cc-flow-core/package.json');
+      // Check if resolve returned a valid string path
+      if (typeof resolved === 'string') {
+        const coreRoot = join(resolved, '..');
+        scriptPath = join(coreRoot, 'workflow/create-workflow.sh');
+      } else {
+        throw new Error('require.resolve returned non-string value');
+      }
+    } catch (error) {
+      // Fallback: construct path from standalone node_modules
+      // __dirname in standalone build: .next/standalone/.next/server/app/api/workflows/generate
+      // So go up 5 levels to reach .next/standalone, then access node_modules
+      const nodeModulesPath = join(__dirname, '../../../../../..', 'node_modules', '@hiraoku', 'cc-flow-core');
+      scriptPath = join(nodeModulesPath, 'workflow/create-workflow.sh');
+    }
 
-    // Use relative path from Claude root (script expects to run from .claude directory)
-    const agentDir = './.claude/agents';
+    // Use absolute path for agent directory - simpler for script
+    const agentDir = join(claudeRootPath, '.claude', 'agents');
+    const commandsDir = join(claudeRootPath, '.claude', 'commands');
 
     console.log('Executing script:', {
       scriptPath,
       agentDir,
+      commandsDir,
       tempFilePath,
       claudeRootPath,
     });
@@ -89,11 +105,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateW
       console.error('Failed to verify temp file:', err);
     }
 
-    // Execute create-workflow.sh from Claude root directory
+    // Execute create-workflow.sh with absolute paths
     const { stdout, stderr, exitCode } = await executeScript(
       scriptPath,
-      [agentDir, '--steps-json', tempFilePath],
-      claudeRootPath  // Run from .claude directory
+      [agentDir, commandsDir, '--steps-json', tempFilePath],
+      claudeRootPath
     );
 
     console.log('Script execution result:', {

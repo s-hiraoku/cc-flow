@@ -26,18 +26,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get script path from bin directory
-    // Same path resolution as workflow generate
-    const packageRoot = join(__dirname, '../../../../../../..', '../..');
-    const scriptPath = join(packageRoot, 'bin/workflow/utils/convert-slash-commands.sh');
+    // Get script path from @hiraoku/cc-flow-core package
+    // Try to resolve package location - handle Next.js standalone build quirks
+    let scriptPath: string;
+    try {
+      const resolved = require.resolve('@hiraoku/cc-flow-core/package.json');
+      // Check if resolve returned a valid string path
+      if (typeof resolved === 'string') {
+        const coreRoot = join(resolved, '..');
+        scriptPath = join(coreRoot, 'workflow/utils/convert-slash-commands.sh');
+      } else {
+        throw new Error('require.resolve returned non-string value');
+      }
+    } catch (error) {
+      // Fallback: construct path from standalone node_modules
+      // __dirname in standalone build: .next/standalone/.next/server/app/api/commands/convert
+      // Go up 6 levels to reach .next/standalone, then access node_modules
+      const nodeModulesPath = join(__dirname, '../../../../../../node_modules', '@hiraoku', 'cc-flow-core');
+      scriptPath = join(nodeModulesPath, 'workflow/utils/convert-slash-commands.sh');
+    }
 
-    // Build command
+    // Construct absolute paths for commands and agents directories
+    const commandsDir = join(claudeRootPath, '.claude', 'commands', directory);
+    const agentsDir = join(claudeRootPath, '.claude', 'agents');
+
+    // Build command with absolute paths
     const dryRunFlag = dryRun ? '--dry-run' : '';
-    const command = `cd "${claudeRootPath}" && bash "${scriptPath}" "${directory}" ${dryRunFlag}`;
+    const command = `bash "${scriptPath}" "${commandsDir}" "${agentsDir}" ${dryRunFlag}`;
 
-    console.log('Executing converter script:', {
+    console.log('Converter path resolution debug:', {
+      __dirname,
       scriptPath,
-      directory,
+      commandsDir,
+      agentsDir,
       dryRun,
       command,
     });
