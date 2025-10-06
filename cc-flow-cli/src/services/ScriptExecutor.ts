@@ -45,12 +45,27 @@ export class ScriptExecutor {
       console.log('');
       console.log('⏳ Starting script execution...');
 
-      execFileSync('bash', commandArgs, {
-        cwd: this.basePath,
-        stdio: 'inherit',
-        timeout: 30000,
-        env: { ...process.env, VERBOSE: '1' }
-      });
+      // Windows対応: Git Bashが必要
+      // Windows環境では、Git for Windowsのインストールを推奨
+      if (process.platform === 'win32') {
+        // Windowsの場合、shellオプションを使ってシステムシェル経由で実行
+        const { execSync } = await import('child_process');
+        const command = `bash ${commandArgs.map(arg => `"${arg.replace(/"/g, '\\"')}"`).join(' ')}`;
+        execSync(command, {
+          cwd: this.basePath,
+          stdio: 'inherit',
+          timeout: 30000,
+          env: { ...process.env, VERBOSE: '1' }
+        });
+      } else {
+        // Unix系OSでは直接bashを実行
+        execFileSync('bash', commandArgs, {
+          cwd: this.basePath,
+          stdio: 'inherit',
+          timeout: 30000,
+          env: { ...process.env, VERBOSE: '1' }
+        });
+      }
 
       console.log('✅ Script execution completed');
       

@@ -42,7 +42,8 @@ Run your command in Claude Code:
 ## Requirements
 - Node.js ≥ 18
 - A Claude Code project with agents at `.claude/agents/**.md`
-- Script execution permission where applicable (`chmod +x` on shell scripts)
+- **Unix/Linux/macOS**: Script execution permission (`chmod +x` on shell scripts)
+- **Windows**: Git for Windows (provides bash) - [Download here](https://git-scm.com/download/win)
 
 ## How It Works
 
@@ -124,7 +125,14 @@ The TUI uses `@hiraoku/cc-flow-core` for workflow generation:
 **Display issues (garbled characters)**
 - This should be resolved in v0.1.0 with the new icon system
 - If issues persist, ensure your terminal supports Unicode
-- Try a modern terminal emulator (e.g., iTerm2, Windows Terminal, Alacritty)
+- **macOS/Linux**: iTerm2, Alacritty, or default terminal
+- **Windows**: Windows Terminal (recommended), PowerShell 7+, or VSCode terminal
+
+**Windows-specific: "bash: command not found"**
+- Install Git for Windows which includes Git Bash
+- Download from: https://git-scm.com/download/win
+- Ensure `bash` is in your PATH after installation
+- Alternative: Use WSL (Windows Subsystem for Linux)
 
 **Command not found after global install**
 - Run `npm install -g @hiraoku/cc-flow-cli` again
