@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readdir, readFile, stat } from 'fs/promises';
+import { readdir, readFile } from 'fs/promises';
 import { join, extname } from 'path';
 import { Agent, AgentsResponse } from '@/types/agent';
 
@@ -7,22 +7,21 @@ async function scanAgentsDirectory(dirPath: string, category: string = ''): Prom
   const agents: Agent[] = [];
 
   try {
-    const entries = await readdir(dirPath);
+    // Use withFileTypes to get dirent objects without separate stat calls
+    const entries = await readdir(dirPath, { withFileTypes: true });
 
     for (const entry of entries) {
-      const fullPath = join(dirPath, entry);
-      const stats = await stat(fullPath);
+      const fullPath = join(dirPath, entry.name);
 
-      if (stats.isDirectory()) {
+      if (entry.isDirectory()) {
         // Recursively scan subdirectories
-        const subAgents = await scanAgentsDirectory(fullPath, entry);
+        const subAgents = await scanAgentsDirectory(fullPath, entry.name);
         agents.push(...subAgents);
-      } else if (extname(entry) === '.md') {
-        // Parse agent markdown file - check if it's still a file during read
+      } else if (entry.isFile() && extname(entry.name) === '.md') {
+        // Parse agent markdown file
         try {
-          // Directly read file to avoid race condition between stat check and read
           const content = await readFile(fullPath, 'utf-8');
-          const agentName = entry.replace('.md', '');
+          const agentName = entry.name.replace('.md', '');
 
           // Extract description from YAML frontmatter
           let description = 'No description available';
