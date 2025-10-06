@@ -7,7 +7,7 @@ import type { WorkflowConfig } from '../models/Agent.js';
 
 // Mock dependencies
 vi.mock('child_process', () => ({
-  execSync: vi.fn()
+  execFileSync: vi.fn()
 }));
 
 vi.mock('fs', () => ({
@@ -86,11 +86,11 @@ describe('ScriptExecutor', () => {
     };
 
     it('executes workflow creation script successfully', async () => {
-      vi.mocked(childProcess.execSync).mockReturnValue(Buffer.from('Success'));
+      vi.mocked(childProcess.execFileSync).mockReturnValue(Buffer.from('Success'));
 
       await executor.executeWorkflowCreation(mockConfig);
 
-      expect(childProcess.execSync).toHaveBeenCalled();
+      expect(childProcess.execFileSync).toHaveBeenCalled();
       expect(consoleLogSpy).toHaveBeenCalled();
     });
 
@@ -105,7 +105,7 @@ describe('ScriptExecutor', () => {
       vi.mocked(fs.existsSync).mockReturnValue(true);
       
       // Then make execSync fail
-      vi.mocked(childProcess.execSync).mockImplementation(() => {
+      vi.mocked(childProcess.execFileSync).mockImplementation(() => {
         throw new Error('Script failed');
       });
 
@@ -114,7 +114,7 @@ describe('ScriptExecutor', () => {
 
     it('includes error details in CLIError', async () => {
       vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(childProcess.execSync).mockImplementation(() => {
+      vi.mocked(childProcess.execFileSync).mockImplementation(() => {
         throw new Error('Script execution failed');
       });
 
@@ -128,10 +128,10 @@ describe('ScriptExecutor', () => {
     });
 
     it('uses 30 second timeout for script execution', async () => {
-      vi.mocked(childProcess.execSync).mockReturnValue(Buffer.from('Success'));
+      vi.mocked(childProcess.execFileSync).mockReturnValue(Buffer.from('Success'));
       let capturedOptions: any;
 
-      vi.mocked(childProcess.execSync).mockImplementation((_cmd: any, opts: any) => {
+      vi.mocked(childProcess.execFileSync).mockImplementation((_cmd: any, _args: any, opts: any) => {
         capturedOptions = opts;
         return Buffer.from('Success');
       });
@@ -142,10 +142,10 @@ describe('ScriptExecutor', () => {
     });
 
     it('uses inherit stdio to show script output', async () => {
-      vi.mocked(childProcess.execSync).mockReturnValue(Buffer.from('Success'));
+      vi.mocked(childProcess.execFileSync).mockReturnValue(Buffer.from('Success'));
       let capturedOptions: any;
 
-      vi.mocked(childProcess.execSync).mockImplementation((_cmd: any, opts: any) => {
+      vi.mocked(childProcess.execFileSync).mockImplementation((_cmd: any, _args: any, opts: any) => {
         capturedOptions = opts;
         return Buffer.from('Success');
       });
@@ -217,7 +217,7 @@ describe('ScriptExecutor', () => {
     it('returns script usage output', async () => {
       vi.mocked(fs.existsSync).mockReturnValue(true);
       vi.mocked(fs.accessSync).mockReturnValue(undefined);
-      vi.mocked(childProcess.execSync).mockReturnValue(Buffer.from('Usage: script.sh [options]'));
+      vi.mocked(childProcess.execFileSync).mockReturnValue(Buffer.from('Usage: script.sh [options]'));
 
       const usage = await executor.getScriptUsage();
 
@@ -230,7 +230,7 @@ describe('ScriptExecutor', () => {
 
       const error: any = new Error('Command failed');
       error.stderr = Buffer.from('Usage from stderr');
-      vi.mocked(childProcess.execSync).mockImplementation(() => {
+      vi.mocked(childProcess.execFileSync).mockImplementation(() => {
         throw error;
       });
 
@@ -245,7 +245,7 @@ describe('ScriptExecutor', () => {
 
       const error: any = new Error('Command failed');
       error.stdout = Buffer.from('Usage from stdout');
-      vi.mocked(childProcess.execSync).mockImplementation(() => {
+      vi.mocked(childProcess.execFileSync).mockImplementation(() => {
         throw error;
       });
 
@@ -257,7 +257,7 @@ describe('ScriptExecutor', () => {
     it('throws CLIError when script execution fails without output', async () => {
       vi.mocked(fs.existsSync).mockReturnValue(true);
       vi.mocked(fs.accessSync).mockReturnValue(undefined);
-      vi.mocked(childProcess.execSync).mockImplementation(() => {
+      vi.mocked(childProcess.execFileSync).mockImplementation(() => {
         throw new Error('Failed');
       });
 
@@ -275,7 +275,7 @@ describe('ScriptExecutor', () => {
       vi.mocked(fs.accessSync).mockReturnValue(undefined);
       let capturedOptions: any;
 
-      vi.mocked(childProcess.execSync).mockImplementation((_cmd: any, opts: any) => {
+      vi.mocked(childProcess.execFileSync).mockImplementation((_cmd: any, _args: any, opts: any) => {
         capturedOptions = opts;
         return Buffer.from('Usage');
       });
@@ -331,7 +331,7 @@ describe('ScriptExecutor', () => {
         createdAt: new Date()
       };
 
-      vi.mocked(childProcess.execSync).mockReturnValue(Buffer.from('Success'));
+      vi.mocked(childProcess.execFileSync).mockReturnValue(Buffer.from('Success'));
 
       await expect(executor.executeWorkflowCreation(config)).resolves.toBeUndefined();
     });
@@ -346,7 +346,7 @@ describe('ScriptExecutor', () => {
         createdAt: new Date()
       };
 
-      vi.mocked(childProcess.execSync).mockReturnValue(Buffer.from('Success'));
+      vi.mocked(childProcess.execFileSync).mockReturnValue(Buffer.from('Success'));
 
       await executor.executeWorkflowCreation(config);
 
@@ -367,7 +367,7 @@ describe('ScriptExecutor', () => {
         createdAt: new Date()
       };
 
-      vi.mocked(childProcess.execSync).mockReturnValue(Buffer.from('Success'));
+      vi.mocked(childProcess.execFileSync).mockReturnValue(Buffer.from('Success'));
 
       await executor.executeWorkflowCreation(config);
 
@@ -405,7 +405,7 @@ describe('ScriptExecutor', () => {
         createdAt: new Date()
       };
 
-      vi.mocked(childProcess.execSync).mockReturnValue(Buffer.from('Success'));
+      vi.mocked(childProcess.execFileSync).mockReturnValue(Buffer.from('Success'));
 
       await executor.executeWorkflowCreation(config);
 
@@ -435,7 +435,7 @@ describe('ScriptExecutor', () => {
         createdAt: new Date()
       };
 
-      vi.mocked(childProcess.execSync).mockReturnValue(Buffer.from('Success'));
+      vi.mocked(childProcess.execFileSync).mockReturnValue(Buffer.from('Success'));
 
       await expect(executor.executeWorkflowCreation(config)).resolves.toBeUndefined();
     });
@@ -450,7 +450,7 @@ describe('ScriptExecutor', () => {
         createdAt: new Date()
       };
 
-      vi.mocked(childProcess.execSync).mockReturnValue(Buffer.from('Success'));
+      vi.mocked(childProcess.execFileSync).mockReturnValue(Buffer.from('Success'));
 
       await executor.executeWorkflowCreation(config);
 

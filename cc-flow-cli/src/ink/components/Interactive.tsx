@@ -84,8 +84,6 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
       theme.layout.minWidth,
       theme.layout.maxWidth
     );
-  // Consistent width calculation: reserve 2 chars for indicator ("▶ ")
-  const contentWidth = Math.max(8, listWidth - 2);
   const lineContainerWidth = listWidth;
 
   const [selectedIndex, moveIndex] = useSelectableIndex(items);

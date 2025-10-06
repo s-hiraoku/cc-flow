@@ -1,5 +1,5 @@
 import { readdirSync, statSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { join, basename, dirname } from 'path';
 
 export interface DirectoryInfo {
   id: string;
@@ -240,8 +240,7 @@ function collectAgentsRecursively(dirPath: string, agents: Agent[]): void {
           const icon = getAgentIcon(agentName);
 
           // Extract directory and category from path
-          const pathParts = itemPath.split('/');
-          const directory = pathParts[pathParts.length - 2] || '';
+          const directory = basename(dirname(itemPath)) || '';
           const category = 'agents';
 
           agents.push({
@@ -281,8 +280,7 @@ function collectAgentsFromDirectory(dirPath: string, agents: Agent[]): void {
           const icon = getAgentIcon(agentName);
 
           // Extract directory and category from path
-          const pathParts = filePath.split('/');
-          const directory = pathParts[pathParts.length - 2] || '';
+          const directory = basename(dirname(filePath)) || '';
           const category = 'agents';
 
           agents.push({

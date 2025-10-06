@@ -152,7 +152,7 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
     };
 
     runConversion();
-  }, [onComplete, selectedCommands, targetPath, currentStep]);
+  }, [onComplete, selectedCommands, targetPath]);
 
   const getStatusIcon = (status: ConversionStep['status']) => {
     switch (status) {

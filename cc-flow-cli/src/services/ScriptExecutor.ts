@@ -1,4 +1,4 @@
-import { execSync, type ExecSyncOptions } from 'child_process';
+import { execFileSync, type ExecSyncOptions } from 'child_process';
 import { join, dirname, resolve } from 'path';
 import { existsSync } from 'fs';
 import { tmpdir } from 'os';
@@ -28,18 +28,24 @@ export class ScriptExecutor {
     
     try {
       // 4. スクリプト実行（絶対パスを渡す）
-      const command = `bash "${scriptPath}" "${agentsDir}" "${commandsDir}" --steps-json "${tempJsonFile}"`;
+      const commandArgs = [
+        scriptPath,
+        agentsDir,
+        commandsDir,
+        '--steps-json',
+        tempJsonFile
+      ];
 
       console.log('🚀 Executing workflow creation:');
       console.log(`   Script: ${scriptPath}`);
       console.log(`   Agents: ${agentsDir}`);
       console.log(`   Output: ${commandsDir}`);
       console.log(`   Config: ${tempJsonFile}`);
-      console.log(`   Command: ${command}`);
+      console.log(`   Command: bash ${commandArgs.map(arg => `"${arg}"`).join(' ')}`);
       console.log('');
       console.log('⏳ Starting script execution...');
 
-      execSync(command, {
+      execFileSync('bash', commandArgs, {
         cwd: this.basePath,
         stdio: 'inherit',
         timeout: 30000,
@@ -227,7 +233,7 @@ export class ScriptExecutor {
     };
     
     try {
-      const output = execSync(`bash "${scriptPath}" --help`, execOptions);
+      const output = execFileSync('bash', [scriptPath, '--help'], execOptions);
       return output.toString();
     } catch (error) {
       // The script may return usage info in stderr when called without arguments
@@ -236,7 +242,7 @@ export class ScriptExecutor {
       if (output) {
         return output.toString();
       }
-      
+
       throw new CLIError(
         'Failed to get script usage information',
         {
