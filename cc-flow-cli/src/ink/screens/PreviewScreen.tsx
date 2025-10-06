@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Box, Text, useInput, useApp, type Key } from 'ink';
 import SelectInput from 'ink-select-input';
-import { UnifiedScreen, ScreenDescription, MenuSection } from '../design-system/index.js';
+import { UnifiedScreen, ScreenDescription, MenuSection, ICONS } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
@@ -22,11 +22,11 @@ export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate
   const { contentWidth } = useScreenDimensions();
 
   const choices: MenuItem[] = isProcessing ? [
-    { label: '⏳ 作成中...', value: 'processing', disabled: true },
-    { label: '❌ キャンセル', value: 'cancel' }
+    { label: `${ICONS.processing} 作成中...`, value: 'processing', disabled: true },
+    { label: `${ICONS.error} キャンセル`, value: 'cancel' }
   ] : [
-    { label: '🚀 ワークフローを作成する', value: 'generate' },
-    { label: '❌ キャンセル', value: 'cancel' }
+    { label: `${ICONS.rocket} ワークフローを作成する`, value: 'generate' },
+    { label: `${ICONS.error} キャンセル`, value: 'cancel' }
   ];
 
   // Handle keyboard shortcuts
@@ -54,7 +54,7 @@ export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate
   const screenConfig = createScreenLayout('preview', {
     title: '最終確認 - ワークフロー作成',
     subtitle: '設定内容を確認してワークフローを作成してください',
-    icon: '📋'
+    icon: ICONS.clipboard
   });
 
   const statusItems = [
@@ -66,12 +66,12 @@ export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate
     <UnifiedScreen
       config={screenConfig}
       statusItems={statusItems}
-      customStatusMessage={hasValidConfig ? 
-        '✅ 設定完了 - ワークフローを作成できます' : 
-        '⚠️ エージェントを選択してから実行してください'}
+      customStatusMessage={hasValidConfig ?
+        `${ICONS.success} 設定完了 - ワークフローを作成できます` :
+        `${ICONS.warning} エージェントを選択してから実行してください`}
     >
       {/* Workflow Basic Information */}
-      <Section title="📝 ワークフロー基本情報" spacing="sm">
+      <Section title={`${ICONS.edit} ワークフロー基本情報`} spacing="sm">
         <Box flexDirection="column" gap={1}>
           <Flex>
             <Text color={theme.colors.hex.lightBlue}>名前: </Text>
@@ -98,7 +98,7 @@ export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate
       </Section>
 
       {/* Agent Execution Order */}
-      <Section title={`🤖 実行順序 (${config.selectedAgents?.length || 0}個のエージェント)`} spacing="sm">
+      <Section title={`${ICONS.agent} 実行順序 (${config.selectedAgents?.length || 0}個のエージェント)`} spacing="sm">
         <Box flexDirection="column" gap={1}>
           {config.selectedAgents?.map((agent, index) => (
             <Box key={agent.id}>
@@ -115,7 +115,7 @@ export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate
       </Section>
 
       {/* Generated Files */}
-      <Section title="📦 生成されるファイル" spacing="sm">
+      <Section title={`${ICONS.package} 生成されるファイル`} spacing="sm">
         <Box flexDirection="column" gap={1}>
           <Text color={theme.colors.hex.lightBlue}>• .claude/commands/{config.workflowName || 'my-workflow'}.md</Text>
           <Text color={theme.colors.hex.lightBlue}>• 一時的なPOMLファイル (処理後に削除)</Text>
@@ -123,7 +123,7 @@ export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate
       </Section>
 
       {/* Execution Instructions */}
-      <Section title="⚡ 実行方法" spacing="sm">
+      <Section title={`${ICONS.lightning} 実行方法`} spacing="sm">
         <Text color={theme.colors.hex.lightBlue}>
           作成後は /{config.workflowName || 'my-workflow'} コマンドで実行可能
         </Text>
@@ -131,7 +131,7 @@ export const PreviewScreen: React.FC<PreviewScreenProps> = ({ config, onGenerate
 
       {/* Error Display */}
       {processingError && (
-        <Section title="❌ エラー" spacing="sm">
+        <Section title={`${ICONS.error} エラー`} spacing="sm">
           <Box
             borderStyle="single"
             borderColor={theme.colors.error}

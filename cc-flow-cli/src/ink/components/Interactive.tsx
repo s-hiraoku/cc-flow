@@ -4,6 +4,7 @@ import TextInput from "ink-text-input";
 import Spinner from "ink-spinner";
 import { useTheme } from "../themes/theme.js";
 import { alignWithinWidth, renderLines } from "../utils/text.js";
+import { ICONS } from "../design-system/index.js";
 import type { Alignment, SpacingValue } from "../types/index.js";
 
 export interface MenuItem {
@@ -155,7 +156,7 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
           >
             {labelLines.map((line, lineIndex) => {
               const indicator =
-                lineIndex === 0 ? (isSelected ? "▶" : " ") : " ";
+                lineIndex === 0 ? (isSelected ? ICONS.selected : " ") : " ";
               const composedLine = alignWithinWidth(
                 `${indicator} ${line}`,
                 lineContainerWidth,
@@ -279,7 +280,7 @@ export const CheckboxList: React.FC<CheckboxListProps> = ({
                     isSelected ? theme.colors.primary : theme.colors.text.muted
                   }
                 >
-                  {lineIndex === 0 ? (isSelected ? "▶" : " ") : " "}
+                  {lineIndex === 0 ? (isSelected ? ICONS.selected : " ") : " "}
                 </Text>
                 <Text
                   color={

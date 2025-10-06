@@ -5,6 +5,7 @@ import {
   ScreenDescription,
   MenuSection,
   HintBox,
+  ICONS,
 } from "../design-system/index.js";
 import { createScreenLayout } from "../design-system/ScreenPatterns.js";
 import type { MenuItem } from "../components/Interactive.js";
@@ -53,7 +54,7 @@ const DirectoryScreenContent: React.FC<DirectoryScreenProps> = ({
             id: "back",
             label: "戻る",
             value: "back",
-            icon: "↩️",
+            icon: ICONS.back,
             description: "前の画面に戻ります",
           },
         ]);
@@ -77,7 +78,7 @@ const DirectoryScreenContent: React.FC<DirectoryScreenProps> = ({
   const screenConfig = createScreenLayout("selection", {
     title: workflowMode === 'convert' ? "スラッシュコマンドディレクトリ選択" : "エージェントディレクトリ選択",
     subtitle: workflowMode === 'convert' ? "変換対象のコマンドディレクトリを選択" : "ワークフロー作成対象の選択",
-    icon: workflowMode === 'convert' ? "📋" : "📂",
+    icon: workflowMode === 'convert' ? ICONS.clipboard : ICONS.folder,
   });
 
   const hintBoxContent = workflowMode === 'convert' ? [
@@ -102,10 +103,10 @@ const DirectoryScreenContent: React.FC<DirectoryScreenProps> = ({
       />
 
       {/* Directory Selection */}
-      <Section title={workflowMode === 'convert' ? "📋 利用可能なコマンドディレクトリ" : "📁 利用可能なディレクトリ"} spacing="sm">
+      <Section title={workflowMode === 'convert' ? `${ICONS.clipboard} 利用可能なコマンドディレクトリ` : `${ICONS.folder} 利用可能なディレクトリ`} spacing="sm">
         {isLoading ? (
           <Text color={theme.colors.hex.blue}>
-            🔍 ディレクトリを読み込み中...
+            {ICONS.search} ディレクトリを読み込み中...
           </Text>
         ) : (
           <MenuSection
@@ -118,7 +119,7 @@ const DirectoryScreenContent: React.FC<DirectoryScreenProps> = ({
       </Section>
 
       {/* Hint Box */}
-      <HintBox title="💡 ディレクトリ構成について" hints={hintBoxContent} />
+      <HintBox title={`${ICONS.hint} ディレクトリ構成について`} hints={hintBoxContent} />
     </UnifiedScreen>
   );
 };

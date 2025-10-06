@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Box, Text, useApp, useInput, type Key } from 'ink';
-import { UnifiedScreen, ScreenDescription } from '../design-system/index.js';
+import { UnifiedScreen, ScreenDescription, ICONS } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { CheckboxList, StatusBar } from '../components/Interactive.js';
 import { Section, Flex } from '../components/Layout.js';
@@ -100,7 +100,7 @@ export const CommandSelectionScreen: React.FC<CommandSelectionScreenProps> = ({
   const screenConfig = createScreenLayout('selection', {
     title: 'スラッシュコマンド選択',
     subtitle: '変換するスラッシュコマンドを選択してください',
-    icon: '📋'
+    icon: ICONS.clipboard
   });
 
   const statusItems = [
@@ -115,9 +115,9 @@ export const CommandSelectionScreen: React.FC<CommandSelectionScreenProps> = ({
     <UnifiedScreen
       config={screenConfig}
       statusItems={statusItems}
-      customStatusMessage={hasValidSelection ? 
-        '✅ スラッシュコマンドが選択されました - Enterで次へ進みます' : 
-        '📋 変換するスラッシュコマンドを選択してください (Spaceで選択)'}
+      customStatusMessage={hasValidSelection ?
+        `${ICONS.success} スラッシュコマンドが選択されました - Enterで次へ進みます` :
+        `${ICONS.clipboard} 変換するスラッシュコマンドを選択してください (Spaceで選択)`}
     >
       {/* Screen Description */}
       <ScreenDescription
@@ -127,18 +127,18 @@ export const CommandSelectionScreen: React.FC<CommandSelectionScreenProps> = ({
       />
 
       {/* Command Selection */}
-      <Section title={`📋 利用可能なスラッシュコマンド (${targetPath})`} spacing="sm">
+      <Section title={`${ICONS.clipboard} 利用可能なスラッシュコマンド (${targetPath})`} spacing="sm">
         {isLoading ? (
           <Text color={theme.colors.hex.blue}>
-            🔍 スラッシュコマンドを読み込み中...
+            {ICONS.search} スラッシュコマンドを読み込み中...
           </Text>
         ) : availableCommands.length === 0 ? (
           <Box flexDirection="column" gap={1}>
             <Text color={theme.colors.error}>
-              ❌ 選択されたディレクトリにスラッシュコマンドが見つかりません
+              {ICONS.error} 選択されたディレクトリにスラッシュコマンドが見つかりません
             </Text>
             <Text color={theme.colors.text.muted}>
-              💡 .md ファイル形式のスラッシュコマンドを配置してください
+              {ICONS.hint} .md ファイル形式のスラッシュコマンドを配置してください
             </Text>
           </Box>
         ) : (
@@ -153,10 +153,10 @@ export const CommandSelectionScreen: React.FC<CommandSelectionScreenProps> = ({
 
       {/* Selection Summary */}
       {selectedCommands.size > 0 && (
-        <Section title="📊 選択サマリー" spacing="sm">
+        <Section title={`${ICONS.clipboard} 選択サマリー`} spacing="sm">
           <Box flexDirection="column" gap={1}>
             <Text color={theme.colors.hex.green}>
-              ✅ {selectedCommands.size}個のスラッシュコマンドが選択されています
+              {ICONS.success} {selectedCommands.size}個のスラッシュコマンドが選択されています
             </Text>
             <Text color={theme.colors.text.muted}>
               これらのコマンドが新しいサブエージェント形式に変換されます

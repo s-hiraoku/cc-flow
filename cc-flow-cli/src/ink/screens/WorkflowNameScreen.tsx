@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Box, Text, useInput, useApp, type Key } from 'ink';
 import TextInput from 'ink-text-input';
-import { UnifiedScreen, ScreenDescription, HintBox } from '../design-system/index.js';
+import { UnifiedScreen, ScreenDescription, HintBox, ICONS } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
@@ -56,7 +56,7 @@ export const WorkflowNameScreen: React.FC<WorkflowNameScreenProps> = ({
   const screenConfig = createScreenLayout('configuration', {
     title: 'ワークフロー名設定',
     subtitle: `対象ディレクトリ: ${targetPath}`,
-    icon: '✏️'
+    icon: ICONS.edit
   });
 
   const statusItems = [
@@ -79,9 +79,9 @@ export const WorkflowNameScreen: React.FC<WorkflowNameScreenProps> = ({
     <UnifiedScreen
       config={screenConfig}
       statusItems={statusItems}
-      customStatusMessage={!isValidName ? '⚠️ ワークフロー名を入力してください' : 
-        currentField === 'name' ? '✅ Enterキーで次のフィールドに進みます' : 
-        '✅ Enterキーでワークフロー設定を完了します'}
+      customStatusMessage={!isValidName ? `${ICONS.warning} ワークフロー名を入力してください` :
+        currentField === 'name' ? `${ICONS.success} Enterキーで次のフィールドに進みます` :
+        `${ICONS.success} Enterキーでワークフロー設定を完了します`}
     >
       {/* Screen Description */}
       <ScreenDescription
@@ -145,13 +145,13 @@ export const WorkflowNameScreen: React.FC<WorkflowNameScreenProps> = ({
 
       {/* Input Hints */}
       <HintBox
-        title="💡 入力のヒント"
+        title={`${ICONS.hint} 入力のヒント`}
         hints={inputHints}
       />
 
       {/* Operation Hints */}
       <HintBox
-        title="📝 操作方法"
+        title={`${ICONS.edit} 操作方法`}
         hints={operationHints}
       />
     </UnifiedScreen>

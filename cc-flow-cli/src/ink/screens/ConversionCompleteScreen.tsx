@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Box, Text, useInput, useApp, type Key } from 'ink';
-import { UnifiedScreen, ScreenDescription, MenuSection, FeatureHighlights, HintBox } from '../design-system/index.js';
+import { UnifiedScreen, ScreenDescription, MenuSection, FeatureHighlights, HintBox, ICONS } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
@@ -29,10 +29,10 @@ export const ConversionCompleteScreen: React.FC<ConversionCompleteScreenProps> =
   const { contentWidth } = useScreenDimensions();
 
   const choices: MenuItem[] = [
-    { label: '🚀 変換されたエージェントでワークフロー作成', value: 'workflow' },
-    { label: '🔄 新しい変換を実行する', value: 'another' },
-    { label: '🏠 メインメニューに戻る', value: 'menu' },
-    { label: '👋 アプリケーションを終了', value: 'exit' }
+    { label: `${ICONS.rocket} 変換されたエージェントでワークフロー作成`, value: 'workflow' },
+    { label: `${ICONS.convert} 新しい変換を実行する`, value: 'another' },
+    { label: `${ICONS.home} メインメニューに戻る`, value: 'menu' },
+    { label: `${ICONS.exit} アプリケーションを終了`, value: 'exit' }
   ];
 
   // Handle keyboard shortcuts
@@ -61,8 +61,8 @@ export const ConversionCompleteScreen: React.FC<ConversionCompleteScreenProps> =
   // Screen configuration using design system patterns
   const screenConfig = createScreenLayout(result.success ? 'complete' : 'preview', {
     title: 'スラッシュコマンド変換完了',
-    subtitle: result.success ? '🎉 スラッシュコマンド変換が完了しました！' : '⚠️ 変換中に問題が発生しました',
-    icon: result.success ? '✅' : '⚠️'
+    subtitle: result.success ? `${ICONS.party} スラッシュコマンド変換が完了しました！` : `${ICONS.warning} 変換中に問題が発生しました`,
+    icon: result.success ? ICONS.success : ICONS.warning
   });
 
   const statusItems = [
@@ -93,12 +93,12 @@ export const ConversionCompleteScreen: React.FC<ConversionCompleteScreenProps> =
       config={screenConfig}
       version={packageVersion}
       statusItems={statusItems}
-      customStatusMessage={result.success ? 
-        '✅ 変換完了！ワークフロー作成に進むことをお勧めします' : 
-        '⚠️ 問題を確認してから再度お試しください'}
+      customStatusMessage={result.success ?
+        `${ICONS.success} 変換完了！ワークフロー作成に進むことをお勧めします` :
+        `${ICONS.warning} 問題を確認してから再度お試しください`}
     >
       {/* Conversion Results Summary */}
-      <Section title="📋 変換結果" spacing="sm">
+      <Section title={`${ICONS.clipboard} 変換結果`} spacing="sm">
         <Box flexDirection="column" gap={1}>
           {result.success ? (
             <>
@@ -128,7 +128,7 @@ export const ConversionCompleteScreen: React.FC<ConversionCompleteScreenProps> =
 
       {/* Converted Agents List (Success only) */}
       {result.success && (
-        <Section title="🤖 変換されたエージェント" spacing="sm">
+        <Section title={`${ICONS.agent} 変換されたエージェント`} spacing="sm">
           <Box flexDirection="column" gap={1}>
             {result.convertedCommands?.map((command, index) => (
               <Box key={command}>
@@ -145,7 +145,7 @@ export const ConversionCompleteScreen: React.FC<ConversionCompleteScreenProps> =
 
       {/* Generated Files (Success only) */}
       {result.success && (
-        <Section title="📦 生成されたファイル" spacing="sm">
+        <Section title={`${ICONS.package} 生成されたファイル`} spacing="sm">
           <FeatureHighlights
             features={generatedFiles}
             contentWidth={contentWidth}
@@ -155,7 +155,7 @@ export const ConversionCompleteScreen: React.FC<ConversionCompleteScreenProps> =
 
       {/* Next Steps (Success only) */}
       {result.success && (
-        <Section title="🚀 次のステップ" spacing="sm">
+        <Section title={`${ICONS.rocket} 次のステップ`} spacing="sm">
           <FeatureHighlights
             features={nextStepFeatures}
             contentWidth={contentWidth}
@@ -166,7 +166,7 @@ export const ConversionCompleteScreen: React.FC<ConversionCompleteScreenProps> =
       {/* Troubleshooting (Failure only) */}
       {!result.success && (
         <HintBox
-          title="💡 対処方法"
+          title={`${ICONS.hint} 対処方法`}
           hints={troubleshootingHints}
         />
       )}

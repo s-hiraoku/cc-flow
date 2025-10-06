@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Text, useInput, useApp, type Key } from 'ink';
 import Spinner from 'ink-spinner';
-import { UnifiedScreen, ScreenDescription, FeatureHighlights } from '../design-system/index.js';
+import { UnifiedScreen, ScreenDescription, FeatureHighlights, ICONS } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { Section } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
@@ -78,9 +78,9 @@ export const EnvironmentScreen: React.FC<EnvironmentScreenProps> = ({ onNext, on
   const getStatusIcon = (status: EnvironmentCheck['status']) => {
     switch (status) {
       case 'pending': return <Spinner type="dots" />;
-      case 'success': return <Text color="green">✅</Text>;
-      case 'warning': return <Text color="yellow">⚠️</Text>;
-      case 'error': return <Text color="red">❌</Text>;
+      case 'success': return <Text color="green">{ICONS.success}</Text>;
+      case 'warning': return <Text color="yellow">{ICONS.warning}</Text>;
+      case 'error': return <Text color="red">{ICONS.error}</Text>;
       default: return <Text color="gray">-</Text>;
     }
   };
@@ -98,7 +98,7 @@ export const EnvironmentScreen: React.FC<EnvironmentScreenProps> = ({ onNext, on
   const screenConfig = createScreenLayout('processing', {
     title: '実行環境確認',
     subtitle: 'ワークフロー作成に必要な環境を確認しています',
-    icon: '⚙️'
+    icon: ICONS.settings
   });
 
   const statusItems = [
@@ -117,9 +117,9 @@ export const EnvironmentScreen: React.FC<EnvironmentScreenProps> = ({ onNext, on
     <UnifiedScreen
       config={screenConfig}
       statusItems={statusItems}
-      customStatusMessage={!isComplete ? 
-        '環境確認中です... しばらくお待ちください' : 
-        '✅ 環境確認完了 - Enterキーで最終確認画面へ進みます'}
+      customStatusMessage={!isComplete ?
+        '環境確認中です... しばらくお待ちください' :
+        `${ICONS.success} 環境確認完了 - Enterキーで最終確認画面へ進みます`}
     >
       {/* Environment Check Results */}
       <Section title="環境チェック結果" spacing="sm">
@@ -140,12 +140,12 @@ export const EnvironmentScreen: React.FC<EnvironmentScreenProps> = ({ onNext, on
       {isComplete && (
         <>
           <ScreenDescription
-            heading="➡️ 環境確認完了 - 次のステップへ"
+            heading={`${ICONS.arrow} 環境確認完了 - 次のステップへ`}
             description="ワークフロー作成の準備が整いました。最終確認画面に進んでワークフローを生成してください。"
             align="center"
           />
 
-          <Section title="✨ 検出された機能" spacing="sm">
+          <Section title={`${ICONS.create} 検出された機能`} spacing="sm">
             <FeatureHighlights
               features={detectedFeatures}
               contentWidth={contentWidth}
@@ -154,7 +154,7 @@ export const EnvironmentScreen: React.FC<EnvironmentScreenProps> = ({ onNext, on
 
           <Box marginTop={1} marginBottom={1}>
             <Text color={theme.colors.hex.orange}>
-              💡 まだワークフローは作成されていません。Enterキーを押してワークフロー作成を完了してください。
+              {ICONS.hint} まだワークフローは作成されていません。Enterキーを押してワークフロー作成を完了してください。
             </Text>
           </Box>
         </>

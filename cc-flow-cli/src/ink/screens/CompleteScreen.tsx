@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Box, Text, useInput, useApp, type Key } from 'ink';
-import { UnifiedScreen, ScreenDescription, MenuSection, FeatureHighlights, HintBox } from '../design-system/index.js';
+import { UnifiedScreen, ScreenDescription, MenuSection, FeatureHighlights, HintBox, ICONS } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
@@ -22,9 +22,9 @@ export const CompleteScreen: React.FC<CompleteScreenProps> = ({ config, onAnothe
   const { contentWidth } = useScreenDimensions();
 
   const choices: MenuItem[] = [
-    { label: '🔄 新しいワークフローを作成する', value: 'another' },
-    { label: '🏠 メインメニューに戻る', value: 'convert' },
-    { label: '👋 アプリケーションを終了', value: 'exit' }
+    { label: `${ICONS.convert} 新しいワークフローを作成する`, value: 'another' },
+    { label: `${ICONS.home} メインメニューに戻る`, value: 'convert' },
+    { label: `${ICONS.exit} アプリケーションを終了`, value: 'exit' }
   ];
 
   // Handle keyboard shortcuts
@@ -50,8 +50,8 @@ export const CompleteScreen: React.FC<CompleteScreenProps> = ({ config, onAnothe
   // Screen configuration using design system patterns
   const screenConfig = createScreenLayout('complete', {
     title: 'ワークフロー作成完了',
-    subtitle: '🎉 ワークフローの作成が完了しました！',
-    icon: '🎉'
+    subtitle: `${ICONS.party} ワークフローの作成が完了しました！`,
+    icon: ICONS.party
   });
 
   const statusItems = [
@@ -76,10 +76,10 @@ export const CompleteScreen: React.FC<CompleteScreenProps> = ({ config, onAnothe
       config={screenConfig}
       version={packageVersion}
       statusItems={statusItems}
-      customStatusMessage="✅ お疲れ様でした！ワークフローをお試しください"
+      customStatusMessage={`${ICONS.success} お疲れ様でした！ワークフローをお試しください`}
     >
       {/* Workflow Summary */}
-      <Section title="📋 作成されたワークフロー" spacing="sm">
+      <Section title={`${ICONS.clipboard} 作成されたワークフロー`} spacing="sm">
         <Box flexDirection="column" gap={1}>
           <Flex>
             <Text color={theme.colors.hex.lightBlue}>コマンド名: </Text>
@@ -131,7 +131,7 @@ export const CompleteScreen: React.FC<CompleteScreenProps> = ({ config, onAnothe
 
       {/* Usage Hints */}
       <HintBox
-        title="💡 ヒント"
+        title={`${ICONS.hint} ヒント`}
         hints={usageHints}
       />
 
