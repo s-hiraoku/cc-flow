@@ -57,7 +57,7 @@ create-workflow.sh <agents-dir> <commands-dir> --steps-json <path>
 {
   "workflowName": "my-workflow",
   "workflowPurpose": "ワークフローの目的",
-  "workflowModel": "claude-3-5-sonnet-20241022",
+  "workflowModel": "claude-sonnet-4-5-20250929",
   "workflowArgumentHint": "<context>",
   "workflowSteps": [
     {

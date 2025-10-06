@@ -1,7 +1,9 @@
 import { execSync, type ExecSyncOptions } from 'child_process';
 import { join, dirname, resolve } from 'path';
-import { existsSync, accessSync, constants } from 'fs';
-import { fileURLToPath } from 'url';
+import { existsSync } from 'fs';
+import { tmpdir } from 'os';
+import { writeFileSync, unlinkSync } from 'fs';
+
 import { createRequire } from 'module';
 import type { WorkflowConfig } from '../models/Agent.js';
 import { CLIError } from '../utils/ErrorHandler.js';
@@ -14,201 +16,181 @@ export class ScriptExecutor {
   }
 
   async executeWorkflowCreation(config: WorkflowConfig): Promise<void> {
-    const { targetPath, workflowName, purpose, selectedAgents } = config;
+    // 1. cc-flow-coreスクリプトのパスを取得
+    const scriptPath = this.getCoreScriptPath();
     
-    // Validate environment before execution
-    await this.validateEnvironment();
+    // 2. 絶対パスに変換
+    const agentsDir = this.resolveAgentsDir(config.targetPath);
+    const commandsDir = this.resolveCommandsDir();
     
-    const scriptPath = this.getScriptPath();
-    const scriptsDir = dirname(scriptPath);
-    const finalWorkflowName = workflowName || this.generateDefaultWorkflowName(targetPath);
-    
-    // Set environment variables for workflow name and purpose
-    process.env['WORKFLOW_NAME'] = finalWorkflowName;
-    if (purpose) {
-      process.env['WORKFLOW_PURPOSE'] = purpose;
-    }
-    
-    // Script expects: <targetPath> [agent1,agent2,agent3] (comma-separated for item-names mode)
-    // If no agents are selected, script will run in interactive mode
-    // Use relative path when executing from scripts directory
-    const scriptName = './create-workflow.sh';
-    let command = `"${scriptName}" "${targetPath}"`;
-
-    if (selectedAgents && selectedAgents.length > 0) {
-      const agentNames = selectedAgents.map(agent => agent.name).join(',');
-      // Add trailing comma to ensure item-names mode (not indices mode)
-      const agentNamesWithComma = agentNames + ',';
-      command = `"${scriptName}" "${targetPath}" "${agentNamesWithComma}"`;
-    }
-    
-    console.log(`\n🚀 Executing workflow creation script:`);
-    console.log(`  Script path: ${scriptPath}`);
-    console.log(`  Working directory: ${scriptsDir}`);
-    console.log(`  Target path: ${targetPath}`);
-    
-    if (selectedAgents && selectedAgents.length > 0) {
-      const agentNames = selectedAgents.map(agent => agent.name).join(',');
-      console.log(`  Agent names: ${agentNames}`);
-      console.log(`  Mode: item-names (comma-separated)`);
-    } else {
-      console.log(`  Agent names: (none - interactive mode)`);
-      console.log(`  Mode: interactive`);
-    }
-    
-    console.log(`  Workflow name: ${finalWorkflowName}`);
-    console.log(`  Full command: ${command}`);
-    
-    // Execute from scripts directory to match shell script expectations
-    const execOptions: ExecSyncOptions = {
-      cwd: scriptsDir,
-      stdio: 'inherit',
-      encoding: 'utf8',
-      timeout: 30000 // 30 second timeout
-    };
+    // 3. JSONファイルを作成
+    const tempJsonFile = this.createWorkflowConfigJson(config);
     
     try {
-      execSync(command, execOptions);
+      // 4. スクリプト実行（絶対パスを渡す）
+      const command = `bash "${scriptPath}" "${agentsDir}" "${commandsDir}" --steps-json "${tempJsonFile}"`;
+
+      console.log('🚀 Executing workflow creation:');
+      console.log(`   Script: ${scriptPath}`);
+      console.log(`   Agents: ${agentsDir}`);
+      console.log(`   Output: ${commandsDir}`);
+      console.log(`   Config: ${tempJsonFile}`);
+      console.log(`   Command: ${command}`);
+      console.log('');
+      console.log('⏳ Starting script execution...');
+
+      execSync(command, {
+        cwd: this.basePath,
+        stdio: 'inherit',
+        timeout: 30000,
+        env: { ...process.env, VERBOSE: '1' }
+      });
+
+      console.log('✅ Script execution completed');
+      
+    } finally {
+      // 5. 一時ファイルを削除
+      this.cleanupTempFile(tempJsonFile);
+    }
+  }
+  
+  private getCoreScriptPath(): string {
+    const require = createRequire(import.meta.url);
+    
+    try {
+      // cc-flow-coreパッケージのパスを解決
+      const pkgPath = require.resolve('@hiraoku/cc-flow-core/package.json');
+      const coreRoot = dirname(pkgPath);
+      
+      // workflow/create-workflow.sh のパス
+      const scriptPath = join(coreRoot, 'workflow/create-workflow.sh');
+      
+      if (!existsSync(scriptPath)) {
+        throw new CLIError(
+          'cc-flow-core script not found',
+          { 
+            operation: 'script-resolution', 
+            component: 'ScriptExecutor',
+            details: { scriptPath } 
+          }
+        );
+      }
+      
+      return scriptPath;
     } catch (error) {
       throw new CLIError(
-        'Workflow creation script execution failed',
-        {
-          operation: 'script-execution',
-          component: 'ScriptExecutor',
-          details: {
-            command,
-            config,
-            error: error instanceof Error ? error.message : String(error)
-          }
+        '@hiraoku/cc-flow-core package not found. Please run: npm install',
+        { 
+          operation: 'package-resolution',
+          component: 'ScriptExecutor'
         },
         error instanceof Error ? error : undefined
       );
     }
   }
-
-  private getScriptPath(): string {
-    console.log('🔍 Debug: Searching for script...');
-
-    // First try to find script in user's project (for development)
-    // Check if we're in cc-flow-cli directory structure
-    const userProjectScript1 = join(this.basePath, 'scripts/create-workflow.sh');
-    const userProjectScriptShared = join(this.basePath, 'scripts/workflow/create-workflow.sh');
-    const userProjectScript2 = join(this.basePath, 'cc-flow-cli/scripts/create-workflow.sh');
-
-    console.log(`🔍 Debug: Checking user project: ${userProjectScript1}`);
-    if (existsSync(userProjectScript1)) {
-      console.log('✅ Debug: Found in user project (scripts/)');
-      return userProjectScript1;
-    }
-
-    console.log(`🔍 Debug: Checking user project shared dir: ${userProjectScriptShared}`);
-    if (existsSync(userProjectScriptShared)) {
-      console.log('✅ Debug: Found in user project (scripts/workflow/)');
-      return userProjectScriptShared;
-    }
-
-    console.log(`🔍 Debug: Checking user project: ${userProjectScript2}`);
-    if (existsSync(userProjectScript2)) {
-      console.log('✅ Debug: Found in user project (cc-flow-cli/scripts/)');
-      return userProjectScript2;
+  
+  private resolveAgentsDir(targetPath: string): string {
+    // targetPath例: './agents/spec', './agents', '.claude/agents/demo'
+    
+    // "./" プレフィックスを除去
+    const cleaned = targetPath.replace(/^\.\//, '');
+    
+    // ".claude" が含まれている場合はそのまま
+    if (cleaned.startsWith('.claude/')) {
+      return resolve(this.basePath, cleaned);
     }
     
-    // Fall back to package's built-in script (for npx usage)
-    try {
-      // Method 1: Try to resolve package location using require.resolve
-      const require = createRequire(import.meta.url);
-      const packagePath = require.resolve('@hiraoku/cc-flow-cli/package.json');
-      const packageRoot = dirname(packagePath);
-      const packageScript1 = join(packageRoot, 'scripts/create-workflow.sh');
-      const packageScriptShared = join(packageRoot, 'scripts/workflow/create-workflow.sh');
-      console.log(`🔍 Debug: Package method 1: ${packageScript1}`);
-      if (existsSync(packageScript1)) {
-        console.log('✅ Debug: Found via package resolution');
-        return packageScript1;
-      }
-      console.log(`🔍 Debug: Package method 1 shared: ${packageScriptShared}`);
-      if (existsSync(packageScriptShared)) {
-        console.log('✅ Debug: Found shared workflow script via package resolution');
-        return packageScriptShared;
-      }
-    } catch (error) {
-      console.log(`❌ Debug: Package resolution failed: ${error}`);
+    // "agents/*" 形式の場合は ".claude/agents/*" に変換
+    if (cleaned.startsWith('agents')) {
+      return resolve(this.basePath, '.claude', cleaned);
     }
     
-    try {
-      // Method 2: Use current file location
-      const currentFile = fileURLToPath(import.meta.url);
-      const currentDir = dirname(currentFile);
-      console.log(`🔍 Debug: Current file: ${currentFile}`);
-      console.log(`🔍 Debug: Current dir: ${currentDir}`);
-      
-      // Try different possible paths
-      const possiblePaths = [
-        join(currentDir, '../../scripts/create-workflow.sh'),  // dist/services -> root
-        join(currentDir, '../../scripts/workflow/create-workflow.sh'),
-        join(currentDir, '../../../scripts/create-workflow.sh'), // node_modules case
-        join(currentDir, '../../../scripts/workflow/create-workflow.sh'),
-        join(currentDir, '../../../../scripts/create-workflow.sh'), // deeper nesting
-        join(currentDir, '../../../../scripts/workflow/create-workflow.sh'),
-      ];
-      
-      for (const packageScript of possiblePaths) {
-        console.log(`🔍 Debug: Checking package path: ${packageScript}`);
-        if (existsSync(packageScript)) {
-          console.log('✅ Debug: Found in package');
-          return packageScript;
-        }
-      }
-    } catch (error) {
-      console.log(`❌ Debug: Error in module path detection: ${error}`);
-    }
-    
-    console.log('❌ Debug: Script not found anywhere');
-    // Return default path for error reporting
-    return join(this.basePath, 'scripts/create-workflow.sh');
+    // その他はそのまま解決
+    return resolve(this.basePath, targetPath);
   }
-
+  
+  private resolveCommandsDir(): string {
+    return resolve(this.basePath, '.claude/commands');
+  }
+  
+  private createWorkflowConfigJson(config: WorkflowConfig): string {
+    
+    const tempFile = join(tmpdir(), `cc-flow-config-${Date.now()}.json`);
+    
+    const workflowConfig = {
+      workflowName: config.workflowName || this.generateDefaultWorkflowName(config.targetPath),
+      workflowPurpose: config.purpose || 'Custom workflow',
+      workflowModel: config.environment || 'claude-sonnet-4-5-20250929',
+      workflowArgumentHint: '<context>',
+      workflowSteps: this.buildWorkflowSteps(config)
+    };
+    
+    writeFileSync(tempFile, JSON.stringify(workflowConfig, null, 2), 'utf8');
+    
+    console.log('📝 Workflow configuration:');
+    console.log(JSON.stringify(workflowConfig, null, 2));
+    
+    return tempFile;
+  }
+  
+  private buildWorkflowSteps(config: WorkflowConfig): Array<{
+    title: string;
+    mode: string;
+    purpose: string;
+    agents: string[];
+  }> {
+    const agents = config.selectedAgents || [];
+    
+    return [{
+      title: 'Main Flow',
+      mode: 'sequential',
+      purpose: config.purpose || 'Execute workflow',
+      agents: agents.map(a => a.name)
+    }];
+  }
+  
+  private cleanupTempFile(tempFile: string): void {
+    
+    try {
+      if (existsSync(tempFile)) {
+        unlinkSync(tempFile);
+        console.log('🗑️  Cleaned up temp file');
+      }
+    } catch (error) {
+      console.warn('Failed to cleanup temp file:', tempFile);
+    }
+  }
+  
   private generateDefaultWorkflowName(targetPath: string): string {
-    if (targetPath === './agents') {
+    // './agents' → 'all-workflow'
+    // './agents/spec' → 'spec-workflow'
+    // '.claude/agents/demo' → 'demo-workflow'
+    
+    const cleaned = targetPath.replace(/^\.\//, '').replace(/^\.claude\//, '');
+    
+    if (cleaned === 'agents') {
       return 'all-workflow';
     }
     
-    const pathParts = targetPath.split('/');
-    const dirName = pathParts[pathParts.length - 1];
+    const parts = cleaned.split('/');
+    const dirName = parts[parts.length - 1];
     return `${dirName}-workflow`;
   }
-
-
+  
   /**
    * Comprehensive environment validation
    */
-  private async validateEnvironment(): Promise<void> {
-    const scriptPath = this.getScriptPath();
-    
-    // Check if script file exists
-    if (!existsSync(scriptPath)) {
-      throw new CLIError(
-        `Workflow creation script not found at: ${scriptPath}`,
-        {
-          operation: 'environment-validation',
-          component: 'ScriptExecutor',
-          details: { expectedPath: scriptPath }
-        }
-      );
-    }
-    
-    // Check if script is executable
+  async validateEnvironment(): Promise<void> {
     try {
-      accessSync(scriptPath, constants.F_OK | constants.X_OK);
+      this.getCoreScriptPath();
     } catch (error) {
       throw new CLIError(
-        `Workflow creation script is not executable: ${scriptPath}`,
-        {
+        'cc-flow-core is not installed or script is missing',
+        { 
           operation: 'environment-validation',
           component: 'ScriptExecutor',
           details: { 
-            scriptPath,
-            suggestion: 'Try running: chmod +x ' + scriptPath
+            suggestion: 'Run: npm install @hiraoku/cc-flow-core' 
           }
         },
         error instanceof Error ? error : undefined
@@ -235,7 +217,7 @@ export class ScriptExecutor {
   async getScriptUsage(): Promise<string> {
     await this.validateEnvironment();
     
-    const scriptPath = this.getScriptPath();
+    const scriptPath = this.getCoreScriptPath();
     const execOptions: ExecSyncOptions = {
       cwd: this.basePath,
       encoding: 'utf8',
@@ -244,7 +226,7 @@ export class ScriptExecutor {
     };
     
     try {
-      const output = execSync(`"${scriptPath}"`, execOptions);
+      const output = execSync(`bash "${scriptPath}" --help`, execOptions);
       return output.toString();
     } catch (error) {
       // The script may return usage info in stderr when called without arguments

@@ -73,6 +73,7 @@
     "url": "https://github.com/s-hiraoku/cc-flow/issues"
   },
   "dependencies": {
+    "@hiraoku/cc-flow-core": "^0.0.8",
     "@types/react": "^19.1.13",
     "date-and-time": "^4.0.5",
     "ink": "^6.3.0",
