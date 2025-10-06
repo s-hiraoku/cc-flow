@@ -97,11 +97,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
         <Section spacing="sm" align="center">
           <Box flexDirection="column" width="100%" alignItems="center">
             {heroLines.map((line, index) => (
-              <Text
-                key={`hero-${index}`}
-                color={theme.colors.yellow}
-                bold
-              >
+              <Text key={`hero-${index}`} color={theme.colors.yellow} bold>
                 {line}
               </Text>
             ))}
@@ -134,7 +130,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
 
         <Section spacing="sm" align="center">
           <StatusBar
-            center="↑↓: 選択 | Enter: 実行 | Q: 終了"
+            center="↑↓: 選択 | Enter: 実行"
             variant="info"
             width={contentWidth}
           />
