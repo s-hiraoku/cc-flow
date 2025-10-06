@@ -24,14 +24,13 @@ export default function EditorPage() {
     handleNodesChange,
     handleEdgesChange,
     handleConnect,
-    generatePreviewJSON,
     canSave,
   } = useWorkflowEditor();
 
   const { agents, loading: agentsLoading, error: agentsError } = useAgents();
   const { generating, currentStep, error: generateError, result: generateResult, generateWorkflow } = useWorkflowGenerate();
-  const { restoring, error: restoreError, restoreWorkflow } = useWorkflowRestore();
-  const { saving, error: saveError, saveWorkflow } = useWorkflowSave();
+  const { restoreWorkflow } = useWorkflowRestore();
+  const { saveWorkflow } = useWorkflowSave();
 
   // Auto-hide success message after 5 seconds with fade out animation
   const { isVisible: showSuccessMessage, isAnimating: isSuccessVisible } = useAutoHideMessage(

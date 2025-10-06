@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { spawn } from 'child_process';
-import { writeFile, unlink, readFile } from 'fs/promises';
+import { writeFile, unlink, readFile, mkdir, rm } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
@@ -51,11 +51,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateW
       );
     }
 
-    // Create temporary JSON file
-    const timestamp = Date.now();
-    const tempFileName = `workflow-${timestamp}.json`;
-    tempFilePath = join(tmpdir(), tempFileName);
-    await writeFile(tempFilePath, json, 'utf-8');
+    // Create a secure temporary directory with restrictive permissions
+    const tempDir = await mkdir(join(tmpdir(), `cc-flow-${Date.now()}`), { mode: 0o700 });
+    tempFilePath = join(tempDir.toString(), 'workflow.json');
+    await writeFile(tempFilePath, json, { mode: 0o600, encoding: 'utf-8' });
 
     // Get script path from @hiraoku/cc-flow-core package
     // Try to resolve package location - handle Next.js standalone build quirks
@@ -89,18 +88,17 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateW
       claudeRootPath,
     });
 
-    // Check if temp file was actually created
+    // Check if temp file was actually created and log its content
     try {
       const { stat } = await import('fs/promises');
       const fileStats = await stat(tempFilePath);
+      // Read file content using already obtained stats
+      const fileContent = await readFile(tempFilePath, 'utf-8');
       console.log('Temp file created successfully:', {
         size: fileStats.size,
         path: tempFilePath,
+        contentPreview: fileContent.substring(0, 500),
       });
-
-      // Read and log the JSON content
-      const fileContent = await readFile(tempFilePath, 'utf-8');
-      console.log('Temp file content:', fileContent.substring(0, 500));
     } catch (err) {
       console.error('Failed to verify temp file:', err);
     }

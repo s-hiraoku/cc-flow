@@ -17,7 +17,7 @@ async function scanAgentsDirectory(dirPath: string, category: string = ''): Prom
         // Recursively scan subdirectories
         const subAgents = await scanAgentsDirectory(fullPath, entry);
         agents.push(...subAgents);
-      } else if (extname(entry) === '.md') {
+      } else if (stats.isFile() && extname(entry) === '.md') {
         // Parse agent markdown file
         try {
           const content = await readFile(fullPath, 'utf-8');

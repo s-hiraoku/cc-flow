@@ -2,7 +2,7 @@ import { execSync, type ExecSyncOptions } from 'child_process';
 import { join, dirname, resolve } from 'path';
 import { existsSync } from 'fs';
 import { tmpdir } from 'os';
-import { writeFileSync, unlinkSync } from 'fs';
+import { writeFileSync, unlinkSync, mkdtempSync, rmdirSync } from 'fs';
 
 import { createRequire } from 'module';
 import type { WorkflowConfig } from '../models/Agent.js';
@@ -114,9 +114,10 @@ export class ScriptExecutor {
   }
   
   private createWorkflowConfigJson(config: WorkflowConfig): string {
-    
-    const tempFile = join(tmpdir(), `cc-flow-config-${Date.now()}.json`);
-    
+    // Create a secure temporary directory with restrictive permissions (0700)
+    const tempDir = mkdtempSync(join(tmpdir(), 'cc-flow-'));
+    const tempFile = join(tempDir, 'config.json');
+
     const workflowConfig = {
       workflowName: config.workflowName || this.generateDefaultWorkflowName(config.targetPath),
       workflowPurpose: config.purpose || 'Custom workflow',
@@ -124,12 +125,12 @@ export class ScriptExecutor {
       workflowArgumentHint: '<context>',
       workflowSteps: this.buildWorkflowSteps(config)
     };
-    
-    writeFileSync(tempFile, JSON.stringify(workflowConfig, null, 2), 'utf8');
-    
+
+    writeFileSync(tempFile, JSON.stringify(workflowConfig, null, 2), { mode: 0o600, encoding: 'utf8' });
+
     console.log('📝 Workflow configuration:');
     console.log(JSON.stringify(workflowConfig, null, 2));
-    
+
     return tempFile;
   }
   

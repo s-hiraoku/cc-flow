@@ -10,7 +10,6 @@ import {
   createScreenLayout,
   useScreenDimensions,
 } from "../design-system/ScreenPatterns.js";
-import { StatusBar } from "../components/Interactive.js";
 import { Section, Flex } from "../components/Layout.js";
 import { useTheme } from "../themes/theme.js";
 import type { Agent } from "../utils/directoryUtils.js";

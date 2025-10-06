@@ -15,6 +15,8 @@ vi.mock('fs', () => ({
   accessSync: vi.fn(),
   writeFileSync: vi.fn(),
   unlinkSync: vi.fn(),
+  mkdtempSync: vi.fn(() => '/tmp/cc-flow-test'),
+  rmdirSync: vi.fn(),
   constants: {
     F_OK: 0,
     X_OK: 1

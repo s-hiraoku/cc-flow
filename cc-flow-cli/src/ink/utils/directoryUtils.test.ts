@@ -6,9 +6,8 @@ import {
   getCommandsFromPath
 } from './directoryUtils.js';
 import * as fs from 'fs';
-import * as path from 'path';
 
-// Mock fs and path modules
+// Mock fs module
 vi.mock('fs', async () => {
   const actual = await vi.importActual<typeof import('fs')>('fs');
   return {

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Box, Text, useInput, useApp, type Key } from 'ink';
-import { UnifiedScreen, ScreenDescription, MenuSection, FeatureHighlights, HintBox, ICONS } from '../design-system/index.js';
+import { UnifiedScreen, MenuSection, FeatureHighlights, HintBox, ICONS } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { Section, Flex } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
