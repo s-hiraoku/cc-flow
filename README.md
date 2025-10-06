@@ -9,7 +9,9 @@
    ╚═════╝ ╚═════╝      ╚═╝     ╚══════╝ ╚═════╝  ╚══╝╚══╝
 ```
 
-🚀 **Create powerful Claude Code workflows with a beautiful interactive terminal interface**
+🚀 **Create powerful Claude Code workflows with a modern interactive terminal interface**
+
+> **Latest:** v0.1.0 features a modern icon system with cross-terminal compatibility
 
 CC-Flow makes it easy to build and run custom workflows that chain multiple Claude Code agents together. No complex configuration needed - just launch the interactive TUI and create workflows visually!
 
@@ -73,22 +75,25 @@ That's it! 🎉 Your custom workflow is ready to use.
 
 ## 🎨 Features
 
-### **Beautiful Terminal Interface**
+### **Modern Terminal Interface (v0.1.0)**
 
-- 3-color ASCII art logo (centers when width allows)
-- Intuitive menus and visual feedback
-- Keyboard shortcuts and accessibility support
-- Works in standard terminal environments
+- ✨ **Modern icon system** using `figures` package for cross-terminal compatibility
+- 🎨 **Tailwind CSS-inspired colors** for better readability
+- 📐 **Improved layout** with proper full-width character handling
+- ⌨️ **Clear visual feedback** with distinct selection (▹) and action (→) icons
+- 🌐 **Bilingual support** (English/Japanese labels)
 
 **Terminal Experience:**
 
 ```
 ┌─ Select Agents (spec directory) ────────┐
 │ Available agents:                        │
-│ > ○ spec-init   🚀 Initialize project   │
-│   ○ spec-design 🎨 Create architecture  │
-│   ○ spec-impl   ⚙️  Implement features   │
+│ ▹ ● spec-init   → Initialize project    │
+│   ● spec-design → Create architecture   │
+│   ● spec-impl   → Implement features    │
 └──────────────────────────────────────────┘
+
+Icons: ▹ = Selected | → = Action | ● = Agent
 ```
 
 ### **Easy Workflow Creation**
@@ -186,14 +191,16 @@ You can run the TUI via npx or install globally. The TUI ultimately invokes a lo
 
 Important: If you are using the CLI outside this repository, make sure your project has the CC-Flow helper files that the TUI calls:
 
-- `scripts/` (contains `create-workflow.sh` and libraries)
-- `templates/` (workflow templates)
+- `scripts/workflow/` (contains `create-workflow.sh` and supporting libraries)
+- `scripts/create-workflow.sh` (wrapper that invokes the shared script)
+- `cc-flow-cli/templates/` (workflow templates)
 
-If you need to copy them manually from this repo, use the package folder paths:
+If you need to copy them manually from this repo, use:
 
 ```bash
 # from repo root
-cp -r cc-flow-cli/scripts cc-flow-cli/templates /path/to/your-project/
+cp -r scripts/workflow scripts/create-workflow.sh cc-flow-cli/templates /path/to/your-project/
+chmod +x /path/to/your-project/scripts/create-workflow.sh
 ```
 
 Repository: https://github.com/s-hiraoku/cc-flow
@@ -234,46 +241,37 @@ Yes! CC-Flow comes with sample `spec` agents for specification-driven developmen
 
 ### **Can I run workflow generation without the TUI?**
 
-Yes. The TUI delegates to a local script. You can call it directly for scripting/CI:
+The TUI uses `@hiraoku/cc-flow-core` for workflow generation, which provides both programmatic API and CLI:
 
 ```bash
-# New recommended path format
-scripts/create-workflow.sh ./agents/spec "1 3 4"
+# Using cc-flow-core CLI (recommended)
+npx @hiraoku/cc-flow-core create-workflow \
+  --agents "spec-init,spec-requirements,spec-design" \
+  --name "my-workflow" \
+  --purpose "API specification workflow"
 
-# Or specify agent names (comma-separated)
-scripts/create-workflow.sh ./agents/spec "spec-init,spec-requirements,spec-design"
-
-# With custom purpose description
-scripts/create-workflow.sh ./agents/spec "1 3 4" "API仕様書作成ワークフロー"
-
-# Cross-category selection (when using ./agents)
-scripts/create-workflow.sh ./agents "spec-init,utility-date"
-
-# Interactive mode with custom purpose
-scripts/create-workflow.sh ./agents/spec "" "カスタムワークフロー目的"
-
-# Back-compat short form (deprecated; emits a warning)
-scripts/create-workflow.sh spec "1 3 4"
+# Using the TUI programmatically
+npx @hiraoku/cc-flow-cli --headless \
+  --directory ".claude/agents/spec" \
+  --agents "1,3,4" \
+  --output ".claude/commands/spec-workflow.md"
 ```
 
-This generates `.claude/commands/<dir>-workflow.md` which you run inside Claude Code as a slash command, for example: `/spec-workflow "your context"`.
+This generates `.claude/commands/<workflow-name>.md` which you run inside Claude Code as a slash command, for example: `/my-workflow "your context"`.
 
 ### **Can I convert slash commands without the TUI?**
 
-Yes. You can use the conversion script directly:
+The conversion feature is integrated into `@hiraoku/cc-flow-core`:
 
 ```bash
-# Convert all commands in demo directory
-scripts/convert-slash-commands.sh demo
+# Using cc-flow-core CLI
+npx @hiraoku/cc-flow-core convert \
+  --input ".claude/commands/demo" \
+  --output ".claude/agents/demo"
 
-# Dry run to see what would be converted
-scripts/convert-slash-commands.sh demo --dry-run
-
-# Convert with custom output directory
-scripts/convert-slash-commands.sh demo --output-dir .claude/agents/custom
-
-# Convert specific directory with template
-scripts/convert-slash-commands.sh utility --template templates/custom-agent-template.md
+# Using the TUI with automation
+npx @hiraoku/cc-flow-cli --mode convert \
+  --directory ".claude/commands/demo"
 ```
 
 This converts slash commands from `.claude/commands/` to sub-agents in `.claude/agents/` that can be used in workflows.
@@ -312,5 +310,40 @@ Happy workflow building! 🎉
 
 ---
 
-**CC-Flow Preview (0.x)**  
-Feature-complete enough for daily use; some flows (e.g. editing from the preview screen) are planned and not yet implemented.
+## 📦 Packages
+
+- **[@hiraoku/cc-flow-cli](./cc-flow-cli/)** (v0.1.0) - Interactive TUI for workflow creation
+- **[@hiraoku/cc-flow-core](https://github.com/s-hiraoku/cc-flow-core)** (v0.0.8) - Core workflow generation engine
+
+## 🗺️ Roadmap
+
+### Current (v0.1.x)
+- ✅ Modern icon system with cross-terminal compatibility
+- ✅ Improved layout and visual feedback
+- ✅ Slash command to agent conversion
+
+### Next (v0.2.x)
+- 🌐 **Web Editor** (Issue #13): Next.js + ReactFlow visual workflow editor
+- 📊 **Workflow Templates**: Pre-built templates library
+- 🔍 **Agent Search**: Full-text search across agents
+
+### Future
+- 📝 **Enhanced Validation**: Real-time workflow validation
+- 🔄 **Workflow Versioning**: Track and manage workflow versions
+- 🤝 **Team Collaboration**: Share and import workflows
+
+## 📄 License
+
+MIT
+
+## 🔗 Links
+
+- [NPM Package](https://www.npmjs.com/package/@hiraoku/cc-flow-cli)
+- [GitHub Repository](https://github.com/s-hiraoku/cc-flow)
+- [Issue Tracker](https://github.com/s-hiraoku/cc-flow/issues)
+- [Changelog](./cc-flow-cli/CHANGELOG.md)
+
+---
+
+**CC-Flow v0.1.0**
+Production-ready TUI for Claude Code workflow automation.

@@ -75,41 +75,41 @@ export const createTheme = (terminalInfo: {
 
   return {
     colors: {
-      primary: "cyan",
-      secondary: "blue",
-      success: "green",
-      warning: "yellow",
-      error: "red",
-      info: "blue",
-      muted: "gray",
-      border: "cyan",
+      primary: "#60A5FA", // Bright Blue - より明るく目立つ
+      secondary: "#818CF8", // Indigo - 落ち着いた紫
+      success: "#34D399", // Emerald - 明るいグリーン
+      warning: "#FBBF24", // Amber - 見やすい黄色
+      error: "#F87171", // Red - ソフトな赤
+      info: "#38BDF8", // Sky Blue - 情報用の青
+      muted: "#9CA3AF", // Gray 400 - 読みやすいグレー
+      border: "#60A5FA", // Bright Blue - プライマリと同じ
       background: "black",
       text: {
-        primary: "white",
-        secondary: "cyan",
-        muted: "gray",
+        primary: "#F3F4F6", // Gray 100 - 真っ白より目に優しい
+        secondary: "#A5B4FC", // Indigo 300 - セカンダリテキスト
+        muted: "#9CA3AF", // Gray 400 - 控えめなテキスト
         inverse: "black",
       },
       // Additional standard colors
       white: "white",
       black: "black",
-      red: "red",
-      green: "green",
-      yellow: "yellow",
-      blue: "blue",
-      magenta: "magenta",
-      cyan: "cyan",
-      gray: "gray",
+      red: "#F87171",
+      green: "#34D399",
+      yellow: "#FBBF24",
+      blue: "#60A5FA",
+      magenta: "#E879F9",
+      cyan: "#22D3EE",
+      gray: "#9CA3AF",
       // Hex colors for advanced styling
       hex: {
-        blue: "#3B82F6",
-        darkBlue: "#1E40AF",
-        lightBlue: "#60A5FA",
-        tealBlue: "#0891B2",
-        green: "#10B981",
-        orange: "#F97316",
-        purple: "#A855F7",
-        pink: "#EC4899",
+        blue: "#60A5FA", // Blue 400
+        darkBlue: "#2563EB", // Blue 600
+        lightBlue: "#93C5FD", // Blue 300
+        tealBlue: "#06B6D4", // Cyan 500
+        green: "#34D399", // Emerald 400
+        orange: "#FB923C", // Orange 400
+        purple: "#C084FC", // Purple 400
+        pink: "#F472B6", // Pink 400
       },
     },
     spacing: {
@@ -124,7 +124,7 @@ export const createTheme = (terminalInfo: {
       maxWidth,
       paddingX: 2,
       paddingY: 1,
-      borderStyle: "round",
+      borderStyle: "double",
     },
     responsive: {
       isCompact: safeHeight < 20 || safeWidth < 70,

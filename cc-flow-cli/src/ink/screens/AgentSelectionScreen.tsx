@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Box, Text, useApp, useInput } from 'ink';
-import { UnifiedScreen, ScreenDescription } from '../design-system/index.js';
+import { Box, Text, useApp, useInput, type Key } from 'ink';
+import { UnifiedScreen, ScreenDescription, ICONS } from '../design-system/index.js';
 import { createScreenLayout, useScreenDimensions } from '../design-system/ScreenPatterns.js';
 import { CheckboxList, StatusBar } from '../components/Interactive.js';
 import { Section, Flex } from '../components/Layout.js';
@@ -66,7 +66,7 @@ export const AgentSelectionScreen: React.FC<AgentSelectionScreenProps> = ({
     }
   }, [availableAgents, onNext, selectedAgents]);
 
-  useInput(useCallback((input: string, key: any) => {
+  useInput(useCallback((input: string, key: Key) => {
     if (key.return && selectedAgents.size > 0) {
       handleNext();
     } else if (key.escape) {
@@ -79,12 +79,12 @@ export const AgentSelectionScreen: React.FC<AgentSelectionScreenProps> = ({
   const selectedAgentsList = availableAgents.filter(agent => selectedAgents.has(agent.id));
 
   const summaryLines = selectedAgentsList.length === 0
-    ? renderLines('⚠️  少なくとも1つのエージェントを選択してください', contentWidth - 4, 'left')
+    ? renderLines(`${ICONS.warning} 少なくとも1つのエージェントを選択してください`, contentWidth - 4, 'left')
     : selectedAgentsList.map((agent, index) => `${index + 1}. ${agent.name}`);
 
   // Screen configuration using design system patterns
   const screenConfig = createScreenLayout('selection', {
-    title: '🤖 エージェント選択',
+    title: `${ICONS.agent} エージェント選択`,
     subtitle: `対象: ${targetPath}`,
     align: 'left'
   });
@@ -98,7 +98,7 @@ export const AgentSelectionScreen: React.FC<AgentSelectionScreenProps> = ({
     <UnifiedScreen
       config={screenConfig}
       statusItems={statusItems}
-      customStatusMessage={selectedAgents.size === 0 ? '⚠️ 少なくとも1つ選択してください' : `✅ ${selectedAgents.size}個選択中 | Enter: 次へ進む`}
+      customStatusMessage={selectedAgents.size === 0 ? `${ICONS.warning} 少なくとも1つ選択してください` : `${ICONS.success} ${selectedAgents.size}個選択中 | Enter: 次へ進む`}
     >
       {/* Screen Description */}
       <ScreenDescription
@@ -114,7 +114,7 @@ export const AgentSelectionScreen: React.FC<AgentSelectionScreenProps> = ({
             id: agent.id,
             label: agent.name,
             description: agent.description,
-            icon: agent.icon || '🤖'
+            icon: agent.icon || ICONS.agent
           }))}
           selectedIds={selectedAgents}
           onToggle={handleToggle}

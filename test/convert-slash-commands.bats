@@ -6,7 +6,7 @@ setup() {
     # テスト用の一時ディレクトリとファイル
     export TEST_DIR="$(mktemp -d)"
     export SCRIPT="$BATS_TEST_DIRNAME/../cc-flow-cli/scripts/convert-slash-commands.sh"
-    export SCRIPT_DIR="$BATS_TEST_DIRNAME/../cc-flow-cli/scripts"
+    export SCRIPT_DIR="$BATS_TEST_DIRNAME/../scripts/workflow"
     export ORIGINAL_PWD="$PWD"
     
     # テスト用のコマンドディレクトリ構造を作成

@@ -102,38 +102,38 @@ describe('Theme System', () => {
 
   describe('useTheme hook', () => {
     it('returns theme from context', () => {
-      let capturedTheme: any = null;
-      
+      let capturedTheme: ReturnType<typeof useTheme> | null = null;
+
       const CaptureTheme: React.FC = () => {
         capturedTheme = useTheme();
         return <Text>Theme captured</Text>;
       };
-      
+
       render(<CaptureTheme />);
-      
+
       expect(capturedTheme).toBeDefined();
-      expect(capturedTheme.colors).toBeDefined();
-      expect(capturedTheme.spacing).toBeDefined();
-      expect(capturedTheme.layout).toBeDefined();
-      expect(capturedTheme.responsive).toBeDefined();
+      expect(capturedTheme?.colors).toBeDefined();
+      expect(capturedTheme?.spacing).toBeDefined();
+      expect(capturedTheme?.layout).toBeDefined();
+      expect(capturedTheme?.responsive).toBeDefined();
     });
 
     it('provides consistent theme structure', () => {
-      let capturedTheme: any = null;
-      
+      let capturedTheme: ReturnType<typeof useTheme> | null = null;
+
       const CaptureTheme: React.FC = () => {
         capturedTheme = useTheme();
         return <Text>Theme captured</Text>;
       };
-      
+
       render(<CaptureTheme />);
-      
+
       // Check required theme structure
-      expect(capturedTheme.colors.primary).toBeDefined();
-      expect(capturedTheme.colors.text.primary).toBeDefined();
-      expect(capturedTheme.spacing.md).toBeDefined();
-      expect(capturedTheme.layout.paddingX).toBeDefined();
-      expect(capturedTheme.responsive.terminalWidth).toBeGreaterThan(0);
+      expect(capturedTheme?.colors.primary).toBeDefined();
+      expect(capturedTheme?.colors.text.primary).toBeDefined();
+      expect(capturedTheme?.spacing.md).toBeDefined();
+      expect(capturedTheme?.layout.paddingX).toBeDefined();
+      expect(capturedTheme?.responsive.terminalWidth).toBeGreaterThan(0);
     });
   });
 

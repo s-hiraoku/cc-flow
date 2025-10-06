@@ -6,6 +6,7 @@ import {
   StatusBar,
   type MenuItem,
 } from "../components/Interactive.js";
+import { ICONS } from "../design-system/index.js";
 import { useTheme } from "../themes/theme.js";
 import { renderLines } from "../utils/text.js";
 import { getVersion } from "../../utils/package.js";
@@ -33,11 +34,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
 
   const menuItems: MenuItem[] = [
     {
-      label: "🚀 Start",
+      label: `${ICONS.rocket} Start`,
       value: "start",
     },
     {
-      label: "👋 Exit",
+      label: `${ICONS.exit} Exit`,
       value: "exit",
     },
   ];
@@ -59,13 +60,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
   const contentWidth = Math.max(20, cardWidth - theme.layout.paddingX * 2 - 2); // borders
 
   const heroLines = renderLines(
-    "⚡ Create workflows using subagents in Claude Code ⚡",
+    `${ICONS.lightning} Create workflows using subagents in Claude Code ${ICONS.lightning}`,
     contentWidth,
     "center"
   );
   const featureLines = [
-    "🎯 エージェントを連携させてワークフロー作成",
-    "⚡ 高速かつ再利用可能なタスク自動化",
+    `${ICONS.target} エージェントを連携させてワークフロー作成`,
+    `${ICONS.lightning} 高速かつ再利用可能なタスク自動化`,
   ];
 
   return (
@@ -96,11 +97,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
         <Section spacing="sm" align="center">
           <Box flexDirection="column" width="100%" alignItems="center">
             {heroLines.map((line, index) => (
-              <Text
-                key={`hero-${index}`}
-                color={theme.colors.yellow}
-                bold
-              >
+              <Text key={`hero-${index}`} color={theme.colors.yellow} bold>
                 {line}
               </Text>
             ))}
@@ -133,7 +130,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
 
         <Section spacing="sm" align="center">
           <StatusBar
-            center="↑↓: 選択 | Enter: 実行 | Q: 終了"
+            center="↑↓: 選択 | Enter: 実行"
             variant="info"
             width={contentWidth}
           />

@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-Keep application code inside `cc-flow-cli/`, with Ink TUI screens under `src/ink/`, workflow services in `src/services/`, and shared utilities in `src/utils/`. Shell helpers live in `cc-flow-cli/scripts/`, while release tooling sits in `scripts/releases/`. Agent prompt templates belong in `cc-flow-cli/templates/`, and active agent or command definitions are tracked in `.claude/agents/` and `.claude/commands/`. System documentation is stored in `docs/`, and integration specs reside in `test/*.bats`.
+Keep application code inside `cc-flow-cli/`, with Ink TUI screens under `src/ink/`, workflow services in `src/services/`, and shared utilities in `src/utils/`. Shared workflow helpers now live in `scripts/workflow/` (with wrappers in `scripts/create-workflow.sh` and `cc-flow-cli/scripts/`). Release tooling sits in `scripts/releases/`. Agent prompt templates belong in `cc-flow-cli/templates/`, and active agent or command definitions are tracked in `.claude/agents/` and `.claude/commands/`. System documentation is stored in `docs/`, and integration specs reside in `test/*.bats`.
 
 ## Build, Test, and Development Commands
 Run `npm install` from `cc-flow-cli/` after cloning to sync Node 18+ dependencies. Use `npm run dev` for the live-reloading Ink TUI. `npm run build` emits distributable assets; `npm run validate` performs the type check plus bundle verification. Execute `npm run test` for the Vitest suite, `npm run test:watch` during active development, and `npm run test:coverage` before releases to confirm thresholds. From the repo root, `bats test` exercises bash workflow regressions.

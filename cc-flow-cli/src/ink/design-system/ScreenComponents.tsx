@@ -185,13 +185,17 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
     setSelectedItem(item);
   };
 
+  // Ensure consistent width calculation: contentWidth already accounts for padding
+  const effectiveWidth = contentWidth || defaultContentWidth;
+  const menuWidth = Math.max(20, effectiveWidth - 2); // Only account for border
+
   const menuContent = (
     <>
       <FocusableMenu
         items={items}
         onSelect={onSelect}
         onSelectionChange={handleSelectionChange}
-        width={Math.max(40, (contentWidth || defaultContentWidth) - 4)} // Account for border and padding
+        width={menuWidth}
         align="left"
       />
 

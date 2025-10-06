@@ -11,9 +11,9 @@ beforeEach(() => {
   // Set consistent terminal size for tests
   process.stdout.columns = 80;
   process.stdout.rows = 24;
-  
+
   // Mock stdout write to capture output
-  process.stdout.write = vi.fn() as any;
+  process.stdout.write = vi.fn() as typeof process.stdout.write;
 });
 
 afterEach(() => {

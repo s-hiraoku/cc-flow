@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Text, useInput, useApp } from 'ink';
+import { Box, Text, useInput, useApp, type Key } from 'ink';
 import Spinner from 'ink-spinner';
-import { UnifiedScreen } from '../design-system/index.js';
+import { UnifiedScreen, ICONS } from '../design-system/index.js';
 import { createScreenLayout } from '../design-system/ScreenPatterns.js';
 import { Section } from '../components/Layout.js';
 import { useTheme } from '../themes/theme.js';
 import { execSync } from 'child_process';
 import { join } from 'path';
 import type { ConversionResult } from '../../types/conversion.js';
+import type { Command } from '../../models/Agent.js';
 
 interface ConversionStep {
   name: string;
@@ -18,7 +19,7 @@ interface ConversionStep {
 
 interface ConversionScreenProps {
   targetPath?: string | undefined;
-  selectedCommands?: any[];
+  selectedCommands?: Command[];
   onComplete: (result: ConversionResult) => void;
   onBack: () => void;
 }
@@ -35,7 +36,7 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
   const theme = useTheme();
 
   // Handle keyboard input
-  useInput(useCallback((input: string, key: any) => {
+  useInput(useCallback((input: string, key: Key) => {
     if (key.escape && !isComplete) {
       onBack();
     } else if (input === 'q' || input === 'Q') {
@@ -80,7 +81,7 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
         for (const command of selectedCommands) {
           try {
             // Convert absolute paths to relative paths
-            const sourcePath = command.path.replace(process.cwd() + '/', '');
+            const sourcePath = command.filePath.replace(process.cwd() + '/', '');
             const targetDirectory = outputDir;
             
             // Use relative path for script
@@ -97,15 +98,15 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
             });
             
             convertedCount++;
-            console.log(`✅ Converted: ${command.name}`);
-            
+            console.log(`${ICONS.success} Converted: ${command.name}`);
+
             // Update progress
-            setSteps(prev => prev.map((step, index) => 
+            setSteps(prev => prev.map((step, index) =>
               index === 2 ? { ...step, message: `${convertedCount}/${selectedCommands.length}個のコマンドを変換済み` } : step
             ));
-            
+
           } catch (error) {
-            console.error(`❌ Failed to convert ${command.name}:`, error);
+            console.error(`${ICONS.error} Failed to convert ${command.name}:`, error);
             // Continue with other commands even if one fails
           }
         }
@@ -128,7 +129,7 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
             message: 'スラッシュコマンドの変換が完了しました',
             convertedCount: convertedCount,
             targetDirectory: outputDir,
-            convertedCommands: selectedCommands.map((cmd: any) => cmd.name || cmd.id)
+            convertedCommands: selectedCommands.map((cmd) => cmd.name || cmd.id)
           });
         }, 1000);
 
@@ -151,14 +152,14 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
     };
 
     runConversion();
-  }, [onComplete, selectedCommands, targetPath, currentStep]);
+  }, [onComplete, selectedCommands, targetPath]);
 
   const getStatusIcon = (status: ConversionStep['status']) => {
     switch (status) {
-      case 'pending': return <Text color="gray">⏳</Text>;
+      case 'pending': return <Text color="gray">{ICONS.clock}</Text>;
       case 'processing': return <Spinner type="dots" />;
-      case 'success': return <Text color="green">✅</Text>;
-      case 'error': return <Text color="red">❌</Text>;
+      case 'success': return <Text color="green">{ICONS.success}</Text>;
+      case 'error': return <Text color="red">{ICONS.error}</Text>;
       default: return <Text color="gray">-</Text>;
     }
   };
@@ -176,7 +177,7 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
   const screenConfig = createScreenLayout('processing', {
     title: 'スラッシュコマンド変換',
     subtitle: 'カスタムスラッシュコマンドをエージェント形式に変換しています',
-    icon: '🔄'
+    icon: ICONS.refresh
   });
 
   const statusItems = [
@@ -188,9 +189,9 @@ export const ConversionScreen: React.FC<ConversionScreenProps> = ({ targetPath, 
     <UnifiedScreen
       config={screenConfig}
       statusItems={statusItems}
-      customStatusMessage={!isComplete ? 
-        `変換中です... 進行状況: ${currentStep + 1}/${steps.length}` : 
-        '✅ まもなくワークフロー作成画面に移行します...'}
+      customStatusMessage={!isComplete ?
+        `変換中です... 進行状況: ${currentStep + 1}/${steps.length}` :
+        `${ICONS.success} まもなくワークフロー作成画面に移行します...`}
     >
       {/* Conversion Progress */}
       <Section title="変換プロセス" spacing="sm">

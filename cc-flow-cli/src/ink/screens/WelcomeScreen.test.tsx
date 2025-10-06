@@ -118,7 +118,6 @@ describe('WelcomeScreen', () => {
     // Check for keyboard hints
     expect(output).toContain('↑↓: 選択');
     expect(output).toContain('Enter: 実行');
-    expect(output).toContain('Q: 終了');
   });
 
   it('renders with proper structure', () => {

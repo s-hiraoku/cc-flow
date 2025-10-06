@@ -1,224 +1,72 @@
-# CLAUDE.md
+# Claude Code Spec-Driven Development
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Kiro-style Spec Driven Development implementation using claude code slash commands, hooks and agents.
 
-## Project Overview
+## Project Context
 
-CC-Flow is a Claude Code workflow platform that enables sequential execution of sub-agents through custom slash commands. It features a beautiful interactive Terminal User Interface (TUI) built with React Ink for creating workflows visually, and uses POML (Prompt Orchestration Markup Language) for workflow orchestration.
+### Paths
+- Steering: `.kiro/steering/`
+- Specs: `.kiro/specs/`
+- Commands: `.claude/commands/`
 
-## Key Commands
+### Steering vs Specification
 
-### Development Commands
+**Steering** (`.kiro/steering/`) - Guide AI with project-wide rules and context
+**Specs** (`.kiro/specs/`) - Formalize development process for individual features
 
-```bash
-# Install dependencies for CLI package
-cd cc-flow-cli && npm install
+### Active Specifications
+- Check `.kiro/specs/` for active specifications
+- Use `/kiro:spec-status [feature-name]` to check progress
 
-# Run CLI in development mode
-cd cc-flow-cli && npm run dev
+## Development Guidelines
+- Think in English, but generate responses in Japanese (思考は英語、回答の生成は日本語で行うように)
 
-# Build CLI package
-cd cc-flow-cli && npm run build
+## Workflow
 
-# Run tests
-cd cc-flow-cli && npm test
+### Phase 0: Steering (Optional)
+`/kiro:steering` - Create/update steering documents
+`/kiro:steering-custom` - Create custom steering for specialized contexts
 
-# Type checking
-cd cc-flow-cli && npm run type-check
+Note: Optional for new features or small additions. You can proceed directly to spec-init.
 
-# Validate build (type-check + build)
-cd cc-flow-cli && npm run validate
-```
+### Phase 1: Specification Creation
+1. `/kiro:spec-init [detailed description]` - Initialize spec with detailed project description
+2. `/kiro:spec-requirements [feature]` - Generate requirements document
+3. `/kiro:spec-design [feature]` - Interactive: "Have you reviewed requirements.md? [y/N]"
+4. `/kiro:spec-tasks [feature]` - Interactive: Confirms both requirements and design review
 
-### Using the CLI
+### Phase 2: Progress Tracking
+`/kiro:spec-status [feature]` - Check current progress and phases
 
-```bash
-# Run interactive TUI (recommended)
-npx @hiraoku/cc-flow-cli
+## Development Rules
+1. **Consider steering**: Run `/kiro:steering` before major development (optional for new features)
+2. **Follow 3-phase approval workflow**: Requirements → Design → Tasks → Implementation
+3. **Approval required**: Each phase requires human review (interactive prompt or manual)
+4. **No skipping phases**: Design requires approved requirements; Tasks require approved design
+5. **Update task status**: Mark tasks as completed when working on them
+6. **Keep steering current**: Run `/kiro:steering` after significant changes
+7. **Check spec compliance**: Use `/kiro:spec-status` to verify alignment
 
-# Or after global install
-npm install -g @hiraoku/cc-flow-cli
-cc-flow
+## Steering Configuration
 
-# Non-interactive script mode (for automation)
-scripts/create-workflow.sh ./agents/spec "3 4 1 6 2"
+### Current Steering Files
+Managed by `/kiro:steering` command. Updates here reflect command changes.
 
-# With custom purpose
-scripts/create-workflow.sh ./agents/spec "3 4 1 6 2" "API仕様書作成"
+### Active Steering Files
+- `product.md`: Always included - Product context and business objectives
+- `tech.md`: Always included - Technology stack and architectural decisions
+- `structure.md`: Always included - File organization and code patterns
 
-# Execute generated workflow
-/spec-workflow "Your task context"
-```
+### Custom Steering Files
+<!-- Added by /kiro:steering-custom command -->
+<!-- Format:
+- `filename.md`: Mode - Pattern(s) - Description
+  Mode: Always|Conditional|Manual
+  Pattern: File patterns for Conditional mode
+-->
 
-## Architecture
+### Inclusion Modes
+- **Always**: Loaded in every interaction (default)
+- **Conditional**: Loaded for specific file patterns (e.g., "*.test.js")
+- **Manual**: Reference with `@filename.md` syntax
 
-### Project Structure
-
-The codebase is organized as a monorepo with two main parts:
-
-```
-cc-flow/
-├── cc-flow-cli/                    # React Ink TUI application (TypeScript)
-│   ├── src/
-│   │   ├── ink/                    # TUI components and screens
-│   │   │   ├── screens/            # Screen components (Welcome, Menu, etc.)
-│   │   │   ├── components/         # Reusable UI components
-│   │   │   ├── design-system/      # Design system and layout patterns
-│   │   │   └── themes/             # Color themes and responsive design
-│   │   ├── services/               # Business logic services
-│   │   ├── models/                 # Data models and types
-│   │   └── utils/                  # Utility functions
-│   ├── scripts/                    # Build and deployment scripts
-│   ├── templates/                  # POML workflow templates
-│   └── bin/                        # Executable entry point
-├── scripts/                        # Workflow creation shell scripts
-├── .claude/                        # Claude Code configuration
-│   ├── commands/                   # Slash command definitions
-│   └── agents/                     # Sub-agent definitions
-└── templates/                      # POML workflow templates
-```
-
-### TUI Architecture (React Ink)
-
-The interactive CLI is built with React Ink and follows a screen-based architecture:
-
-- **App.tsx**: Main application component with state management
-- **Screens**: Self-contained UI screens for different workflow steps
-- **Design System**: Reusable components with consistent styling
-- **Interactive Components**: Focus-aware menu and input components
-- **Theme System**: Responsive design with color themes
-
-Key TUI features:
-- Bilingual UI (English/Japanese)
-- Keyboard navigation and accessibility
-- Responsive terminal layouts
-- Beautiful ASCII art and visual feedback
-
-### Command System
-
-Commands are defined as markdown files with YAML frontmatter:
-
-```markdown
----
-description: Command description
-argument-hint: <args>
-allowed-tools: [Bash]
----
-
-# command-name
-
-\`\`\`bash
-ARGUMENTS="$*"
-./scripts/script.sh "$ARGUMENTS"
-\`\`\`
-```
-
-### POML Integration
-
-- **Templates**: Use `{WORKFLOW_AGENT_ARRAY}` placeholder for agent arrays
-- **Syntax**: Arrays must use single quotes: `['agent1', 'agent2']`
-- **Variables**: Use `{{variable}}` for POML context variables
-- **Loops**: `<item for="item in ['a', 'b']">{{item}}</item>`
-
-### Agent Structure
-
-Agents are markdown files with specific metadata:
-
-- **Location**: `.claude/agents/<category>/<agent-name>.md`
-- **Categories**: `spec/` (specification workflow), `utility/` (helper agents)
-- **Workflow Integration**: Agents can be chained together in custom workflows
-
-## Working with the TUI
-
-### Creating Workflows
-
-1. Run `npx @hiraoku/cc-flow-cli` to launch the TUI
-2. Select "Create workflow from existing agents"
-3. Choose agent directory (e.g., "spec")
-4. Select agents using checkbox interface
-5. Set execution order interactively
-6. Preview and confirm workflow creation
-
-### Converting Slash Commands
-
-1. Run the CLI and select "Convert slash commands to agents"
-2. Choose source directory containing commands
-3. Select commands to convert
-4. Generated agents can be used in workflows
-
-### Script Mode (Non-Interactive)
-
-For automation or CI/CD:
-
-```bash
-# Create workflow with agent order
-scripts/create-workflow.sh ./agents/spec "3 4 1 6 2"
-
-# Create workflow with agent order and custom purpose
-scripts/create-workflow.sh ./agents/spec "3 4 1 6 2" "API仕様書作成ワークフロー"
-
-# Interactive mode with custom purpose
-scripts/create-workflow.sh ./agents/spec "" "テスト作成ワークフロー"
-
-# Convert slash commands
-scripts/convert-slash-commands.sh demo --dry-run
-```
-
-## Important Implementation Details
-
-### TypeScript Configuration
-
-- **Target**: ES2022 with ESNext modules
-- **Module System**: ESModules with .js imports
-- **Build Output**: Compiled to `dist/` directory
-- **Node.js**: Minimum version 18.0.0
-
-### React Ink Specifics
-
-- **Components**: Functional components with hooks
-- **Layout**: Box model with flexbox
-- **Input Handling**: `useInput` hook for keyboard events
-- **State Management**: React state with custom hooks
-- **Testing**: Vitest with coverage reporting
-
-### Development Workflow
-
-1. **Local Development**: Use `npm run dev` for hot reloading
-2. **Type Checking**: Run `npm run type-check` before commits
-3. **Testing**: Use `npm test` for unit tests
-4. **Building**: `npm run build` compiles TypeScript to JavaScript
-5. **Publishing**: `npm run prepublishOnly` runs full validation
-
-### Error Handling
-
-- **Shell Execution**: Scripts handle all error checking internally
-- **TUI Errors**: Graceful error display with recovery options
-- **Validation**: Input validation at multiple levels
-- **Debugging**: Console output for development debugging
-
-## Development Notes
-
-- **Dependencies**: Uses modern React Ink v6+ with TypeScript 5.6
-- **Package Management**: npm with package-lock.json
-- **Accessibility**: Terminal UI follows accessibility best practices
-- **Responsive Design**: Adapts to different terminal sizes
-- **Internationalization**: Bilingual UI with Japanese/English support
-- **Claude Code Integration**: Generated commands call `claude subagent`
-
-### Common Patterns
-
-- **Screen Components**: Follow `UnifiedScreen` pattern for consistency
-- **Menu Systems**: Use `FocusableMenu` for interactive selections
-- **Layout**: Use design system components for consistent spacing
-- **Colors**: Use theme system for consistent color schemes
-- **Error Messages**: Japanese emoji patterns (❌, ✅, 🔍, 📂)
-
-### POML Workflow Conversion
-
-**Goal**: Convert workflows using formal POML files for processing, enabling sub-agents to execute in the specified order as instructed.
-
-- **Workflow Processing**: Use formal POML syntax for dynamic workflow generation
-- **Sub-agent Execution**: Ensure sub-agents execute sequentially according to POML instructions
-- **Template Conversion**: Convert agent selections into proper POML workflow files
-- **Execution Flow**: Generated workflows should call `claude subagent` for each step
-- **Context Passing**: Pass task context through the workflow chain

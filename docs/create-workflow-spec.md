@@ -2,7 +2,7 @@
 
 ## 📖 概要
 
-**create-workflow.sh** は、Claude Code のカスタムスラッシュコマンドを自動生成するスクリプトです。JSON設定ファイルを使って、複数のエージェントを組み合わせた強力なワークフローコマンドを作成できます。
+**create-workflow.sh** は、Claude Code のカスタムスラッシュコマンドを自動生成するスクリプトです。JSON設定ファイルを使って、複数のエージェントを組み合わせたワークフローコマンドを作成できます。スクリプト本体と各種ライブラリはリポジトリ共通の `scripts/workflow/` にあり、ルートの `scripts/create-workflow.sh` や `cc-flow-cli/scripts/create-workflow.sh` から委譲される構成になりました（外部プロジェクトでも `scripts/workflow/` をコピーすれば CLI・レポ両方から利用可能）。
 
 ## 🚀 クイックスタート
 
@@ -183,14 +183,21 @@ node -e "console.log(JSON.parse(require('fs').readFileSync('config.json')))"
 
 ```
 scripts/
-├── create-workflow.sh          # メインスクリプト
-├── lib/
-│   ├── agent-discovery.sh      # エージェント検索
-│   ├── template-processor.sh   # テンプレート処理
-│   └── poml-processor.sh       # POML処理
-└── utils/
-    └── common.sh               # 共通関数
+├── create-workflow.sh            # ラッパー（共有ワークフローへ委譲）
+└── workflow/
+    ├── create-workflow.sh        # コア実装
+    ├── lib/
+    │   ├── agent-discovery.sh
+    │   ├── template-processor.sh
+    │   ├── poml-processor.sh
+    │   ├── slash-command-discovery.sh
+    │   └── conversion-processor.sh
+    ├── utils/
+    │   └── common.sh
+    └── test/                     # BATS 用の共通フィクスチャ
 ```
+
+> `cc-flow-cli/scripts/create-workflow.sh` も同じ共有ディレクトリを指すラッパーです。npm パッケージを利用する場合は `scripts/workflow/` と `scripts/create-workflow.sh` をプロジェクトルートに配置すれば、CLI/TUI 双方から同じ処理系を呼び出せます。
 
 ### 処理の流れ
 

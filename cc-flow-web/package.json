@@ -1,0 +1,94 @@
+{
+  "name": "@hiraoku/cc-flow-web",
+  "version": "0.0.27",
+  "private": false,
+  "description": "Visual workflow editor for CC-Flow with drag-and-drop interface",
+  "keywords": [
+    "cc-flow",
+    "workflow",
+    "editor",
+    "visual",
+    "claude"
+  ],
+  "author": "Hiraoku",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hiraoku/cc-flow-web.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hiraoku/cc-flow-web/issues"
+  },
+  "homepage": "https://github.com/hiraoku/cc-flow-web#readme",
+  "bin": {
+    "cc-flow-web": "./bin/cli.js"
+  },
+  "files": [
+    ".next/standalone",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && npm run postbuild",
+    "postbuild": "cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && mkdir -p .next/standalone/node_modules/@hiraoku && cp -r node_modules/@hiraoku/cc-flow-core .next/standalone/node_modules/@hiraoku/",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest run --coverage",
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "npm run build",
+    "publish:safe": "npm publish --access public"
+  },
+  "dependencies": {
+    "@hiraoku/cc-flow-core": "^0.0.7",
+    "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@xyflow/react": "^12.8.5",
+    "autoprefixer": "^10.4.21",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "commander": "^12.1.0",
+    "liquid-glass-react": "^1.1.1",
+    "lucide-react": "^0.544.0",
+    "next": "15.5.3",
+    "open": "^10.2.0",
+    "react": "19.1.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "19.1.0",
+    "react-hook-form": "^7.63.0",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7",
+    "valibot": "^1.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^2.1.8",
+    "@vitest/ui": "^2.1.8",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.3",
+    "jsdom": "^25.0.1",
+    "msw": "^2.6.9",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^2.1.8"
+  }
+}

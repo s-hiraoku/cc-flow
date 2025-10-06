@@ -3,7 +3,11 @@ import _stringWidth from 'string-width';
 import wrapAnsi from 'wrap-ansi';
 
 const stringWidth = (value: string): number => {
-  return _stringWidth(stripAnsi(value), { ambiguousIsNarrow: false });
+  // Ensure consistent full-width character handling
+  return _stringWidth(stripAnsi(value), {
+    ambiguousIsNarrow: false,
+    countAnsiEscapeCodes: false
+  });
 };
 
 export const visibleWidth = (value: string): number => stringWidth(value);
@@ -55,7 +59,12 @@ export const wrapLines = (value: string, width: number): string[] => {
   if (width <= 0) {
     return [value];
   }
-  return wrapAnsi(value, width, { hard: true, trim: false }).split('\n');
+  // Ensure consistent wrapping with proper full-width character support
+  return wrapAnsi(value, width, {
+    hard: true,
+    trim: false,
+    wordWrap: true
+  }).split('\n');
 };
 
 export const wrapAndAlign = (

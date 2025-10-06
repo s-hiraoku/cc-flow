@@ -1,0 +1,21 @@
+<poml>
+  <meta>
+    <version min="0.0.8" />
+  </meta>
+
+  <!-- ORIGINAL VERSION - All partials included
+  <include src="partials/role.poml" />
+  <include src="partials/task-overview.poml" />
+  <include src="partials/example.poml" />
+  <include src="partials/stepwise.poml" />
+  -->
+
+  <!-- SIMPLIFIED VERSION - OPTION 1: Minimal includes for concise prompts -->
+  <include src="partials/role.poml" />
+  <include src="partials/task-overview.poml" />
+  <!-- example.poml removed to reduce redundancy -->
+  <include src="partials/stepwise.poml" />
+
+  <!-- Workflow Configuration Templates -->
+
+</poml>

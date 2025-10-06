@@ -4,6 +4,7 @@ import TextInput from "ink-text-input";
 import Spinner from "ink-spinner";
 import { useTheme } from "../themes/theme.js";
 import { alignWithinWidth, renderLines } from "../utils/text.js";
+import { ICONS } from "../design-system/index.js";
 import type { Alignment, SpacingValue } from "../types/index.js";
 
 export interface MenuItem {
@@ -83,8 +84,7 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
       theme.layout.minWidth,
       theme.layout.maxWidth
     );
-  const contentWidth = Math.max(8, listWidth - 6);
-  const lineContainerWidth = Math.min(contentWidth + 2, listWidth); // indicator + space + content, clamped to available width
+  const lineContainerWidth = listWidth;
 
   const [selectedIndex, moveIndex] = useSelectableIndex(items);
 
@@ -119,10 +119,11 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
         const isSelected = index === selectedIndex;
         const isDisabled = Boolean(item.disabled);
         const label = item.icon ? `${item.icon} ${item.label}` : item.label;
-        const labelLines = renderLines(label, contentWidth, "left");
+        // Use lineContainerWidth for consistent wrapping
+        const labelLines = renderLines(label, lineContainerWidth - 2, "left");
         const descriptionLines =
           showDescription && item.description && isSelected
-            ? renderLines(item.description, contentWidth, "left")
+            ? renderLines(item.description, lineContainerWidth - 2, "left")
             : [];
 
         const getVariantColor = () => {
@@ -142,17 +143,18 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
         
         const textColor = getVariantColor();
 
+        const totalHeight = labelLines.length + (showDescription ? descriptionLines.length : 0);
+
         return (
           <Box
             key={item.id ?? item.value}
             flexDirection="column"
             marginBottom={spacing}
-            height={showDescription ? 3 : 1}
-            minHeight={showDescription ? 3 : 1}
+            minHeight={totalHeight}
           >
             {labelLines.map((line, lineIndex) => {
               const indicator =
-                lineIndex === 0 ? (isSelected ? "▶" : " ") : " ";
+                lineIndex === 0 ? (isSelected ? ICONS.selected : " ") : " ";
               const composedLine = alignWithinWidth(
                 `${indicator} ${line}`,
                 lineContainerWidth,
@@ -168,32 +170,26 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
                 </Box>
               );
             })}
-            {showDescription && (
-              <Box flexDirection="column" width={lineContainerWidth} height={2}>
-                {descriptionLines.length > 0 ? (
-                  descriptionLines.map((line, lineIndex) => {
-                    const composedLine = alignWithinWidth(
-                      `  ${line}`,
-                      lineContainerWidth,
-                      align
-                    );
-                    return (
-                      <Box
-                        key={`menu-desc-${item.value}-${lineIndex}`}
-                        width={lineContainerWidth}
-                        height={1}
-                      >
-                        <Text color={theme.colors.text.muted} italic>
-                          {composedLine}
-                        </Text>
-                      </Box>
-                    );
-                  })
-                ) : (
-                  <Box height={2} width={lineContainerWidth}>
-                    <Text> </Text>
-                  </Box>
-                )}
+            {showDescription && descriptionLines.length > 0 && (
+              <Box flexDirection="column" width={lineContainerWidth}>
+                {descriptionLines.map((line, lineIndex) => {
+                  const composedLine = alignWithinWidth(
+                    `  ${line}`,
+                    lineContainerWidth,
+                    align
+                  );
+                  return (
+                    <Box
+                      key={`menu-desc-${item.value}-${lineIndex}`}
+                      width={lineContainerWidth}
+                      height={1}
+                    >
+                      <Text color={theme.colors.text.muted} italic>
+                        {composedLine}
+                      </Text>
+                    </Box>
+                  );
+                })}
               </Box>
             )}
           </Box>
@@ -207,7 +203,7 @@ interface CheckboxListProps {
   items: Array<{
     id: string;
     label: string;
-    description?: string;
+    description?: string | undefined;
     icon?: string;
     disabled?: boolean;
   }>;
@@ -282,7 +278,7 @@ export const CheckboxList: React.FC<CheckboxListProps> = ({
                     isSelected ? theme.colors.primary : theme.colors.text.muted
                   }
                 >
-                  {lineIndex === 0 ? (isSelected ? "▶" : " ") : " "}
+                  {lineIndex === 0 ? (isSelected ? ICONS.selected : " ") : " "}
                 </Text>
                 <Text
                   color={

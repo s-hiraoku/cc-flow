@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 - App code lives in `cc-flow-cli/`; TUI screens stay in `src/ink/`, services in `src/services/`, and shared helpers in `src/utils/`.
-- Shell automation tools reside in `cc-flow-cli/scripts/` and release utilities in `scripts/releases/`.
+- Shared workflow automation tools reside in `scripts/workflow/` (wrapper entry at `scripts/create-workflow.sh`), while release utilities live in `scripts/releases/`.
 - Agent templates are under `cc-flow-cli/templates/`; active agent and command configs live in `.claude/agents/` and `.claude/commands/`.
 - System docs are stored in `docs/`; integration tests use BATS in `test/*.bats`.
 

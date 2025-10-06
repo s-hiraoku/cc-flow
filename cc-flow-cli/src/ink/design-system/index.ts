@@ -28,10 +28,13 @@ export {
   UnifiedScreen
 } from './ScreenComponents.js';
 
+// Icons
+export { ICONS, getIcon, type IconKey } from './icons.js';
+
 // Examples (for reference and testing)
 export { MenuScreenExample } from './examples/MenuScreenExample.js';
 export { DirectoryScreenExample } from './examples/DirectoryScreenExample.js';
-export { 
+export {
   WelcomeScreenRefactored,
-  WelcomeScreenManualExample 
+  WelcomeScreenManualExample
 } from './examples/WelcomeScreenRefactored.js';

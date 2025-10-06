@@ -7,13 +7,21 @@ export interface Agent {
   category: string; // "agents" or "commands"
 }
 
+export interface Command {
+  id: string; // Command identifier
+  name: string; // Command name
+  filePath: string; // Path to command file
+  description?: string; // Optional description
+}
+
 export interface WorkflowConfig {
   targetPath: string; // "./agents/spec" or "./agents"
   workflowName?: string; // "spec-workflow" or custom name
   purpose: string; // User-defined workflow purpose (required)
   selectedAgents: Agent[]; // Selected agents
-  selectedCommands?: any[]; // Selected commands for conversion
+  selectedCommands?: Command[]; // Selected commands for conversion
   executionOrder: string[]; // Agent names in execution order
+  environment?: string; // Environment setting (e.g., 'claude-code')
   createdAt: Date;
 }
 

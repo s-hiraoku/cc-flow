@@ -1,6 +1,6 @@
 {
   "name": "@hiraoku/cc-flow-cli",
-  "version": "0.0.15",
+  "version": "0.1.0",
   "description": "Interactive TUI for creating Claude Code workflows",
   "publishConfig": {
     "access": "public",
@@ -73,8 +73,10 @@
     "url": "https://github.com/s-hiraoku/cc-flow/issues"
   },
   "dependencies": {
+    "@hiraoku/cc-flow-core": "^0.0.8",
     "@types/react": "^19.1.13",
     "date-and-time": "^4.0.5",
+    "figures": "^6.1.0",
     "ink": "^6.3.0",
     "ink-big-text": "^2.0.0",
     "ink-gradient": "^3.0.0",

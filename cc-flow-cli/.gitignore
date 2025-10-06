@@ -65,3 +65,6 @@ temp/
 
 # CLI testing
 test-output/
+
+# playwright-mcp
+.playwright-mcp/
