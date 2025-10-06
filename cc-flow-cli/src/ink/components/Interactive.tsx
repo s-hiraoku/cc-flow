@@ -83,8 +83,9 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
       theme.layout.minWidth,
       theme.layout.maxWidth
     );
-  const contentWidth = Math.max(8, listWidth - 6);
-  const lineContainerWidth = Math.min(contentWidth + 2, listWidth); // indicator + space + content, clamped to available width
+  // Consistent width calculation: reserve 2 chars for indicator ("▶ ")
+  const contentWidth = Math.max(8, listWidth - 2);
+  const lineContainerWidth = listWidth;
 
   const [selectedIndex, moveIndex] = useSelectableIndex(items);
 
@@ -119,10 +120,11 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
         const isSelected = index === selectedIndex;
         const isDisabled = Boolean(item.disabled);
         const label = item.icon ? `${item.icon} ${item.label}` : item.label;
-        const labelLines = renderLines(label, contentWidth, "left");
+        // Use lineContainerWidth for consistent wrapping
+        const labelLines = renderLines(label, lineContainerWidth - 2, "left");
         const descriptionLines =
           showDescription && item.description && isSelected
-            ? renderLines(item.description, contentWidth, "left")
+            ? renderLines(item.description, lineContainerWidth - 2, "left")
             : [];
 
         const getVariantColor = () => {
