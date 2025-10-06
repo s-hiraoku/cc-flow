@@ -1,6 +1,6 @@
 {
   "name": "@hiraoku/cc-flow-cli",
-  "version": "0.0.15",
+  "version": "0.1.0",
   "description": "Interactive TUI for creating Claude Code workflows",
   "publishConfig": {
     "access": "public",
