@@ -7,6 +7,39 @@ LIB_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$LIB_SCRIPT_DIR/../utils/common.sh"
 source "$LIB_SCRIPT_DIR/template-processor.sh"
 
+# GNU/BSD portable in-place sed wrapper
+sed_inplace() {
+    local file="$1"
+    shift
+
+    if [[ "$OSTYPE" == darwin* ]]; then
+        sed -i '' "$@" "$file"
+    else
+        sed -i "$@" "$file"
+    fi
+}
+
+# Escape sed replacement strings (handles \\ | &)
+escape_sed_replacement() {
+    local value="$1"
+    value="${value//\\/\\\\}"
+    value="${value//&/\\&}"
+    value="${value//|/\\|}"
+    printf '%s' "$value"
+}
+
+# Replace placeholders written with or without spacing
+replace_placeholder() {
+    local file="$1"
+    local placeholder="$2"
+    local raw_value="$3"
+    local value
+    value="$(escape_sed_replacement "$raw_value")"
+
+    sed_inplace "$file" "s|{ ${placeholder} }|$value|g"
+    sed_inplace "$file" "s|{${placeholder}}|$value|g"
+}
+
 # スラッシュコマンドをエージェントに変換
 convert_command_to_agent() {
     local source_file="$1"
@@ -40,32 +73,36 @@ convert_command_to_agent() {
     local description="${EXTRACTED_DESCRIPTION:-}"
     local tools="${EXTRACTED_TOOLS:-}"
     local content="${EXTRACTED_CONTENT:-}"
+    local argument_hint
+    argument_hint="$(extract_argument_hint "$source_file")"
+    local conversion_date="$(date '+%Y-%m-%d %H:%M:%S')"
+    local conversion_version="1.0"
+    local target_category="$(basename "$target_directory")"
+    local template_name="$(basename "$template_file")"
+    local validation_status="✅ 変換完了"
+    local conversion_warnings="なし"
+    local cc_flow_version="0.0.5"
 
     # 一時ファイルにテンプレートをコピー
     cp "$template_file" "$target_file"
 
     # sedを使ってプレースホルダーを置換
-    # macOSのsedは-iに引数が必要
-    sed -i '' "s|{ AGENT_NAME }|$name|g" "$target_file"
-    sed -i '' "s|{ AGENT_DESCRIPTION }|$description|g" "$target_file"
-    sed -i '' "s|{ AGENT_MODEL }|sonnet|g" "$target_file"
-    sed -i '' "s|{ AGENT_TOOLS }|$tools|g" "$target_file"
-    sed -i '' "s|{ AGENT_COLOR }|blue|g" "$target_file"
-    sed -i '' "s|{ SOURCE_PATH }|$source_file|g" "$target_file"
-    sed -i '' "s|{ SOURCE_COMMAND_NAME }|$command_name|g" "$target_file"
-    sed -i '' "s|{ SOURCE_ARGUMENT_HINT }|$(extract_argument_hint "$source_file")|g" "$target_file"
-    sed -i '' "s|{ SOURCE_ALLOWED_TOOLS }|$tools|g" "$target_file"
-    sed -i '' "s|{ CONVERSION_DATE }|$(date '+%Y-%m-%d %H:%M:%S')|g" "$target_file"
-    sed -i '' "s|{ CONVERSION_VERSION }|1.0|g" "$target_file"
-    sed -i '' "s|{ TARGET_CATEGORY }|$(basename "$target_directory")|g" "$target_file"
-    sed -i '' "s|{ TEMPLATE_NAME }|$(basename "$template_file")|g" "$target_file"
-    sed -i '' "s|{ VALIDATION_STATUS }|✅ 変換完了|g" "$target_file"
-    sed -i '' "s|{ CONVERSION_WARNINGS }|なし|g" "$target_file"
-    sed -i '' "s|{ CC_FLOW_VERSION }|0.0.5|g" "$target_file"
-
-    # { AGENT_NAME } と { AGENT_CONTENT } を置換
-    # 最初の { AGENT_NAME } をもう一度置換（本文内に残っている場合）
-    sed -i '' "s|{AGENT_NAME}|$name|g" "$target_file"
+    replace_placeholder "$target_file" "AGENT_NAME" "$name"
+    replace_placeholder "$target_file" "AGENT_DESCRIPTION" "$description"
+    replace_placeholder "$target_file" "AGENT_MODEL" "sonnet"
+    replace_placeholder "$target_file" "AGENT_TOOLS" "$tools"
+    replace_placeholder "$target_file" "AGENT_COLOR" "blue"
+    replace_placeholder "$target_file" "SOURCE_PATH" "$source_file"
+    replace_placeholder "$target_file" "SOURCE_COMMAND_NAME" "$command_name"
+    replace_placeholder "$target_file" "SOURCE_ARGUMENT_HINT" "$argument_hint"
+    replace_placeholder "$target_file" "SOURCE_ALLOWED_TOOLS" "$tools"
+    replace_placeholder "$target_file" "CONVERSION_DATE" "$conversion_date"
+    replace_placeholder "$target_file" "CONVERSION_VERSION" "$conversion_version"
+    replace_placeholder "$target_file" "TARGET_CATEGORY" "$target_category"
+    replace_placeholder "$target_file" "TEMPLATE_NAME" "$template_name"
+    replace_placeholder "$target_file" "VALIDATION_STATUS" "$validation_status"
+    replace_placeholder "$target_file" "CONVERSION_WARNINGS" "$conversion_warnings"
+    replace_placeholder "$target_file" "CC_FLOW_VERSION" "$cc_flow_version"
 
     # { AGENT_CONTENT } を実際のコンテンツに置換
     # 一時ファイルを使用して複数行コンテンツを処理
@@ -85,18 +122,7 @@ convert_command_to_agent() {
     mv "$temp_file" "$target_file"
 
     # 残りのプレースホルダーも置換
-    sed -i '' "s|{AGENT_CONTENT}||g" "$target_file"
-    sed -i '' "s|{SOURCE_PATH}|$source_file|g" "$target_file"
-    sed -i '' "s|{SOURCE_COMMAND_NAME}|$command_name|g" "$target_file"
-    sed -i '' "s|{SOURCE_ARGUMENT_HINT}|$(extract_argument_hint "$source_file")|g" "$target_file"
-    sed -i '' "s|{SOURCE_ALLOWED_TOOLS}|$tools|g" "$target_file"
-    sed -i '' "s|{CONVERSION_DATE}|$(date '+%Y-%m-%d %H:%M:%S')|g" "$target_file"
-    sed -i '' "s|{CONVERSION_VERSION}|1.0|g" "$target_file"
-    sed -i '' "s|{TARGET_CATEGORY}|$(basename "$target_directory")|g" "$target_file"
-    sed -i '' "s|{TEMPLATE_NAME}|$(basename "$template_file")|g" "$target_file"
-    sed -i '' "s|{VALIDATION_STATUS}|✅ 変換完了|g" "$target_file"
-    sed -i '' "s|{CONVERSION_WARNINGS}|なし|g" "$target_file"
-    sed -i '' "s|{CC_FLOW_VERSION}|0.0.5|g" "$target_file"
+    replace_placeholder "$target_file" "AGENT_CONTENT" ""
 
     echo "✅ 変換完了: $target_file"
 }
