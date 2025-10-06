@@ -142,13 +142,14 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
         
         const textColor = getVariantColor();
 
+        const totalHeight = labelLines.length + (showDescription ? descriptionLines.length : 0);
+
         return (
           <Box
             key={item.id ?? item.value}
             flexDirection="column"
             marginBottom={spacing}
-            height={showDescription ? 3 : 1}
-            minHeight={showDescription ? 3 : 1}
+            minHeight={totalHeight}
           >
             {labelLines.map((line, lineIndex) => {
               const indicator =
@@ -168,32 +169,26 @@ export const FocusableMenu: React.FC<FocusableMenuProps> = ({
                 </Box>
               );
             })}
-            {showDescription && (
-              <Box flexDirection="column" width={lineContainerWidth} height={2}>
-                {descriptionLines.length > 0 ? (
-                  descriptionLines.map((line, lineIndex) => {
-                    const composedLine = alignWithinWidth(
-                      `  ${line}`,
-                      lineContainerWidth,
-                      align
-                    );
-                    return (
-                      <Box
-                        key={`menu-desc-${item.value}-${lineIndex}`}
-                        width={lineContainerWidth}
-                        height={1}
-                      >
-                        <Text color={theme.colors.text.muted} italic>
-                          {composedLine}
-                        </Text>
-                      </Box>
-                    );
-                  })
-                ) : (
-                  <Box height={2} width={lineContainerWidth}>
-                    <Text> </Text>
-                  </Box>
-                )}
+            {showDescription && descriptionLines.length > 0 && (
+              <Box flexDirection="column" width={lineContainerWidth}>
+                {descriptionLines.map((line, lineIndex) => {
+                  const composedLine = alignWithinWidth(
+                    `  ${line}`,
+                    lineContainerWidth,
+                    align
+                  );
+                  return (
+                    <Box
+                      key={`menu-desc-${item.value}-${lineIndex}`}
+                      width={lineContainerWidth}
+                      height={1}
+                    >
+                      <Text color={theme.colors.text.muted} italic>
+                        {composedLine}
+                      </Text>
+                    </Box>
+                  );
+                })}
               </Box>
             )}
           </Box>
