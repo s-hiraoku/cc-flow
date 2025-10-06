@@ -1,6 +1,6 @@
 {
   "name": "@hiraoku/cc-flow-web",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "private": false,
   "description": "Visual workflow editor for CC-Flow with drag-and-drop interface",
   "keywords": [
@@ -48,7 +48,7 @@
     "publish:safe": "npm publish --access public"
   },
   "dependencies": {
-    "@hiraoku/cc-flow-core": "^0.0.7",
+    "@hiraoku/cc-flow-core": "^0.1.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",

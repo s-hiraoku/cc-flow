@@ -52,8 +52,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateW
     }
 
     // Create a secure temporary directory with restrictive permissions
-    const tempDir = await mkdir(join(tmpdir(), `cc-flow-${Date.now()}`), { mode: 0o700 });
-    tempFilePath = join(tempDir.toString(), 'workflow.json');
+    const tempDir = join(tmpdir(), `cc-flow-${Date.now()}`);
+    await mkdir(tempDir, { mode: 0o700 });
+    tempFilePath = join(tempDir, 'workflow.json');
     await writeFile(tempFilePath, json, { mode: 0o600, encoding: 'utf-8' });
 
     // Get script path from @hiraoku/cc-flow-core package
