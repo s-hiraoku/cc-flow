@@ -2,7 +2,7 @@ import { execSync, type ExecSyncOptions } from 'child_process';
 import { join, dirname, resolve } from 'path';
 import { existsSync } from 'fs';
 import { tmpdir } from 'os';
-import { writeFileSync, unlinkSync, mkdtempSync, rmdirSync } from 'fs';
+import { writeFileSync, unlinkSync, mkdtempSync } from 'fs';
 
 import { createRequire } from 'module';
 import type { WorkflowConfig } from '../models/Agent.js';

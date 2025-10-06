@@ -17,9 +17,10 @@ async function scanAgentsDirectory(dirPath: string, category: string = ''): Prom
         // Recursively scan subdirectories
         const subAgents = await scanAgentsDirectory(fullPath, entry);
         agents.push(...subAgents);
-      } else if (stats.isFile() && extname(entry) === '.md') {
-        // Parse agent markdown file
+      } else if (extname(entry) === '.md') {
+        // Parse agent markdown file - check if it's still a file during read
         try {
+          // Directly read file to avoid race condition between stat check and read
           const content = await readFile(fullPath, 'utf-8');
           const agentName = entry.replace('.md', '');
 
@@ -44,6 +45,7 @@ async function scanAgentsDirectory(dirPath: string, category: string = ''): Prom
 
           agents.push(agent);
         } catch (error) {
+          // File might have been deleted or is not readable - skip it
           console.warn(`Failed to read agent file: ${fullPath}`, error);
         }
       }

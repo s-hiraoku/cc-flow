@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { spawn } from 'child_process';
-import { writeFile, unlink, readFile, mkdir, rm } from 'fs/promises';
+import { writeFile, unlink, readFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
@@ -88,20 +88,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateW
       claudeRootPath,
     });
 
-    // Check if temp file was actually created and log its content
-    try {
-      const { stat } = await import('fs/promises');
-      const fileStats = await stat(tempFilePath);
-      // Read file content using already obtained stats
-      const fileContent = await readFile(tempFilePath, 'utf-8');
-      console.log('Temp file created successfully:', {
-        size: fileStats.size,
-        path: tempFilePath,
-        contentPreview: fileContent.substring(0, 500),
-      });
-    } catch (err) {
-      console.error('Failed to verify temp file:', err);
-    }
+    // Log temp file creation (file was just created above)
+    console.log('Temp file created at:', tempFilePath);
 
     // Execute create-workflow.sh with absolute paths
     const { stdout, stderr, exitCode } = await executeScript(
