@@ -74,6 +74,49 @@ npm run dev
 
 Open your browser to `http://localhost:3000`
 
+## Requirements
+
+### Prerequisites
+- Node.js >= 18.0.0
+- npm >= 9.0.0
+
+### Platform-Specific Requirements
+
+#### Unix/Linux/macOS
+- ✅ Natively supported
+- Bash is pre-installed by default
+
+#### Windows
+cc-flow-web uses `@hiraoku/cc-flow-core` which is Bash script-based. Windows requires one of the following:
+
+**Recommended: Git for Windows**
+- Integrated package including Git Bash
+- Download: https://git-scm.com/download/win
+- After installation, `bash` command is added to PATH
+
+**Alternative: WSL (Windows Subsystem for Linux)**
+- Built-in Linux environment for Windows 10/11
+- Setup: https://docs.microsoft.com/windows/wsl/install
+
+**Limitations:**
+- ❌ PowerShell alone does not work
+- ❌ Command Prompt alone does not work
+- ✅ `bash` command via Git Bash or WSL is required
+
+### Verify Environment
+
+Check if Bash environment is properly set up:
+
+```bash
+# Check Bash version
+bash --version
+
+# Check Node.js version
+node --version
+```
+
+If both commands return version information, you can use cc-flow-web.
+
 ## Development
 
 ### Prerequisites

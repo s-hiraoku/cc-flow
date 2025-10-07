@@ -2,18 +2,18 @@
 
 > Core workflow generation logic for CC-Flow - Claude Code workflow creation toolkit
 
-## 概要
+## Overview
 
-`@hiraoku/cc-flow-core` は、Claude Code のワークフロー作成を支援するコアロジックパッケージです。
-このパッケージは CC-Flow エコシステムの**心臓部**であり、全てのインターフェース（CLI、Web など）から利用されます。
+`@hiraoku/cc-flow-core` is a core logic package that supports Claude Code workflow creation.
+This package is the **heart** of the CC-Flow ecosystem and is used by all interfaces (CLI, Web, etc.).
 
-## アーキテクチャ
+## Architecture
 
 ```
 ┌─────────────────────────────────────┐
 │      @hiraoku/cc-flow-core          │
 │                                     │
-│  ワークフロー生成のコアロジック      │
+│   Core Workflow Generation Logic   │
 └─────────────────────────────────────┘
               ↑          ↑
               │          │
@@ -22,23 +22,67 @@
      └───────────┘  └─────────────┘
 ```
 
-## 機能
+## Features
 
-- ✅ ワークフロー生成（workflow.md）
-- ✅ POML → Markdown 変換
-- ✅ テンプレート管理
-- ✅ エージェント検出・変換
-- ✅ スラッシュコマンド変換
+- ✅ Workflow generation (workflow.md)
+- ✅ POML → Markdown conversion
+- ✅ Template management
+- ✅ Agent discovery & conversion
+- ✅ Slash command conversion
 
-## インストール
+## Installation
 
 ```bash
 npm install @hiraoku/cc-flow-core
 ```
 
-## 使用方法
+## Requirements
 
-### スクリプト引数仕様
+### Prerequisites
+
+- **Node.js**: ≥18.0.0
+- **Bash**: Unix-like shell environment
+
+### Platform-Specific Requirements
+
+#### Unix/Linux/macOS
+- ✅ Natively supported
+- Bash is pre-installed by default
+
+#### Windows
+cc-flow-core is Bash script-based, so Windows requires one of the following:
+
+**Recommended: Git for Windows**
+- Integrated package including Git Bash
+- Download: https://git-scm.com/download/win
+- After installation, `bash` command is added to PATH
+
+**Alternative: WSL (Windows Subsystem for Linux)**
+- Built-in Linux environment for Windows 10/11
+- Setup: https://docs.microsoft.com/windows/wsl/install
+
+**Limitations:**
+- ❌ PowerShell alone does not work
+- ❌ Command Prompt alone does not work
+- ✅ `bash` command via Git Bash or WSL is required
+
+### Environment Verification
+
+Check if Bash environment is properly set up:
+
+```bash
+# Check Bash version
+bash --version
+
+# Check Node.js version
+node --version
+```
+
+If both commands return version information, you can use cc-flow-core.
+
+## Usage
+
+### Script Argument Specification
 
 #### create-workflow.sh
 
@@ -46,34 +90,34 @@ npm install @hiraoku/cc-flow-core
 create-workflow.sh <agents-dir> <commands-dir> --steps-json <path>
 ```
 
-**引数:**
-- `<agents-dir>`: エージェントファイル(.md)が配置されているディレクトリの**絶対パス**
-- `<commands-dir>`: 生成されるワークフローファイルの出力先ディレクトリの**絶対パス**
-- `--steps-json <path>`: ワークフロー定義JSONファイルのパス
+**Arguments:**
+- `<agents-dir>`: **Absolute path** to the directory containing agent files (.md)
+- `<commands-dir>`: **Absolute path** to the output directory for generated workflow files
+- `--steps-json <path>`: Path to workflow definition JSON file
 
-**JSONファイル形式:**
+**JSON File Format:**
 
 ```json
 {
   "workflowName": "my-workflow",
-  "workflowPurpose": "ワークフローの目的",
+  "workflowPurpose": "Workflow purpose",
   "workflowModel": "claude-sonnet-4-5-20250929",
   "workflowArgumentHint": "<context>",
   "workflowSteps": [
     {
       "title": "Step 1",
       "mode": "sequential",
-      "purpose": "目的",
+      "purpose": "Purpose",
       "agents": ["agent1", "agent2"]
     }
   ]
 }
 ```
 
-**使用例:**
+**Example:**
 
 ```bash
-# 絶対パスを指定して実行
+# Execute with absolute paths
 ./workflow/create-workflow.sh \
   /path/to/project/.claude/agents \
   /path/to/project/.claude/commands \
@@ -86,46 +130,46 @@ create-workflow.sh <agents-dir> <commands-dir> --steps-json <path>
 convert-slash-commands.sh <commands-dir> <agents-dir> [--dry-run]
 ```
 
-**引数:**
-- `<commands-dir>`: 変換対象のコマンドディレクトリの**絶対パス**
-- `<agents-dir>`: 出力先エージェントディレクトリの**絶対パス**
-- `--dry-run`: (オプション) 実際の変換は行わず、プレビューのみ表示
+**Arguments:**
+- `<commands-dir>`: **Absolute path** to the command directory to convert
+- `<agents-dir>`: **Absolute path** to the output agent directory
+- `--dry-run`: (Optional) Preview only without actual conversion
 
-**ディレクトリ構造の保持:**
+**Directory Structure Preservation:**
 
-`/path/to/.claude/commands/kiro` を指定すると、出力は `/path/to/.claude/agents/kiro` に作成されます。
+Specifying `/path/to/.claude/commands/kiro` will create output in `/path/to/.claude/agents/kiro`.
 
-**使用例:**
+**Examples:**
 
 ```bash
-# kiroディレクトリのコマンドを .claude/agents/kiro に変換
+# Convert kiro directory commands to .claude/agents/kiro
 ./workflow/utils/convert-slash-commands.sh \
   /path/to/project/.claude/commands/kiro \
   /path/to/project/.claude/agents
 
-# utilityカテゴリのコマンドを .claude/agents/utility に変換
+# Convert utility category commands to .claude/agents/utility
 ./workflow/utils/convert-slash-commands.sh \
   /path/to/project/.claude/commands/utility \
   /path/to/project/.claude/agents
 
-# dry-runモードで確認
+# Verify with dry-run mode
 ./workflow/utils/convert-slash-commands.sh \
   /path/to/project/.claude/commands \
   /path/to/project/.claude/agents \
   --dry-run
 ```
 
-### コマンドラインから直接実行
+### Direct Execution from Command Line
 
 ```bash
-# ワークフロー作成
+# Create workflow
 npx cc-flow-create-workflow ./agents/my-workflow
 
-# スラッシュコマンド変換
+# Convert slash commands
 npx cc-flow-convert-commands utility
 ```
 
-### プログラムから利用（Node.js / TypeScript）
+### Programmatic Usage (Node.js / TypeScript)
 
 ```javascript
 const { spawn } = require('child_process');
@@ -133,12 +177,12 @@ const { join } = require('path');
 const { writeFileSync } = require('fs');
 const { tmpdir } = require('os');
 
-// パッケージのパスを取得
+// Get package path
 const corePackage = require.resolve('@hiraoku/cc-flow-core/package.json');
 const corePath = join(corePackage, '..');
 const scriptPath = join(corePath, 'workflow/create-workflow.sh');
 
-// ワークフロー定義を作成
+// Create workflow definition
 const workflowConfig = {
   workflowName: 'demo-workflow',
   workflowPurpose: 'Demo purpose',
@@ -152,11 +196,11 @@ const workflowConfig = {
   ]
 };
 
-// 一時ファイルに保存
+// Save to temporary file
 const tempFile = join(tmpdir(), 'workflow-config.json');
 writeFileSync(tempFile, JSON.stringify(workflowConfig));
 
-// スクリプトを実行（絶対パスを渡す）
+// Execute script (pass absolute paths)
 const agentsDir = join(process.cwd(), '.claude/agents');
 const commandsDir = join(process.cwd(), '.claude/commands');
 
@@ -176,44 +220,44 @@ child.on('close', (code) => {
 });
 ```
 
-## パッケージ構成
+## Package Structure
 
 ```
 @hiraoku/cc-flow-core/
-├── create-workflow.sh          # ワークフロー生成メインスクリプト
-├── convert-slash-commands.sh   # コマンド変換スクリプト
-├── workflow/                   # コアロジック
-│   ├── lib/                    # ライブラリ
-│   └── utils/                  # ユーティリティ
-└── templates/                  # テンプレートファイル
+├── create-workflow.sh          # Main workflow generation script
+├── convert-slash-commands.sh   # Command conversion script
+├── workflow/                   # Core logic
+│   ├── lib/                    # Libraries
+│   └── utils/                  # Utilities
+└── templates/                  # Template files
     ├── workflow.md
     ├── workflow.poml
     └── partials/
 ```
 
-## 依存パッケージ
+## Dependent Packages
 
-### CLI インターフェース
+### CLI Interface
 - [@hiraoku/cc-flow-cli](https://www.npmjs.com/package/@hiraoku/cc-flow-cli)
 
-### Web インターフェース
+### Web Interface
 - [@hiraoku/cc-flow-web](https://www.npmjs.com/package/@hiraoku/cc-flow-web)
 
-## 開発
+## Development
 
-### テンプレートのカスタマイズ
+### Template Customization
 
-`templates/` ディレクトリ内のファイルを編集することで、生成されるワークフローをカスタマイズできます。
+You can customize generated workflows by editing files in the `templates/` directory.
 
-### 新機能の追加
+### Adding New Features
 
-コアロジックに新機能を追加すると、全てのインターフェース（CLI、Web）で自動的に利用可能になります。
+Adding new features to the core logic automatically makes them available in all interfaces (CLI, Web).
 
-## ライセンス
+## License
 
 MIT
 
-## リンク
+## Links
 
 - [GitHub Repository](https://github.com/hiraoku/cc-flow)
 - [Documentation](https://github.com/hiraoku/cc-flow#readme)

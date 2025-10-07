@@ -1,6 +1,6 @@
 {
   "name": "@hiraoku/cc-flow-core",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Core workflow generation logic for CC-Flow - Claude Code workflow creation toolkit",
   "keywords": [
     "cc-flow",
