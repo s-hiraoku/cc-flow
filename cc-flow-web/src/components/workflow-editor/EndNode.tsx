@@ -7,6 +7,17 @@ import { EndNodeData } from "@/types/workflow";
 export default function EndNode({ id, data, selected }: NodeProps) {
   const { deleteElements } = useReactFlow();
   const endData = data as EndNodeData;
+  const handleClasses = "rounded-full";
+  const handleStyle = {
+    width: "20px",
+    height: "20px",
+    border: "4px solid white",
+    background: "#f59e0b",
+    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 10px rgba(245, 158, 11, 0.5)",
+    top: "50%",
+    left: "0",
+    transform: "translate(-50%, -50%)",
+  } as const;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -29,8 +40,9 @@ export default function EndNode({ id, data, selected }: NodeProps) {
       >
         <Handle
           type="target"
-          position={Position.Top}
-          className="h-3 w-3 border-2 border-white bg-amber-500"
+          position={Position.Left}
+          className={handleClasses}
+          style={handleStyle}
         />
         {/* Delete button */}
         <button

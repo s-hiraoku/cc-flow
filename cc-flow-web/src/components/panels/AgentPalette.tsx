@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import { Panel, Button } from "@/components/ui";
+import { Panel, Button, Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui";
 import { LoadingSpinner } from "@/components/common";
 import { Agent } from "@/types/agent";
 import { AgentService } from "@/services";
@@ -99,6 +99,35 @@ export default function AgentPalette({
   const [searchTerm, setSearchTerm] = useState("");
   const [collapsed, setCollapsed] = useState(false);
 
+  const basePanelClasses = "relative transition-all duration-300 lg:flex-shrink-0";
+  const collapsedPanelClasses =
+    "lg:absolute lg:left-6 lg:top-1/2 lg:z-40 lg:w-auto lg:-translate-y-1/2 lg:rounded-3xl lg:border-transparent lg:bg-white/90 lg:px-3 lg:py-4 lg:shadow-2xl lg:backdrop-blur-md lg:ring-1 lg:ring-black/10 lg:h-auto";
+  const expandedPanelClasses = "lg:static lg:h-full lg:w-72 lg:rounded-3xl lg:shadow-xl";
+  const panelClassName = `${basePanelClasses} ${collapsed ? collapsedPanelClasses : expandedPanelClasses}`;
+  const collapsedButtonClasses =
+    "flex h-10 w-10 items-center justify-center rounded-2xl bg-white/85 text-gray-600 shadow-md ring-1 ring-black/5 transition hover:bg-indigo-500 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500";
+
+  const headerContent = collapsed ? undefined : (
+    <div className="flex items-center justify-between">
+      <span className="flex items-center gap-3 text-base font-semibold text-gray-900">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+          <Sparkles className="h-4 w-4" aria-hidden />
+        </span>
+        <span className="leading-tight">Agent Palette</span>
+      </span>
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-label="Collapse agent palette"
+        aria-expanded={!collapsed}
+        onClick={() => setCollapsed(true)}
+        className="p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+      >
+        <PanelLeftClose className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+
   // Memoized categories
   const categories = useMemo(
     () => AgentService.getUniqueCategories(agents),
@@ -186,47 +215,51 @@ export default function AgentPalette({
   );
 
   return (
-    <Panel
-      variant="default"
-      title={
-        collapsed ? (
-          <div className="flex items-center justify-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label="Expand agent palette"
+    <TooltipProvider>
+      <Panel
+        variant="default"
+        title={headerContent}
+        subtitle={collapsed ? undefined : "Drag nodes and agents onto the canvas"}
+        className={panelClassName}
+      >
+      {collapsed ? (
+        <div className="flex flex-col items-center gap-4" role="group" aria-label="Collapsed agent palette">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500 text-white shadow-lg">
+            <Sparkles className="h-5 w-5" aria-hidden />
+            <span className="sr-only">Agent palette</span>
+          </span>
+          <div className="flex flex-col items-center gap-3">
+            <button
+              type="button"
+              className={collapsedButtonClasses}
               onClick={() => setCollapsed(false)}
-              className="p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+              title="Show workflow nodes"
             >
-              <PanelLeftOpen className="h-4 w-4" />
-            </Button>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-3 text-base font-semibold text-gray-900">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                <Sparkles className="h-4 w-4" aria-hidden />
-              </span>
-              <span className="leading-tight">Agent Palette</span>
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label="Collapse agent palette"
-              onClick={() => setCollapsed(true)}
-              className="p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+              <Workflow className="h-5 w-5" aria-hidden />
+              <span className="sr-only">Show workflow nodes</span>
+            </button>
+            <button
+              type="button"
+              className={collapsedButtonClasses}
+              onClick={() => setCollapsed(false)}
+              title="Browse agents"
             >
-              <PanelLeftClose className="h-4 w-4" />
-            </Button>
+              <Users className="h-5 w-5" aria-hidden />
+              <span className="sr-only">Browse agents</span>
+            </button>
           </div>
-        )
-      }
-      subtitle={collapsed ? undefined : "Drag nodes and agents onto the canvas"}
-      className={`relative transition-all duration-200 ${
-        collapsed ? "w-full shadow-lg lg:w-14" : "w-full shadow-xl lg:w-72"
-      } lg:flex-shrink-0`}
-    >
-      {!collapsed && (
+          <div className="h-10 w-px rounded-full bg-gradient-to-b from-indigo-200 via-gray-200 to-transparent" aria-hidden />
+          <button
+            type="button"
+            className={collapsedButtonClasses}
+            onClick={() => setCollapsed(false)}
+            aria-label="Expand agent palette"
+            aria-expanded={!collapsed}
+          >
+            <PanelLeftOpen className="h-5 w-5" aria-hidden />
+          </button>
+        </div>
+      ) : (
         <div className="flex h-full flex-col overflow-hidden">
           <div className="space-y-6 px-5 pb-4 pt-6">
             {/* Error State */}
@@ -261,15 +294,16 @@ export default function AgentPalette({
               </div>
               <div className="space-y-3">
                 {PRIMITIVE_NODES.map((primitive) => (
-                  <div
-                    key={primitive.type}
-                    className={`cursor-grab select-none rounded-2xl border ${
-                      PRIMITIVE_THEME[primitive.type]?.card ?? "border-gray-200 bg-white"
-                    } px-4 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:border-indigo-400 hover:shadow-lg active:cursor-grabbing active:scale-[0.98]`}
-                    draggable
-                    onDragStart={(event) => handlePrimitiveDragStart(event, primitive)}
-                  >
-                    <div className="flex items-start gap-3">
+                  <Tooltip key={primitive.type} delayDuration={300}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={`cursor-grab select-none rounded-2xl border ${
+                          PRIMITIVE_THEME[primitive.type]?.card ?? "border-gray-200 bg-white"
+                        } px-4 py-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:border-indigo-400 hover:shadow-lg active:cursor-grabbing active:scale-[0.98]`}
+                        draggable
+                        onDragStart={(event) => handlePrimitiveDragStart(event, primitive)}
+                      >
+                    <div className="flex items-center gap-3">
                       <div
                         className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${
                           PRIMITIVE_THEME[primitive.type]?.icon ?? "bg-gray-100 text-gray-700"
@@ -334,15 +368,19 @@ export default function AgentPalette({
                           </svg>
                         )}
                       </div>
-                      <div>
-                        <p className="text-xs uppercase tracking-wider text-gray-600">
+                      <div className="flex-1">
+                        <h4 className="text-base font-semibold text-gray-900">{primitive.name}</h4>
+                        <p className="text-xs text-gray-600">
                           {primitive.type === "step-group" ? "Parallel" : primitive.type === "end" ? "Output" : "Entry"}
                         </p>
-                        <h4 className="text-base font-medium text-gray-900">{primitive.name} node</h4>
-                        <p className="mt-1 text-sm leading-relaxed text-gray-700">{primitive.description}</p>
                       </div>
                     </div>
-                  </div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs">
+                      <p className="font-medium text-gray-900">{primitive.description}</p>
+                    </TooltipContent>
+                  </Tooltip>
                 ))}
               </div>
             </section>
@@ -410,52 +448,57 @@ export default function AgentPalette({
             ) : filteredAgents.length > 0 ? (
               <div className="space-y-4 pb-2">
                 {filteredAgents.map((agent) => (
-                  <div
-                    key={`${agent.category || 'default'}-${agent.name}`}
-                    className={`group cursor-grab select-none rounded-2xl border px-4 py-4 shadow-sm transition-all duration-200 hover:scale-[1.01] hover:border-indigo-300 hover:shadow-lg active:cursor-grabbing active:scale-[0.98] ${getCategoryBorderAndBg(
-                      agent.category || "default"
-                    )}`}
-                    draggable
-                    onDragStart={(event) => handleAgentDragStart(event, agent)}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="pointer-events-none">
-                        <div
-                          className={`flex h-9 w-9 items-center justify-center rounded-lg ${getCategoryIconColor(
-                            agent.category || "default"
-                          )}`}
-                          aria-hidden
-                        >
-                          <svg
-                            className="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            strokeWidth={2.5}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d={getCategoryIcon(agent.category || "default")}
-                            />
-                          </svg>
+                  <Tooltip key={`${agent.category || 'default'}-${agent.name}`} delayDuration={300}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={`group cursor-grab select-none rounded-2xl border px-4 py-3 shadow-sm transition-all duration-200 hover:scale-[1.01] hover:border-indigo-300 hover:shadow-lg active:cursor-grabbing active:scale-[0.98] ${getCategoryBorderAndBg(
+                          agent.category || "default"
+                        )}`}
+                        draggable
+                        onDragStart={(event) => handleAgentDragStart(event, agent)}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="pointer-events-none">
+                            <div
+                              className={`flex h-9 w-9 items-center justify-center rounded-lg ${getCategoryIconColor(
+                                agent.category || "default"
+                              )}`}
+                              aria-hidden
+                            >
+                              <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                strokeWidth={2.5}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d={getCategoryIcon(agent.category || "default")}
+                                />
+                              </svg>
+                            </div>
+                          </div>
+                          <div className="pointer-events-none flex-1 min-w-0">
+                            <h3 className="text-base font-medium text-gray-900 truncate">{agent.name}</h3>
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              <span
+                                className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium uppercase tracking-wide text-gray-900 ${getCategoryIconColor(
+                                  agent.category || "default"
+                                )}`}
+                              >
+                                {formatCategoryLabel(agent.category || "")}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div className="pointer-events-none flex-1 min-w-0">
-                        <h3 className="text-base font-medium text-gray-900 truncate">{agent.name}</h3>
-                        <p className="mt-1 text-sm leading-relaxed text-gray-700 line-clamp-3 overflow-hidden">{agent.description}</p>
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                          <span
-                            className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium uppercase tracking-wide text-gray-900 ${getCategoryIconColor(
-                              agent.category || "default"
-                            )}`}
-                          >
-                            {formatCategoryLabel(agent.category || "")}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs">
+                      <p className="font-medium text-gray-900">{agent.description}</p>
+                    </TooltipContent>
+                  </Tooltip>
                 ))}
               </div>
             ) : (
@@ -469,6 +512,7 @@ export default function AgentPalette({
           </div>
         </div>
       )}
-    </Panel>
+      </Panel>
+    </TooltipProvider>
   );
 }

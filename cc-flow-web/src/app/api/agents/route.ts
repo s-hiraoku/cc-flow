@@ -68,7 +68,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const agentsPath = join(claudeRootPath, '.claude', 'agents');
+    // claudeRootPath might already include .claude, so check and adjust
+    const agentsPath = claudeRootPath.endsWith('.claude')
+      ? join(claudeRootPath, 'agents')
+      : join(claudeRootPath, '.claude', 'agents');
     const allAgents = await scanAgentsDirectory(agentsPath);
 
     // Group agents by category

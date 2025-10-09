@@ -42,6 +42,34 @@ export default function PropertiesPanel({
   onNodesChange,
 }: PropertiesPanelProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const basePanelClasses = "relative transition-all duration-300 lg:flex-shrink-0";
+  const collapsedPanelClasses =
+    "lg:absolute lg:right-6 lg:top-1/2 lg:z-40 lg:w-auto lg:-translate-y-1/2 lg:rounded-3xl lg:border-transparent lg:bg-white/90 lg:px-3 lg:py-4 lg:shadow-2xl lg:backdrop-blur-md lg:ring-1 lg:ring-black/10 lg:h-auto";
+  const expandedPanelClasses = "lg:static lg:h-full lg:w-[24rem] lg:rounded-3xl lg:shadow-xl";
+  const panelClassName = `${basePanelClasses} ${collapsed ? collapsedPanelClasses : expandedPanelClasses}`;
+  const collapsedButtonClasses =
+    "flex h-10 w-10 items-center justify-center rounded-2xl bg-white/85 text-gray-600 shadow-md ring-1 ring-black/5 transition hover:bg-indigo-500 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500";
+
+  const headerContent = collapsed ? undefined : (
+    <div className="flex items-center justify-between">
+      <span className="flex items-center gap-3 text-base font-semibold text-gray-900">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+          <Settings2 className="h-4 w-4" aria-hidden />
+        </span>
+        <span className="leading-tight">Properties</span>
+      </span>
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-label="Collapse properties"
+        aria-expanded={!collapsed}
+        onClick={() => setCollapsed(true)}
+        className="p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+      >
+        <PanelRightClose className="h-4 w-4" />
+      </Button>
+    </div>
+  );
 
   // Custom hooks for logic separation
   const {
@@ -111,43 +139,57 @@ export default function PropertiesPanel({
   return (
     <Panel
       variant="default"
-      title={collapsed ? (
-        <div className="flex items-center justify-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label="Expand properties"
+      title={headerContent}
+      subtitle={collapsed ? undefined : "Tune nodes, review stats, and inspect JSON outputs"}
+      className={panelClassName}
+    >
+      {collapsed ? (
+        <div className="flex flex-col items-center gap-4" role="group" aria-label="Collapsed properties panel">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500 text-white shadow-lg">
+            <Settings2 className="h-5 w-5" aria-hidden />
+            <span className="sr-only">Properties panel</span>
+          </span>
+          <div className="flex flex-col items-center gap-3">
+            <button
+              type="button"
+              className={collapsedButtonClasses}
+              onClick={() => setCollapsed(false)}
+              title="Workflow stats"
+            >
+              <BarChart3 className="h-5 w-5" aria-hidden />
+              <span className="sr-only">Workflow stats</span>
+            </button>
+            <button
+              type="button"
+              className={collapsedButtonClasses}
+              onClick={() => setCollapsed(false)}
+              title="Review workflow JSON"
+            >
+              <FileCode className="h-5 w-5" aria-hidden />
+              <span className="sr-only">Review workflow JSON</span>
+            </button>
+            <button
+              type="button"
+              className={collapsedButtonClasses}
+              onClick={() => setCollapsed(false)}
+              title="Playbook actions"
+            >
+              <PlayCircle className="h-5 w-5" aria-hidden />
+              <span className="sr-only">Playbook actions</span>
+            </button>
+          </div>
+          <div className="h-10 w-px rounded-full bg-gradient-to-b from-indigo-200 via-gray-200 to-transparent" aria-hidden />
+          <button
+            type="button"
+            className={collapsedButtonClasses}
             onClick={() => setCollapsed(false)}
-            className="p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+            aria-label="Expand properties"
+            aria-expanded={!collapsed}
           >
-            <PanelRightOpen className="h-4 w-4" />
-          </Button>
+            <PanelRightOpen className="h-5 w-5" aria-hidden />
+          </button>
         </div>
       ) : (
-        <div className="flex items-center justify-between">
-          <span className="flex items-center gap-3 text-base font-semibold text-gray-900">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-              <Settings2 className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="leading-tight">Properties</span>
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-label="Collapse properties"
-            onClick={() => setCollapsed(true)}
-            className="p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-          >
-            <PanelRightClose className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-      subtitle={collapsed ? undefined : "Tune nodes, review stats, and inspect JSON outputs"}
-      className={`relative transition-all duration-200 ${
-        collapsed ? "w-full shadow-lg lg:w-14" : "w-full shadow-xl lg:w-[24rem]"
-      } lg:flex-shrink-0`}
-    >
-      {!collapsed && (
         <div className="flex flex-col h-full min-h-0 overflow-hidden">
           <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-6 pt-5">
             <div className="space-y-6">

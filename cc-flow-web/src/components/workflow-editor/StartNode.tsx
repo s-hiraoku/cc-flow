@@ -8,6 +8,19 @@ export default function StartNode({ id, data, selected }: NodeProps) {
   const { deleteElements } = useReactFlow();
   const startData = data as StartNodeData;
   const hasError = startData.hasError || false;
+  const handleClasses = "rounded-full";
+  const handleStyle = {
+    width: "20px",
+    height: "20px",
+    border: "4px solid white",
+    background: hasError ? "#ef4444" : "#10b981",
+    boxShadow: hasError
+      ? "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 10px rgba(239, 68, 68, 0.5)"
+      : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 10px rgba(16, 185, 129, 0.5)",
+    top: "50%",
+    right: "0",
+    transform: "translate(50%, -50%)",
+  } as const;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -86,10 +99,9 @@ export default function StartNode({ id, data, selected }: NodeProps) {
         </div>
         <Handle
           type="source"
-          position={Position.Bottom}
-          className={`h-3 w-3 border-2 border-white ${
-            hasError ? "bg-red-500" : "bg-emerald-500"
-          }`}
+          position={Position.Right}
+          className={handleClasses}
+          style={handleStyle}
         />
       </div>
     </div>
