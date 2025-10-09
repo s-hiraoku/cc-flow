@@ -17,6 +17,29 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
   const updateNodeInternals = useUpdateNodeInternals();
   const stepData = data as StepGroupNodeData;
   const hasError = stepData.hasError || false;
+  const targetHandleClasses = "rounded-full";
+  const sourceHandleClasses = targetHandleClasses;
+  const baseHandleStyle = {
+    width: "20px",
+    height: "20px",
+    border: "4px solid white",
+    background: hasError ? "#ef4444" : "#a855f7",
+    boxShadow: hasError
+      ? "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 10px rgba(239, 68, 68, 0.5)"
+      : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 10px rgba(168, 85, 247, 0.5)",
+  };
+  const leftHandleStyle = {
+    ...baseHandleStyle,
+    top: "50%",
+    left: "0",
+    transform: "translate(-50%, -50%)",
+  } as const;
+  const rightHandleStyle = {
+    ...baseHandleStyle,
+    top: "50%",
+    right: "0",
+    transform: "translate(50%, -50%)",
+  } as const;
 
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
@@ -129,13 +152,12 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {/* Target handle at the top */}
+        {/* Target handle on the left */}
         <Handle
           type="target"
-          position={Position.Top}
-          className={`w-3 h-3 border-2 border-white ${
-            hasError ? "bg-red-500" : "bg-purple-500"
-          }`}
+          position={Position.Left}
+          className={targetHandleClasses}
+          style={leftHandleStyle}
         />
 
         <StepGroupHeader
@@ -206,13 +228,12 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
           </div>
         </div>
 
-        {/* Source handle at the bottom */}
+        {/* Source handle on the right */}
         <Handle
           type="source"
-          position={Position.Bottom}
-          className={`h-3 w-3 border-2 border-white ${
-            hasError ? "bg-red-500" : "bg-purple-500"
-          }`}
+          position={Position.Right}
+          className={sourceHandleClasses}
+          style={rightHandleStyle}
         />
       </div>
     </div>

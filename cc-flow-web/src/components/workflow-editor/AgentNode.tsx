@@ -14,6 +14,43 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
   const hasError = agentData.hasError || false;
   const colors = getCategoryColors(category);
   const icon = getCategoryIcon(category);
+  // Color mapping for handle backgrounds
+  const colorMap: Record<string, { bg: string; shadow: string }> = {
+    "border-sky-400": { bg: "#38bdf8", shadow: "rgba(56, 189, 248, 0.5)" },
+    "border-emerald-400": { bg: "#34d399", shadow: "rgba(52, 211, 153, 0.5)" },
+    "border-violet-400": { bg: "#a78bfa", shadow: "rgba(167, 139, 250, 0.5)" },
+    "border-amber-400": { bg: "#fbbf24", shadow: "rgba(251, 191, 36, 0.5)" },
+    "border-rose-400": { bg: "#fb7185", shadow: "rgba(251, 113, 133, 0.5)" },
+    "border-indigo-400": { bg: "#818cf8", shadow: "rgba(129, 140, 248, 0.5)" },
+    "border-teal-400": { bg: "#2dd4bf", shadow: "rgba(45, 212, 191, 0.5)" },
+    "border-cyan-400": { bg: "#22d3ee", shadow: "rgba(34, 211, 238, 0.5)" },
+    "border-indigo-300": { bg: "#a5b4fc", shadow: "rgba(165, 180, 252, 0.5)" }, // default
+  };
+
+  const handleColor = hasError
+    ? { bg: "#ef4444", shadow: "rgba(239, 68, 68, 0.5)" }
+    : colorMap[colors.handleBorder] || colorMap["border-indigo-300"];
+
+  const handleClasses = "rounded-full";
+  const baseHandleStyle = {
+    width: "20px",
+    height: "20px",
+    border: "4px solid white",
+    background: handleColor.bg,
+    boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 10px ${handleColor.shadow}`,
+  };
+  const targetHandleStyle = {
+    ...baseHandleStyle,
+    top: "50%",
+    left: "0",
+    transform: "translate(-50%, -50%)",
+  } as const;
+  const sourceHandleStyle = {
+    ...baseHandleStyle,
+    top: "50%",
+    right: "0",
+    transform: "translate(50%, -50%)",
+  } as const;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -46,14 +83,11 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
         </button>
-
         <Handle
           type="target"
-          position={Position.Top}
-          className={`h-3 w-3 border-2 border-white ${
-            hasError ? "bg-red-500" : colors.handle
-          }`}
-          style={{ left: "50%", transform: "translateX(-50%)" }}
+          position={Position.Left}
+          className={handleClasses}
+          style={targetHandleStyle}
         />
 
         <div className="flex items-start">
@@ -98,11 +132,9 @@ export default function AgentNode({ id, data, selected }: NodeProps) {
 
         <Handle
           type="source"
-          position={Position.Bottom}
-          className={`h-3 w-3 border-2 border-white ${
-            hasError ? "bg-red-500" : colors.handle
-          }`}
-          style={{ left: "50%", transform: "translateX(-50%)" }}
+          position={Position.Right}
+          className={handleClasses}
+          style={sourceHandleStyle}
         />
       </div>
     </div>
