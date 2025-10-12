@@ -1,5 +1,7 @@
 # CC-Flow: Claude Code Workflow Platform
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/s-hiraoku/cc-flow)
+
 ```
    ██████╗ ██████╗       ███████╗██╗      ██████╗ ██╗    ██╗
   ██╔════╝██╔════╝      ██╔════╝██║     ██╔═══██╗██║    ██║
@@ -41,12 +43,14 @@ CC-Flow is an opinionated toolkit for chaining Claude Code agents. It combines a
 The core package acts as the contract between human-facing editors and Claude Code. Its architecture is deliberately shell-first so it can run in CI/CD, the CLI, or the web editor's server runtime without bundling TypeScript.
 
 **Key Components**
+
 - `create-workflow.sh`: Main entrypoint that accepts agent lists, ordering, purpose, and metadata via flags. It orchestrates dependency checks, template rendering, and output writing.
 - `convert-slash-commands.sh`: Reads existing slash command Markdown, normalizes metadata, and generates agent files that the CLI/Web can consume.
 - `workflow/` templates: Authoritative POML and Markdown blueprints. Placeholders such as `{WORKFLOW_AGENT_ARRAY}` and `{WORKFLOW_PURPOSE}` are replaced during generation.
 - `templates/` helper snippets: Shared fragments reused across workflow flavors (sequential, parallel, quick-start).
 
 **Execution Pipeline**
+
 1. **Environment validation** – Ensures `node`, `npm`, `npx`, `jq`, and `pomljs` are present, short-circuiting with actionable errors.
 2. **Input normalization** – Parses flag arguments, resolves agent paths, and assembles ordered agent arrays.
 3. **Template rendering** – Generates POML using the template directory, substituting placeholders and writing to a secure `mktemp` directory.
@@ -54,6 +58,7 @@ The core package acts as the contract between human-facing editors and Claude Co
 5. **Cleanup & reporting** – Moves the final command into `.claude/commands/`, removes temporary files, and writes success messages consumed by the CLI/Web UIs.
 
 **Integration Points**
+
 - **CLI**: Binds to the scripts through `ScriptExecutor.ts`, streams stdout/stderr into Ink components, and surfaces validation results inline.
 - **Web Editor**: Executes the scripts from the server runtime (Next.js API route/CLI binary) after serializing canvas state to the same JSON payload the CLI uses.
 - **Direct Shell Usage**: Teams can call the scripts from CI pipelines, rendering workflows without spinning up UIs.
@@ -61,6 +66,7 @@ The core package acts as the contract between human-facing editors and Claude Co
 ## Quick Start
 
 ### 1. Prepare Your Claude Project
+
 - Organize agents under `.claude/agents/<category>/*.md`.
 - Optional: keep existing slash commands in `.claude/commands/` for conversion.
 - Ensure Node.js 18+ is available.
@@ -88,6 +94,7 @@ Generated commands live under `.claude/commands/<workflow-name>.md`, ready to ex
 ## Usage Examples
 
 ### cc-flow-cli (Ink TUI)
+
 ```bash
 # Launch interactive mode
 npx @hiraoku/cc-flow-cli
@@ -104,6 +111,7 @@ npx @hiraoku/cc-flow-cli --mode convert --directory ".claude/commands/spec"
 ```
 
 ### cc-flow-web (Visual Editor)
+
 ```bash
 cd /path/to/your/project/.claude
 cc-flow-web --port 4000 --no-open
@@ -111,6 +119,7 @@ cc-flow-web --port 4000 --no-open
 ```
 
 ### cc-flow-core (Shell-first)
+
 ```bash
 # Sequential workflow with custom purpose
 npx @hiraoku/cc-flow-core create-workflow \
@@ -129,6 +138,7 @@ All three workflows rely on the same templates and validation rules delivered by
 ## Feature Highlights
 
 ### CLI v0.1.1 (Ink TUI)
+
 - ✨ Three-pane Ink experience with bilingual labels and iconography powered by `figures`.
 - 🧭 Guided wizard covering environment checks, directory selection, agent ordering, and preview.
 - 🔄 Slash command conversion mode (`--mode convert`) that migrates legacy commands to agents.
@@ -136,6 +146,7 @@ All three workflows rely on the same templates and validation rules delivered by
 - 🧪 Vitest test suite plus TypeScript strict mode for predictable contributions.
 
 ### Web Editor v0.1.2 (Next.js + ReactFlow)
+
 - 🧱 Drag-and-drop canvas with Start, Agent, Step Group, and End nodes.
 - 🔁 Step Groups support sequential or parallel execution with up to 10 agents per group.
 - 📏 Nodes auto-resize to reveal every agent; drop-zones hide automatically when full.
@@ -144,17 +155,20 @@ All three workflows rely on the same templates and validation rules delivered by
 - 💾 JSON persistence, download/upload support, and CLI-ready generation progress indicators.
 
 ### Core v0.1.0 (`@hiraoku/cc-flow-core`)
+
 - 🧰 Shell scripts (`create-workflow.sh`, `convert-slash-commands.sh`) with modern flag parsing.
 - 📦 Template system that renders Claude Code-compatible Markdown and POML bundles.
 - 🔐 Hardened tmp directory handling, dependency validation (`node`, `npm`, `jq`, `pomljs`).
 
 ## Typical Workflow
+
 - Create or update agents in `.claude/agents/` (e.g., `spec/spec-init.md`).
 - Launch the CLI or Web Editor to select agents, reorder steps, and group parallel work.
 - Preview the generated command, adjust Step Groups, and ensure validation passes.
 - Export/Save the workflow, then call it inside Claude Code with your task context.
 
 ## Documentation & Guides
+
 - CLI documentation: `cc-flow-cli/README.md`
 - Web editor documentation suite: `cc-flow-web/docs/`
 - System architecture notes: `docs/`
@@ -175,25 +189,28 @@ Step Groups support up to 10 agents. The web editor adapts node height automatic
 
 ## Packages
 
-| Package | Version | Description |
-| --- | --- | --- |
-| [@hiraoku/cc-flow-cli](./cc-flow-cli/) | 0.1.1 | Ink-based terminal UI for workflow creation and conversion |
-| [@hiraoku/cc-flow-web](./cc-flow-web/) | 0.1.2 | Next.js/ReactFlow visual workflow editor with drag-and-drop Step Groups |
-| [@hiraoku/cc-flow-core](./cc-flow-core/) | 0.1.0 | Shell-first workflow automation toolkit powering both front-ends |
+| Package                                  | Version | Description                                                             |
+| ---------------------------------------- | ------- | ----------------------------------------------------------------------- |
+| [@hiraoku/cc-flow-cli](./cc-flow-cli/)   | 0.1.1   | Ink-based terminal UI for workflow creation and conversion              |
+| [@hiraoku/cc-flow-web](./cc-flow-web/)   | 0.1.2   | Next.js/ReactFlow visual workflow editor with drag-and-drop Step Groups |
+| [@hiraoku/cc-flow-core](./cc-flow-core/) | 0.1.0   | Shell-first workflow automation toolkit powering both front-ends        |
 
 ## Roadmap
 
 **Current (v0.1.x)**
+
 - ✅ Ink TUI with bilingual UI, POML generation, and slash command conversion
 - ✅ Visual web editor with dynamic Step Groups and validation overlays
 - ✅ Hardened workflow templates and secure shell tooling
 
 **Next (v0.2.x)**
+
 - 📊 Workflow template gallery shared between CLI and web
 - 🔍 Agent search across large `.claude` directories
 - 🔄 Bidirectional sync between saved JSON, Markdown commands, and POML
 
 **Future**
+
 - 📝 Advanced validation and linting for complex branching workflows
 - 🤝 Collaboration features and shared workflow libraries
 - 🔒 Fine-grained versioning for workflows and agent packs

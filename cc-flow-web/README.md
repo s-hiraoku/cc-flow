@@ -2,8 +2,6 @@
 
 Visual workflow editor for CC-Flow with an intuitive drag-and-drop interface.
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/s-hiraoku/cc-flow)
-
 ## Installation
 
 ### Option 1: Install from npm (Recommended)
@@ -34,6 +32,7 @@ cc-flow-web
 ```
 
 This will:
+
 1. Start the web server on port 3000
 2. Automatically open your browser to the editor
 3. Use the current directory as the Claude root path
@@ -79,10 +78,12 @@ Open your browser to `http://localhost:3000`
 ## Development
 
 ### Prerequisites
+
 - Node.js >= 18.0.0
 - npm >= 9.0.0
 
 ### Setup
+
 ```bash
 # Install dependencies
 npm install
@@ -92,6 +93,7 @@ npm run dev
 ```
 
 ### Available Scripts
+
 ```bash
 npm run dev         # Development server with hot reload
 npm run build       # Production build
@@ -103,6 +105,7 @@ npm run type-check  # TypeScript type checking
 ## Features
 
 ### ✅ Implemented
+
 - **Visual Workflow Editor**: ReactFlow-based drag-and-drop canvas with 4 node types (Start, Agent, Step Group, End)
 - **Agent Palette**: Search, filter, and drag agents with category-based organization
 - **Properties Panel**: Configure settings, view workflow statistics, and preview JSON outputs
@@ -115,6 +118,7 @@ npm run type-check  # TypeScript type checking
 - **Smart UI**: Drop zone automatically hides when maximum agents (10) are reached
 
 ### 📋 Planned (Future Versions)
+
 - Workflow templates and presets library
 - Advanced graph analysis and optimization suggestions
 - Collaboration features and real-time multi-user editing
@@ -150,16 +154,18 @@ cc-flow-web/
 ## Documentation
 
 ### 📚 Complete Documentation Suite
+
 Comprehensive documentation is available in the `/docs` directory:
 
 - **[Documentation Index](./docs/README.md)** - Complete documentation navigation
-- **[Development Guide](./docs/development/DEVELOPMENT_GUIDE.md)** - Setup and development workflow  
+- **[Development Guide](./docs/development/DEVELOPMENT_GUIDE.md)** - Setup and development workflow
 - **[User Guide](./docs/guides/USER_GUIDE.md)** - End-user documentation
 - **[Technical Architecture](./docs/architecture/TECHNICAL_ARCHITECTURE.md)** - System design and components
 - **[Testing Guide](./docs/testing/TESTING_GUIDE.md)** - Testing strategy and implementation
 - **[Code Standards](./docs/development/CODE_STANDARDS.md)** - Coding conventions and best practices
 
 ### 🎯 Quick Navigation by Role
+
 - **New Users**: [User Guide](./docs/guides/USER_GUIDE.md)
 - **Developers**: [Development Guide](./docs/development/DEVELOPMENT_GUIDE.md)
 - **Architects**: [Technical Architecture](./docs/architecture/TECHNICAL_ARCHITECTURE.md)
@@ -178,6 +184,7 @@ This web editor is designed to work seamlessly with the existing cc-flow CLI eco
 ## Contributing
 
 ### Development Workflow
+
 1. Review [Development Guide](./docs/development/DEVELOPMENT_GUIDE.md) for setup and workflow
 2. Check [Technical Architecture](./docs/architecture/TECHNICAL_ARCHITECTURE.md) for system design
 3. Follow [Code Standards](./docs/development/CODE_STANDARDS.md) for consistency
@@ -185,6 +192,7 @@ This web editor is designed to work seamlessly with the existing cc-flow CLI eco
 5. Maintain compatibility with cc-flow CLI ecosystem
 
 ### Code Standards
+
 - **TypeScript**: Strict mode enabled, no `any` types in production
 - **ESLint**: Configured for React and TypeScript best practices
 - **Prettier**: Consistent code formatting
@@ -195,6 +203,7 @@ This web editor is designed to work seamlessly with the existing cc-flow CLI eco
 This package implements comprehensive supply chain security measures:
 
 ### For Users
+
 - **Provenance Verification**: All releases include npm provenance attestations
 - **Dependency Auditing**: Regular security scans with `npm audit`
 - **Minimal Dependencies**: Standalone build reduces attack surface
@@ -210,6 +219,7 @@ npm audit signatures
 ```
 
 ### Reporting Security Issues
+
 Please see [SECURITY.md](./SECURITY.md) for details on reporting vulnerabilities.
 
 ## License
