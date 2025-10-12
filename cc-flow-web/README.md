@@ -2,6 +2,8 @@
 
 Visual workflow editor for CC-Flow with an intuitive drag-and-drop interface.
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/s-hiraoku/cc-flow)
+
 ## Installation
 
 ### Option 1: Install from npm (Recommended)
