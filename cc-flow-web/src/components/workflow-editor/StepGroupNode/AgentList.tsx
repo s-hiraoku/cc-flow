@@ -14,7 +14,7 @@ export default function AgentList({ agents, onRemoveAgent }: AgentListProps) {
   }
 
   return (
-    <div className="space-y-2 max-h-80 overflow-y-auto">
+    <div className="space-y-2">
       {agents.map((agent, index) => {
         const agentName = typeof agent === 'string' ? agent : agent.name;
         const category = typeof agent === 'string' ? 'default' : (agent.category || 'default');
