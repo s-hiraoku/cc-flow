@@ -229,5 +229,5 @@ This project is part of the CC-Flow ecosystem. Please refer to the main reposito
 ---
 
 **Project Status**: Active Development
-**Latest Version**: 0.1.2
+**Latest Version**: 0.1.3
 **Maintained by**: CC-Flow Development Team
