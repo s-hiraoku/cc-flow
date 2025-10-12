@@ -9,341 +9,204 @@
    ╚═════╝ ╚═════╝      ╚═╝     ╚══════╝ ╚═════╝  ╚══╝╚══╝
 ```
 
-🚀 **Create powerful Claude Code workflows with a modern interactive terminal interface**
+🚀 **Build Claude Code workflows from both a modern terminal UI and a visual web editor.**
 
-> **Latest:** v0.1.0 features a modern icon system with cross-terminal compatibility
+> **Latest (2025-10-12):** `@hiraoku/cc-flow-web` v0.1.2 adds dynamic Step Group sizing, automatic drop-zone handling, and parallel group fixes. `@hiraoku/cc-flow-cli` v0.1.1 ships POML-powered workflow generation with a fully interactive Ink TUI.
 
-CC-Flow makes it easy to build and run custom workflows that chain multiple Claude Code agents together. No complex configuration needed - just launch the interactive TUI and create workflows visually!
+CC-Flow is an opinionated toolkit for chaining Claude Code agents. It combines a beautiful terminal interface, a drag-and-drop web editor, and a reusable shell toolkit so you can design, validate, and run workflows without touching brittle scripts.
 
-## 🎯 What is CC-Flow?
+## Platform Overview
 
-CC-Flow lets you:
+- **Interactive CLI (`@hiraoku/cc-flow-cli`)** – Ink-powered terminal UI for discovering agents, configuring workflows, and converting existing slash commands.
+- **Visual Web Editor (`@hiraoku/cc-flow-web`)** – Next.js + ReactFlow application with Step Group modeling, validation overlays, and JSON export.
+- **Automation Core (`@hiraoku/cc-flow-core`)** – Shell-first workflow engine that both front-ends call to render production-ready commands.
 
-- **Chain Claude Code agents** together in custom workflows
-- **Create workflows visually** with an intuitive terminal interface
-- **Convert slash commands to agents** for better organization and reusability
-- **Automate complex tasks** by combining multiple specialized agents
-- **Save time** by reusing workflows for similar tasks
+## Package Responsibilities
 
-Perfect for development workflows like: specification creation, code review processes, testing pipelines, deployment automation, and more.
+- **cc-flow-core**
+  - Owns the workflow generation pipeline, including template rendering, POML authoring, and Markdown command emission.
+  - Ships battle-tested shell scripts (`create-workflow.sh`, `convert-slash-commands.sh`) that can run standalone or be embedded by other tools.
+  - Defines the workflow schema, validation rules, and filesystem conventions shared across the platform.
+- **cc-flow-cli**
+  - Provides a guided Ink TUI that orchestrates `cc-flow-core` scripts via TypeScript services.
+  - Handles environment checks, agent discovery, and user input while delegating final workflow output to the core package.
+  - Offers headless and conversion modes for CI usage or bulk command migration.
+- **cc-flow-web**
+  - Exposes a ReactFlow-based canvas for visually authoring Step Groups and agents.
+  - Persists editor state as JSON, then calls the same core workflow generator to produce executable commands.
+  - Adds real-time validation, property panels, and notifications tailored for browser usage.
 
-## ⚡ Quick Start
+## cc-flow-core Architecture
 
-### 1. **Launch the Interactive TUI**
+The core package acts as the contract between human-facing editors and Claude Code. Its architecture is deliberately shell-first so it can run in CI/CD, the CLI, or the web editor's server runtime without bundling TypeScript.
+
+**Key Components**
+- `create-workflow.sh`: Main entrypoint that accepts agent lists, ordering, purpose, and metadata via flags. It orchestrates dependency checks, template rendering, and output writing.
+- `convert-slash-commands.sh`: Reads existing slash command Markdown, normalizes metadata, and generates agent files that the CLI/Web can consume.
+- `workflow/` templates: Authoritative POML and Markdown blueprints. Placeholders such as `{WORKFLOW_AGENT_ARRAY}` and `{WORKFLOW_PURPOSE}` are replaced during generation.
+- `templates/` helper snippets: Shared fragments reused across workflow flavors (sequential, parallel, quick-start).
+
+**Execution Pipeline**
+1. **Environment validation** – Ensures `node`, `npm`, `npx`, `jq`, and `pomljs` are present, short-circuiting with actionable errors.
+2. **Input normalization** – Parses flag arguments, resolves agent paths, and assembles ordered agent arrays.
+3. **Template rendering** – Generates POML using the template directory, substituting placeholders and writing to a secure `mktemp` directory.
+4. **POML → Markdown conversion** – Invokes `pomljs` to emit Claude-ready Markdown commands with embedded execution steps.
+5. **Cleanup & reporting** – Moves the final command into `.claude/commands/`, removes temporary files, and writes success messages consumed by the CLI/Web UIs.
+
+**Integration Points**
+- **CLI**: Binds to the scripts through `ScriptExecutor.ts`, streams stdout/stderr into Ink components, and surfaces validation results inline.
+- **Web Editor**: Executes the scripts from the server runtime (Next.js API route/CLI binary) after serializing canvas state to the same JSON payload the CLI uses.
+- **Direct Shell Usage**: Teams can call the scripts from CI pipelines, rendering workflows without spinning up UIs.
+
+## Quick Start
+
+### 1. Prepare Your Claude Project
+- Organize agents under `.claude/agents/<category>/*.md`.
+- Optional: keep existing slash commands in `.claude/commands/` for conversion.
+- Ensure Node.js 18+ is available.
+
+### 2. Pick Your Editor
 
 ```bash
+# Launch the interactive terminal experience
 npx @hiraoku/cc-flow-cli
-# or (after global install):
-cc-flow
+
+# (from inside your .claude directory) launch the web editor
+cc-flow-web --port 3000
 ```
 
-> 📖 **For detailed CLI usage, installation options, and troubleshooting**, see the [CC-Flow CLI documentation](./cc-flow-cli/README.md)
+Both UIs talk to the same core engine, so you can start in one interface and finish in the other.
 
-**You'll see a beautiful welcome screen with:**
-
-- 🎨 Colorful ASCII art logo
-- 📋 Clear menu options with two main workflows:
-  - 🚀 **Create workflow from existing agents** - Build workflows using existing sub-agents
-  - 🔄 **Convert slash commands to agents** - Transform custom slash commands into reusable sub-agents
-- ⌨️ Keyboard shortcuts
-- 🌐 Bilingual UI (English/Japanese labels)
-
-### 2. **Follow the Visual Setup**
-
-- ✅ See the beautiful CC-FLOW welcome screen
-- ✅ Choose your agent directory (e.g., "spec" for specification workflows)
-- ✅ Select which agents you want to use
-- ✅ Set the execution order
-- ✅ Preview and confirm your workflow
-
-**Interactive Features:**
-
-- ✨ Visual agent cards with descriptions
-- ✅ Checkbox-based selection in the TUI
-- 🔢 Script mode supports numeric index and CSV selection
-- 📝 Real-time validation and tips
-- 👀 Preview before confirmation
-
-### 3. **Run Your Workflow**
+### 3. Generate & Run Your Workflow
 
 ```bash
-# Use the generated workflow command
 /your-workflow "describe your task here"
 ```
 
-That's it! 🎉 Your custom workflow is ready to use.
+Generated commands live under `.claude/commands/<workflow-name>.md`, ready to execute inside Claude Code.
 
-## 🎨 Features
+## Usage Examples
 
-### **Modern Terminal Interface (v0.1.0)**
-
-- ✨ **Modern icon system** using `figures` package for cross-terminal compatibility
-- 🎨 **Tailwind CSS-inspired colors** for better readability
-- 📐 **Improved layout** with proper full-width character handling
-- ⌨️ **Clear visual feedback** with distinct selection (▹) and action (→) icons
-- 🌐 **Bilingual support** (English/Japanese labels)
-
-**Terminal Experience:**
-
-```
-┌─ Select Agents (spec directory) ────────┐
-│ Available agents:                        │
-│ ▹ ● spec-init   → Initialize project    │
-│   ● spec-design → Create architecture   │
-│   ● spec-impl   → Implement features    │
-└──────────────────────────────────────────┘
-
-Icons: ▹ = Selected | → = Action | ● = Agent
-```
-
-### **Easy Workflow Creation**
-
-- Visual agent selection with descriptions
-- Step-by-step ordering (choose next agent sequentially)
-- Real-time validation and error checking
-- Preview before creating workflows
-
-### **Powerful Automation**
-
-- Chain multiple agents together
-- Context flows between agents automatically
-- Reusable workflows for common tasks
-- Built-in error handling and recovery
-
-## 📚 Common Use Cases
-
-### **Software Development**
-
+### cc-flow-cli (Ink TUI)
 ```bash
-# Create a specification workflow
-npx @hiraoku/cc-flow-cli
-# Select: spec → spec-init, spec-requirements, spec-design, spec-impl
-# Run: /spec-workflow "build user authentication system"
-```
-
-**Workflow Creation Flow:**
-
-```
-📁 Select Directory → 🔍 Choose Agents → 📋 Set Order → ✅ Confirm → 🎉 Ready!
-```
-
-### **Slash Command Conversion**
-
-Transform your custom slash commands into reusable sub-agents:
-
-```bash
-# Convert slash commands to agents
-npx @hiraoku/cc-flow-cli
-# Select: "Convert slash commands to agents"
-# Choose directory: demo (contains 3 example commands)
-# Select commands: analyze-code, generate-docs, create-tests
-# Result: Converted to .claude/agents/demo/ for workflow use
-```
-
-**Conversion Process:**
-
-```
-🔍 Search Commands → ☑️ Select Commands → ⚙️ Configure → 🔄 Convert → ✅ Ready for Workflows!
-```
-
-**Example Demo Commands Available:**
-
-- 📊 **analyze-code** - Comprehensive code quality analysis
-- 📚 **generate-docs** - Automatic documentation generation  
-- 🧪 **create-tests** - Test suite generation
-
-### **Code Review Process**
-
-```bash
-# Create a review workflow
-npx @hiraoku/cc-flow-cli
-# Select agents for: code analysis → security check → documentation
-# Run: /review-workflow "review this pull request"
-```
-
-### **Testing Pipeline**
-
-```bash
-# Create a testing workflow
-npx @hiraoku/cc-flow-cli
-# Select agents for: unit tests → integration tests → e2e tests
-# Run: /test-workflow "test the payment module"
-```
-
-## 🔧 Installation & Setup
-
-### **Prerequisites**
-
-- Claude Code CLI available on PATH (the generated commands call `claude subagent`)
-- Node.js 18+ (for the TUI application)
-- Project contains your agents under `.claude/agents/**.md`
-
-### **Setup**
-
-You can run the TUI via npx or install globally. The TUI ultimately invokes a local script `scripts/create-workflow.sh` in your current project directory to generate workflow commands.
-
-- Option A: Run with npx (recommended)
-  - From your Claude Code project root: `npx @hiraoku/cc-flow-cli`
-
-- Option B: Global install
-  - `npm install -g @hiraoku/cc-flow-cli`
-  - Run with: `cc-flow`
-
-Important: If you are using the CLI outside this repository, make sure your project has the CC-Flow helper files that the TUI calls:
-
-- `scripts/workflow/` (contains `create-workflow.sh` and supporting libraries)
-- `scripts/create-workflow.sh` (wrapper that invokes the shared script)
-- `cc-flow-cli/templates/` (workflow templates)
-
-If you need to copy them manually from this repo, use:
-
-```bash
-# from repo root
-cp -r scripts/workflow scripts/create-workflow.sh cc-flow-cli/templates /path/to/your-project/
-chmod +x /path/to/your-project/scripts/create-workflow.sh
-```
-
-Repository: https://github.com/s-hiraoku/cc-flow
-
-npm: https://www.npmjs.com/package/@hiraoku/cc-flow-cli
-
-Then ensure the workflow script is executable:
-
-```bash
-chmod +x scripts/create-workflow.sh
-```
-
-### **Start Creating Workflows**
-
-```bash
-# Launch the TUI
+# Launch interactive mode
 npx @hiraoku/cc-flow-cli
 
-# Follow the interactive prompts
-# Your workflow will be ready in minutes!
+# Headless generation
+npx @hiraoku/cc-flow-cli \
+  --directory ".claude/agents/spec" \
+  --agents "spec-init,spec-design" \
+  --name "spec-workflow" \
+  --output ".claude/commands/spec-workflow.md"
+
+# Convert existing commands to agents
+npx @hiraoku/cc-flow-cli --mode convert --directory ".claude/commands/spec"
 ```
 
-## 🤔 FAQ
-
-### **How do I create my first workflow?**
-
-Just run `npx @hiraoku/cc-flow-cli` (or `cc-flow` if installed globally) and follow the visual prompts. The TUI guides you through everything!
-
-### **Can I use existing agents?**
-
-Yes! CC-Flow comes with sample `spec` agents for specification-driven development. You can use them as-is or create your own.
-
-### **How do I add new agents?**
-
-1. Create a `.md` file in `/.claude/agents/your-category/`
-2. Launch the TUI to include it in workflows
-3. That's it!
-
-### **Can I run workflow generation without the TUI?**
-
-The TUI uses `@hiraoku/cc-flow-core` for workflow generation, which provides both programmatic API and CLI:
-
+### cc-flow-web (Visual Editor)
 ```bash
-# Using cc-flow-core CLI (recommended)
+cd /path/to/your/project/.claude
+cc-flow-web --port 4000 --no-open
+# Visit http://localhost:4000, design your workflow, then click "Generate" to export Markdown
+```
+
+### cc-flow-core (Shell-first)
+```bash
+# Sequential workflow with custom purpose
 npx @hiraoku/cc-flow-core create-workflow \
   --agents "spec-init,spec-requirements,spec-design" \
-  --name "my-workflow" \
-  --purpose "API specification workflow"
+  --name "spec-workflow" \
+  --purpose "End-to-end specification pipeline"
 
-# Using the TUI programmatically
-npx @hiraoku/cc-flow-cli --headless \
-  --directory ".claude/agents/spec" \
-  --agents "1,3,4" \
-  --output ".claude/commands/spec-workflow.md"
-```
-
-This generates `.claude/commands/<workflow-name>.md` which you run inside Claude Code as a slash command, for example: `/my-workflow "your context"`.
-
-### **Can I convert slash commands without the TUI?**
-
-The conversion feature is integrated into `@hiraoku/cc-flow-core`:
-
-```bash
-# Using cc-flow-core CLI
+# Convert legacy slash commands into agents
 npx @hiraoku/cc-flow-core convert \
   --input ".claude/commands/demo" \
   --output ".claude/agents/demo"
-
-# Using the TUI with automation
-npx @hiraoku/cc-flow-cli --mode convert \
-  --directory ".claude/commands/demo"
 ```
 
-This converts slash commands from `.claude/commands/` to sub-agents in `.claude/agents/` that can be used in workflows.
+All three workflows rely on the same templates and validation rules delivered by `cc-flow-core`, ensuring that workflows generated in one environment will execute consistently in another.
 
-### **Can I edit from the preview screen?**
+## Feature Highlights
 
-Not yet. Editing from the preview screen is planned. For now, cancel and re-run the wizard to change selection or order.
+### CLI v0.1.1 (Ink TUI)
+- ✨ Three-pane Ink experience with bilingual labels and iconography powered by `figures`.
+- 🧭 Guided wizard covering environment checks, directory selection, agent ordering, and preview.
+- 🔄 Slash command conversion mode (`--mode convert`) that migrates legacy commands to agents.
+- 📄 POML-backed workflow generation with secure temp file handling and rich error reporting.
+- 🧪 Vitest test suite plus TypeScript strict mode for predictable contributions.
 
-### **What if I need help?**
+### Web Editor v0.1.2 (Next.js + ReactFlow)
+- 🧱 Drag-and-drop canvas with Start, Agent, Step Group, and End nodes.
+- 🔁 Step Groups support sequential or parallel execution with up to 10 agents per group.
+- 📏 Nodes auto-resize to reveal every agent; drop-zones hide automatically when full.
+- ⚠️ Real-time validation overlays highlight connection issues and misconfigured nodes.
+- 🧭 Agent palette with search/filter, keyboard shortcuts, and dual-language labels.
+- 💾 JSON persistence, download/upload support, and CLI-ready generation progress indicators.
 
-- The TUI has built-in help and validation
-- Check the included sample agents for examples
-- All workflows include error handling and recovery
+### Core v0.1.0 (`@hiraoku/cc-flow-core`)
+- 🧰 Shell scripts (`create-workflow.sh`, `convert-slash-commands.sh`) with modern flag parsing.
+- 📦 Template system that renders Claude Code-compatible Markdown and POML bundles.
+- 🔐 Hardened tmp directory handling, dependency validation (`node`, `npm`, `jq`, `pomljs`).
 
-## 🚀 Ready to Get Started?
+## Typical Workflow
+- Create or update agents in `.claude/agents/` (e.g., `spec/spec-init.md`).
+- Launch the CLI or Web Editor to select agents, reorder steps, and group parallel work.
+- Preview the generated command, adjust Step Groups, and ensure validation passes.
+- Export/Save the workflow, then call it inside Claude Code with your task context.
 
-```bash
-npx @hiraoku/cc-flow-cli
-```
+## Documentation & Guides
+- CLI documentation: `cc-flow-cli/README.md`
+- Web editor documentation suite: `cc-flow-web/docs/`
+- System architecture notes: `docs/`
 
-**Within 5 minutes you'll have:**
+## FAQ
 
-- ✅ A beautiful interactive workflow creator
-- ✅ Custom workflows tailored to your needs
-- ✅ Powerful automation for your development tasks
+**How do I create my first workflow?**
+Run `npx @hiraoku/cc-flow-cli` or `cc-flow-web` from inside your `.claude` directory. Follow the prompts, preview the workflow, then save.
 
-**Success! Your workflow is ready:**
+**Can I reuse existing slash commands?**
+Yes. Use the CLI conversion mode or run `npx @hiraoku/cc-flow-core convert --input ".claude/commands/demo" --output ".claude/agents/demo"` to turn commands into reusable agents.
 
-```bash
-✅ ワークフローコマンドを作成しました: /spec-workflow
-💡 実行: /spec-workflow "your task description"
-🎯 Agents: spec-init → spec-requirements → spec-design → spec-impl
-```
+**Is there a headless mode?**
+The CLI exposes `--directory`, `--agents`, `--output`, and related flags so you can automate workflow generation in CI or scripts. The web editor produces the same JSON bundle used by the CLI.
 
-Happy workflow building! 🎉
+**How many agents fit inside a Step Group?**
+Step Groups support up to 10 agents. The web editor adapts node height automatically and hides the drop-zone once the limit is reached.
 
----
+## Packages
 
-## 📦 Packages
+| Package | Version | Description |
+| --- | --- | --- |
+| [@hiraoku/cc-flow-cli](./cc-flow-cli/) | 0.1.1 | Ink-based terminal UI for workflow creation and conversion |
+| [@hiraoku/cc-flow-web](./cc-flow-web/) | 0.1.2 | Next.js/ReactFlow visual workflow editor with drag-and-drop Step Groups |
+| [@hiraoku/cc-flow-core](./cc-flow-core/) | 0.1.0 | Shell-first workflow automation toolkit powering both front-ends |
 
-- **[@hiraoku/cc-flow-cli](./cc-flow-cli/)** (v0.1.0) - Interactive TUI for workflow creation
-- **[@hiraoku/cc-flow-core](https://github.com/s-hiraoku/cc-flow-core)** (v0.0.8) - Core workflow generation engine
+## Roadmap
 
-## 🗺️ Roadmap
+**Current (v0.1.x)**
+- ✅ Ink TUI with bilingual UI, POML generation, and slash command conversion
+- ✅ Visual web editor with dynamic Step Groups and validation overlays
+- ✅ Hardened workflow templates and secure shell tooling
 
-### Current (v0.1.x)
-- ✅ Modern icon system with cross-terminal compatibility
-- ✅ Improved layout and visual feedback
-- ✅ Slash command to agent conversion
+**Next (v0.2.x)**
+- 📊 Workflow template gallery shared between CLI and web
+- 🔍 Agent search across large `.claude` directories
+- 🔄 Bidirectional sync between saved JSON, Markdown commands, and POML
 
-### Next (v0.2.x)
-- 🌐 **Web Editor** (Issue #13): Next.js + ReactFlow visual workflow editor
-- 📊 **Workflow Templates**: Pre-built templates library
-- 🔍 **Agent Search**: Full-text search across agents
+**Future**
+- 📝 Advanced validation and linting for complex branching workflows
+- 🤝 Collaboration features and shared workflow libraries
+- 🔒 Fine-grained versioning for workflows and agent packs
 
-### Future
-- 📝 **Enhanced Validation**: Real-time workflow validation
-- 🔄 **Workflow Versioning**: Track and manage workflow versions
-- 🤝 **Team Collaboration**: Share and import workflows
-
-## 📄 License
+## License
 
 MIT
 
-## 🔗 Links
+## Links
 
-- [NPM Package](https://www.npmjs.com/package/@hiraoku/cc-flow-cli)
-- [GitHub Repository](https://github.com/s-hiraoku/cc-flow)
-- [Issue Tracker](https://github.com/s-hiraoku/cc-flow/issues)
-- [Changelog](./cc-flow-cli/CHANGELOG.md)
+- npm (CLI): https://www.npmjs.com/package/@hiraoku/cc-flow-cli
+- npm (Web): https://www.npmjs.com/package/@hiraoku/cc-flow-web
+- GitHub issues: https://github.com/s-hiraoku/cc-flow/issues
+- Changelogs: `cc-flow-cli/CHANGELOG.md`, `cc-flow-web/CHANGELOG.md`
 
----
-
-**CC-Flow v0.1.0**
-Production-ready TUI for Claude Code workflow automation.
+Happy workflow building! 🎉

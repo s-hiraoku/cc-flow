@@ -100,7 +100,7 @@ npm run type-check  # TypeScript type checking
 
 ## Features
 
-### ✅ Implemented (v0.0.1)
+### ✅ Implemented
 - **Visual Workflow Editor**: ReactFlow-based drag-and-drop canvas with 4 node types (Start, Agent, Step Group, End)
 - **Agent Palette**: Search, filter, and drag agents with category-based organization
 - **Properties Panel**: Configure settings, view workflow statistics, and preview JSON outputs
@@ -109,6 +109,8 @@ npm run type-check  # TypeScript type checking
 - **Workflow Generation**: Generate CLI-ready commands with progress tracking and notifications
 - **Keyboard Navigation**: Full keyboard accessibility with Tab, Enter, Space, and Escape support
 - **Step Group Management**: Sequential and parallel execution modes with agent grouping
+- **Dynamic Node Sizing**: Nodes automatically expand to display all agents (up to 10 per group)
+- **Smart UI**: Drop zone automatically hides when maximum agents (10) are reached
 
 ### 📋 Planned (Future Versions)
 - Workflow templates and presets library
@@ -214,6 +216,6 @@ This project is part of the CC-Flow ecosystem. Please refer to the main reposito
 
 ---
 
-**Project Status**: Initial Release
-**Latest Version**: 0.0.1
+**Project Status**: Active Development
+**Latest Version**: 0.1.2
 **Maintained by**: CC-Flow Development Team
