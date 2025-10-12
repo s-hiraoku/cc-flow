@@ -98,13 +98,13 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
   // Calculate dynamic height based on number of agents
   const agentCount = stepData.agents.length;
   const headerHeight = 64; // pt-16 = 64px
-  const dropZoneHeight = 150; // Fixed height for drop zone
+  const dropZoneHeight = agentCount >= 10 ? 0 : 150; // Hide drop zone when 10 agents reached
   const agentItemHeight = 52; // Height per agent item including gap
   const padding = 24; // px-3 pb-3 = 12px * 2
   const titleHeight = 28; // Title height with margin
   const minAgentAreaHeight = 100; // Minimum height for agent area
 
-  // Calculate agent area height (minimum 100px for "No agents yet")
+  // Calculate agent area height - expand to show all agents
   const agentAreaHeight =
     agentCount > 0
       ? agentCount * agentItemHeight + 24 // 24px for padding
@@ -189,8 +189,9 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
           </div>
 
           {/* Fixed height drop zone at bottom */}
-          <div
-            className={`rounded-xl border-2 border-dashed p-4 transition-all ${
+          {agentCount < 10 && (
+            <div
+              className={`rounded-xl border-2 border-dashed p-4 transition-all ${
               isDragOver
                 ? "border-purple-400/70 bg-purple-100"
                 : "border-purple-400/40 bg-gray-50"
@@ -226,6 +227,7 @@ export default function StepGroupNode({ id, data, selected }: NodeProps) {
               </p>
             </div>
           </div>
+          )}
         </div>
 
         {/* Source handle on the right */}
