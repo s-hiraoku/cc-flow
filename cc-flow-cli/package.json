@@ -74,7 +74,7 @@
   },
   "dependencies": {
     "@hiraoku/cc-flow-core": "^0.1.0",
-    "@types/react": "^19.1.13",
+    "@types/react": "^19.2.18",
     "date-and-time": "^4.0.5",
     "figures": "^6.1.0",
     "ink": "^6.3.0",
@@ -90,7 +90,7 @@
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.0",
-    "@types/node": "^22.0.0",
+    "@types/node": "^22.20.1",
     "@vitest/coverage-v8": "^3.2.4",
     "ink-testing-library": "^4.0.0",
     "tsx": "^4.19.0",
